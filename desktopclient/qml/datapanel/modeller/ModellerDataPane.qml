@@ -61,6 +61,10 @@ Item {
         }
     }
 
+    function deleteSelectedOperation(){
+        canvas.deleteSelectedOperation()
+    }
+
     signal exit;
 
     property bool canSeparate : true
