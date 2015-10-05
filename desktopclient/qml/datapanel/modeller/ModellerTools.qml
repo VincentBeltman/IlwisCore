@@ -35,6 +35,9 @@ ToolBar{
 
                     source : iconsource("deleteoperation20.png")
                 }
+                onClicked: {
+                    modellerDataPane.deleteSelectedOperation()
+                }
             }
             Button {
                 id : conbut

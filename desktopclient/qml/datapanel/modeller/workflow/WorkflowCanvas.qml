@@ -3,12 +3,48 @@ import MasterCatalogModel 1.0
 import OperationCatalogModel 1.0
 import OperationModel 1.0
 import WorkflowModel 1.0
+import QtQuick.Dialogs 1.1
 import ".." as Modeller
+
 
 Modeller.ModellerWorkArea {
     property WorkflowModel workflow;
+    property var deleteItemIndex;
+
+
+
+    function deleteSelectedOperation(){
+        for(var i=0; i < wfCanvas.operationsList.length; ++i){
+            var item = wfCanvas.operationsList[i]
+            if (item.isSelected) {
+                deleteItemIndex = i
+                messageDialog.open()
+                break
+            }
+        }
+    }
+
+    MessageDialog {
+        id: messageDialog
+        title: "Deleting operation"
+        text: "Are you sure you want to delete this operation?"
+        standardButtons: StandardButton.Yes | StandardButton.No
+        onYes: {
+            var item = wfCanvas.operationsList[deleteItemIndex]
+            wfCanvas.operationsList.splice(deleteItemIndex, 1)
+            item.destroy()
+            workflow.deleteOperation(item)
+        }
+        Component.onCompleted: visible = false
+    }
 
     Canvas {
+        Keys.onDeletePressed: {
+            deleteSelectedOperation()
+        }
+        Keys.onBackPressed: {
+            deleteSelectedOperation()
+        }
 
         id : wfCanvas
         anchors.fill: parent
@@ -156,17 +192,25 @@ Modeller.ModellerWorkArea {
             hoverEnabled: wfCanvas.workingLineBegin.x !== -1
 
             onPressed: {
+                var pressed = -1, item, isContained
                 for(var i=0; i < wfCanvas.operationsList.length; ++i){
-                    var item = wfCanvas.operationsList[i]
-                    var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
+                    item = wfCanvas.operationsList[i]
+                    isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
                     if ( isContained) {
-                        wfCanvas.oldx = mouseX
-                        wfCanvas.oldy = mouseY
-                        wfCanvas.currentIndex = i;
-                        item.isSelected = true
-                        manager.showOperationForm(item.operation.id)
-                    }else
-                        item.isSelected = false
+                        pressed = i
+                    }
+                    item.isSelected = false
+                }
+                wfCanvas.oldx = mouseX
+                wfCanvas.oldy = mouseY
+                if (pressed > -1) {
+                    wfCanvas.currentIndex = pressed;
+                    item = wfCanvas.operationsList[pressed]
+                    item.isSelected = true
+                    manager.showOperationForm(item.operation.id)
+                    manager.showMetaData(item.operation)
+                } else {
+                    manager.clearMetaData();
                 }
             }
 

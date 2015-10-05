@@ -39,7 +39,22 @@ bool TransformCoordinates::execute(ExecutionContext *ctx, SymbolTable &symTable)
         if((_prepState = prepare(ctx,symTable)) != sPREPARED)
             return false;
 
-    return false;
+    _outputFeatures->coordinateSystem(_csy);
+    _outputFeatures->envelope(_outputFeatures->coordinateSystem()->convertEnvelope(_inputFeatures->coordinateSystem(), _inputFeatures->envelope()));
+
+
+    for(const auto& infeature : _inputFeatures){
+       _outputFeatures->newFeatureFrom(infeature, _inputFeatures->coordinateSystem());
+    }
+    _outputFeatures->attributesFromTable(_inputFeatures->attributeTable());
+
+    if ( ctx != 0) {
+        QVariant value;
+        value.setValue<IFeatureCoverage>(_outputFeatures);
+        ctx->setOutput(symTable, value, _outputFeatures->name(), itFEATURE,_outputFeatures->source());
+    }
+
+    return true;
 }
 
 OperationImplementation *TransformCoordinates::create(quint64 metaid, const Ilwis::OperationExpression &expr)
@@ -65,7 +80,37 @@ quint64 TransformCoordinates::createMetadata()
 
 OperationImplementation::State TransformCoordinates::prepare(ExecutionContext *ctx, const SymbolTable &sym)
 {
-    return sPREPAREFAILED;
+    QString inputfile = _expression.parm(0).value();
+    QString code = _expression.parm(1).value();
+    QString newmap = _expression.parm(0,false).value();
+
+    // Goede file?
+    if (!_inputFeatures.prepare(inputfile, itFEATURE)) {
+        ERROR2(ERR_COULD_NOT_LOAD_2,inputfile,"");
+        return sPREPAREFAILED;
+    }
+    // Zijn er wel punten?
+    if ( _inputFeatures->featureCount(itLINE) == 0){
+        ERROR2(ERR_INVALID_PROPERTY_FOR_2,TR("number of points"), TR("pointrastercrossing operation"));
+        return sPREPAREFAILED;
+    }
+    //Valide coordinaatsysteen
+    if (!_csy.prepare(code)) {
+        ERROR2(ERR_COULD_NOT_LOAD_2,code,"" );
+        return sPREPAREFAILED;
+    }
+
+    // Is de nieuwe file wel schrijfbaar?
+    OperationHelperFeatures helper;
+    IIlwisObject obj = helper.initialize(_inputFeatures.as<IlwisObject>(), itFEATURE, itUNKNOWN) ;
+    if ( !obj.isValid()) {
+        ERROR2(ERR_INVALID_INIT_FOR_2,"FeatureCoverage",inputfile);
+        return sPREPAREFAILED;
+    }
+    _outputFeatures = obj.as<FeatureCoverage>();
+    _outputFeatures->name(newmap);
+
+    return sPREPARED;
 }
 
 

@@ -57,20 +57,20 @@ bool WorkflowModel::hasValueDefined(int operationindex, int parameterindex){
 
 void WorkflowModel::deleteOperation(int index)
 {
-//    if ( index < _operations.size()){
-//        _operations.erase(_operations.begin() + index);
-//        bool again = true;
-//        while(again){
-//            for(auto iter = _flows.begin(); iter != _flows.end(); ++iter){
-//                again = false;
-//                if ( (*iter)._beginOperation == index || (*iter)._endOperation == index){
-//                    _flows.erase(iter);
-//                    again = true;
-//                    break;
-//                }
-//            }
-//        }
-//    }
+    if ( index < _operations.size()){
+        _operations.erase(_operations.begin() + index);
+        bool again = true;
+        while(again){
+            for(auto iter = _flows.begin(); iter != _flows.end(); ++iter){
+                again = false;
+                if ( (*iter)._beginOperation == index || (*iter)._endOperation == index){
+                    _flows.erase(iter);
+                    again = true;
+                    break;
+                }
+            }
+        }
+    }
 }
 
 void WorkflowModel::deleteFlow(int operationIndex1, int operationIndex2, int indexStart, int indexEnd)

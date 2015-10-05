@@ -22,7 +22,7 @@ Rectangle {
     }
 
     Component{
-        id : metadata
+        id : metadataComp
         MetaData{
         }
     }
@@ -34,6 +34,19 @@ Rectangle {
             tab.active=true
             tab.item.newForm(operationid, qsTr("Set default values"))
         }
+    }
+
+    function showMetaData(item){
+        var tab = modellerProperties.getTab(2)
+        tab.item.setDesc(item.description)
+        tab.item.setName(item.syntax)
+        tab.item.setKeywords(item.keywords)
+    }
+    function clearMetaData(){
+        var tab = modellerProperties.getTab(2)
+        tab.item.setDesc("")
+        tab.item.setName("")
+        tab.item.setKeywords("")
     }
 
 
@@ -62,7 +75,7 @@ Rectangle {
             tab.active = true
 
             addTab(qsTr("Operation Form"), operationForms)
-            tab = addTab(qsTr("Metadata"), metadata)
+            tab = addTab(qsTr("Metadata"), metadataComp)
             tab.active = true // we need to be active as layers maybe added to it
         }
 
