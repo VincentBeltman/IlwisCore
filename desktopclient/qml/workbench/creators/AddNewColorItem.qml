@@ -25,7 +25,7 @@ Column {
     Text {
         width : parent.width
         height : 20
-        text : "Thematic Item"
+        text : "Palette Item"
         opacity : newItem.enabled ? 1 : 0
     }
 
@@ -42,20 +42,22 @@ Column {
             labelWidth: 100
             width : parent.width
         }
-
-        Controls.TextEditLabelPair{
-            id : itemcode
-            labelText: qsTr("Code")
-            labelWidth: 100
+        Item {
             width : parent.width
+            height : 20
+            Text {
+                id : colorlabel
+                width : 100
+                height : parent.height
+                text : qsTr("Color")
+            }
+
+            Controls.ColorPicker{
+                id : palettecolor
+                anchors.left : colorlabel.right
+            }
         }
 
-        Controls.TextEditLabelPair{
-            id : itemdesc
-            labelText: qsTr("Description")
-            labelWidth: 100
-            width : parent.width
-        }
         Button{
             anchors.right: parent.right
             anchors.rightMargin: 2
@@ -65,10 +67,13 @@ Column {
             onClicked: {
                 newItem.enabled = false
                 var items = []
-                items.push({name: itemname.content, code: itemcode.content, description : itemdesc.content})
+                items.push({name: itemname.content, color: palettecolor.selectedColor})
                 addDomainItems(items, false)
             }
         }
     }
 }
+
+
+
 

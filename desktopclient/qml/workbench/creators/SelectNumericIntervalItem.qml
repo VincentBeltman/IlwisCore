@@ -42,11 +42,12 @@ Rectangle {
                 var items = []
                 itemtable.selection.forEach( function(rowIndex) {
                     var item = itemtable.model[rowIndex].name
-                    items.push({name: item, code: itemtable.model[rowIndex].code, description : itemtable.model[rowIndex].description})
+                    items.push({name: item, minvalue : itemtable.model[rowIndex].minvalue, maxvalue : itemtable.model[rowIndex].maxvalue,code: itemtable.model[rowIndex].code, description : itemtable.model[rowIndex].description})
                 })
                 addDomainItems(items, true)
             }
         }
     }
 }
+
 

@@ -28,7 +28,7 @@ Rectangle {
             height : 20
         }
 
-        ItemTable{
+        ItemList{
             id : itemtable
         }
 
@@ -42,7 +42,7 @@ Rectangle {
                 var items = []
                 itemtable.selection.forEach( function(rowIndex) {
                     var item = itemtable.model[rowIndex].name
-                    items.push({name: item, code: itemtable.model[rowIndex].code, description : itemtable.model[rowIndex].description})
+                    items.push({name: item})
                 })
                 addDomainItems(items, true)
             }

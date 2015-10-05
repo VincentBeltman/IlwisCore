@@ -25,7 +25,7 @@ Column {
     Text {
         width : parent.width
         height : 20
-        text : "Thematic Item"
+        text : "Numeric Interval"
         opacity : newItem.enabled ? 1 : 0
     }
 
@@ -41,6 +41,21 @@ Column {
             labelText: qsTr("Name")
             labelWidth: 100
             width : parent.width
+        }
+        Controls.TextEditLabelPair{
+            id : itemminvalue
+            labelText: qsTr("Minimum Value")
+            labelWidth: 100
+            width : parent.width
+            regexvalidator: /^\d*(\.\d*)?$/
+        }
+
+        Controls.TextEditLabelPair{
+            id : itemmaxvalue
+            labelText: qsTr("Maximum Value")
+            labelWidth: 100
+            width : parent.width
+            regexvalidator: /^\d*(\.\d*)?$/
         }
 
         Controls.TextEditLabelPair{
@@ -65,10 +80,12 @@ Column {
             onClicked: {
                 newItem.enabled = false
                 var items = []
-                items.push({name: itemname.content, code: itemcode.content, description : itemdesc.content})
+                items.push({name: itemname.content, minvalue : itemminvalue.content, maxvalue : itemmaxvalue.content,code: itemcode.content, description : itemdesc.content})
                 addDomainItems(items, false)
             }
         }
     }
 }
+
+
 

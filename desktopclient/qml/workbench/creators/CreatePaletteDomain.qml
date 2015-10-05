@@ -21,29 +21,27 @@ Controls.DropableItem{
         for(var i = 0; i < items.length; ++i){
             if ( items[i].name === "")
                 continue;
+
             var duplicate = false
             for ( var j = 0; j < container.itemArray.length; ++j){
-                // double names allowed
+                // no double names allowed
                 if( items[i].name === container.itemArray[j].name){
                     duplicate = true
-                }
-                // no double codes allowed unless its empty
-                if( items[i].code !== "" && (items[i].code === container.itemArray[j].code)){
-                    duplicate = true
-                }
-                if ( duplicate)
                     break
+                }
             }
-            if ( !duplicate)
+            if ( !duplicate){
                 container.itemArray.push(items[i])
+            }
         }
+        console.debug("rtr")
         commonpart.domitems.item.model = container.itemArray
     }
 
 
     Rectangle {
         id : container
-        height: 520
+        height: 560
         width : parent.width
         border.width : 1
         border.color : Global.edgecolor
@@ -54,14 +52,13 @@ Controls.DropableItem{
         ItemDomainCommonPart{
             id : commonpart
             domaintype: "itemdomain"
-            valuetype: "Thematic class"
-            parentItemList : "SelectThematicItem.qml"
-            newItemEditor: "AddNewThematicItem.qml"
-            domitems.source : "ItemTable.qml"
+            valuetype: "Palette Color"
+            parentItemList : "SelectColorItem.qml"
+            newItemEditor: "AddNewColorItem.qml"
+            domitems.source : "PaletteColorList.qml"
         }
 
-
-        Item {
+         Item {
             width : parent.width
             height : 60
             anchors.bottom: parent.bottom
@@ -76,18 +73,15 @@ Controls.DropableItem{
                 onClicked: {
                     dropItem.state = "invisible"
                     var itemstring = ""
-                    if ( commonpart.domitems.model){
-                        for(var i = 0; i < commonpart.domitems.model.length; ++i){
+                    if ( commonpart.domitems.item.model){
+                        for(var i = 0; i < domainitems.item.model.length; ++i){
                             if (itemstring !== "")
                                 itemstring += "|"
-                            itemstring += commonpart.domitems.model[i].name;
-                            if (  commonpart.parentdomain == ""){
-                                itemstring += "|"+ commonpart.domitems.model[i].code;
-                                itemstring += "|"+ commonpart.domitems.model[i].description;
-                            }
+                            itemstring += commonpart.domitems.item.model[i].name;
+                            itemstring += "|" + commonpart.domitems.item.model[i].color;
                         }
 
-                        var createInfo = {parentdomain : commonpart.parentdomain, type : "itemdomain", valuetype : "thematic", name :  commonpart.name, items : itemstring, description : commonpart.description,strict : commonpart.strict}
+                        var createInfo = {parentdomain : commonpart.parentdomain, type : "itemdomain", valuetype : "palette", name :  commonpart.name, items : itemstring, description : commonpart.description,strict : commonpart.strict}
                         var ilwisid = objectcreator.createObject(createInfo)
                     }
                 }
@@ -109,3 +103,7 @@ Controls.DropableItem{
     }
 
 }
+
+
+
+
