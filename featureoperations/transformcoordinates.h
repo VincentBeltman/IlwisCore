@@ -19,6 +19,11 @@ public:
 
     NEW_OPERATION(TransformCoordinates);
 
+private:
+    ICoordinateSystem _csy;
+    IFeatureCoverage _inputFC;
+    IFeatureCoverage _outputFC;
+
 };
 }
 }

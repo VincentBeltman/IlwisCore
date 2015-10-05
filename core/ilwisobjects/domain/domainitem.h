@@ -27,6 +27,11 @@ public:
      */
     virtual QString name() const =0 ;
 
+    static IlwisTypes valueTypeS()
+    {
+        return itUNKNOWN;
+    }
+
     /**
      * Clones this DomainItem<br>
      * a clone should fully copy all the internal members of a item onto the new item

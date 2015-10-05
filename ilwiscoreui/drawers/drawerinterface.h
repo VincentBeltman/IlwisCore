@@ -3,7 +3,13 @@
 
 #include <memory>
 #include <QColor>
-#include <GL/gl.h>
+
+#ifdef _WIN32
+    #include <GL/gl.h>
+#elif __APPLE__
+    #include <OpenGL/gl.h>
+#endif
+
 #include <QVector3D>
 #include "ilwiscoreui_global.h"
 #include <math.h>

@@ -4,8 +4,11 @@
 #include "workflow.h"
 #include "operationmetadata.h"
 #include "workflowmodel.h"
+#include "symboltable.h"
+#include "commandhandler.h"
 
 using namespace Ilwis;
+using namespace boost;
 
 WorkflowModel::WorkflowModel()
 {
@@ -84,4 +87,32 @@ void WorkflowModel::deleteFlow(int operationIndex1, int operationIndex2, int ind
 //         }
 
 //     }
+}
+
+/**
+ * Runs all the operations in the workflow and generates output
+ */
+void WorkflowModel::run()
+{
+    qDebug() << _workflow.inputParameterCount();
+    qDebug() << _workflow.outputParameterCount();
+
+    qDebug() << _workflow.getLongName();
+
+
+//    _workflow.getOperationMetadata(_operationNodes[0])->getOutputParameters()[0];
+
+    qDebug() << _workflow.createMetadata();
+    _workflow.debugPrintGraph();
+    _workflow.debugWorkflowMetadata();
+
+
+//    ExecutionContext ctx;
+//    SymbolTable symbolTable;
+//    qDebug() << _workflow.name();
+//    QString executeString = QString("output=%1()").arg(_workflow.name());
+//    bool ok = commandhandler()->execute(executeString, &ctx, symbolTable);
+//    if ( !ok) {
+//        qDebug() << "Fail";
+//    }
 }
