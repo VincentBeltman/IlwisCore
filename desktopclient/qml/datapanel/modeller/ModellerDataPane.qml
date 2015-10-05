@@ -61,6 +61,12 @@ Item {
         }
     }
 
+    function run() {
+        console.log(canvas.workflow.id)
+//        manager.showRunForm(canvas.workflow.id)
+        canvas.run()
+    }
+
     signal exit;
 
     property bool canSeparate : true
