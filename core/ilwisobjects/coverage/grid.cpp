@@ -202,6 +202,19 @@ double Grid::value(const Pixel &pix) {
     return value(bandBlocks + block, offset);
 }
 
+#ifdef __APPLE__
+double &Grid::value(quint32 block, int offset )  {
+    if ( _allInMemory ) // no loads needed
+        return _blocks[block]->at(offset);
+
+    Locker<> lock(_mutex); // slower case. must prevent other threads to messup admin
+    if ( !_blocks[block]->inMemory())
+      if(!update(block))
+          throw ErrorObject(TR("Grid block is out of bounds"));
+
+    return _blocks[block]->at(offset); // block is now in memory
+}
+#else
 inline double &Grid::value(quint32 block, int offset )  {
     if ( _allInMemory ) // no loads needed
         return _blocks[block]->at(offset);
@@ -213,6 +226,7 @@ inline double &Grid::value(quint32 block, int offset )  {
 
     return _blocks[block]->at(offset); // block is now in memory
 }
+#endif
 
 
 

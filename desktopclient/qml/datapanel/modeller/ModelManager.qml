@@ -21,6 +21,11 @@ Rectangle {
         OperationForms{}
     }
 
+    Component {
+        id : runForms
+        OperationForms{}
+    }
+
     Component{
         id : metadata
         MetaData{
@@ -33,6 +38,18 @@ Rectangle {
             var tab= modellerProperties.getTab(1)
             tab.active=true
             tab.item.newForm(operationid, qsTr("Set default values"))
+        }
+    }
+
+    /**
+      * Shows the run form after clicking the run button
+      */
+    function showRunForm(workflowid){
+        if ( workflowid){
+            datapane.state = "smaller"
+            var tab= modellerProperties.getTab(2)
+            tab.active=true
+            tab.item.newForm(workflowid, qsTr("Set run values"))
         }
     }
 
@@ -62,6 +79,7 @@ Rectangle {
             tab.active = true
 
             addTab(qsTr("Operation Form"), operationForms)
+            addTab(qsTr("Workflow Form"), runForms)
             tab = addTab(qsTr("Metadata"), metadata)
             tab.active = true // we need to be active as layers maybe added to it
         }

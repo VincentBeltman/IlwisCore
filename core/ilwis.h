@@ -22,6 +22,7 @@
 #include <functional>
 #include <memory>
 #include "errmessages.h"
+#include <cmath>
 
 #define VALID(a) (a.isValid() && a->isValid())
 

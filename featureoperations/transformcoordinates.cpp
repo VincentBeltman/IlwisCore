@@ -35,11 +35,29 @@ TransformCoordinates::TransformCoordinates(quint64 metaid, const Ilwis::Operatio
 
 bool TransformCoordinates::execute(ExecutionContext *ctx, SymbolTable &symTable)
 {
+    qDebug() << "In execute";
+
     if (_prepState == sNOTPREPARED)
         if((_prepState = prepare(ctx,symTable)) != sPREPARED)
             return false;
 
-    return false;
+    _outputFC->coordinateSystem(_csy);
+
+    _outputFC->envelope(_csy->convertEnvelope(_inputFC->coordinateSystem(), _inputFC->envelope()));
+
+    for(const auto& infeature : _inputFC){
+        _outputFC->newFeatureFrom(infeature, _inputFC->coordinateSystem());
+    }
+
+    _outputFC->attributesFromTable(_inputFC->attributeTable());
+
+    if ( ctx != 0) {
+        QVariant value;
+        value.setValue<IFeatureCoverage>(_outputFC);
+        ctx->setOutput(symTable, value, _outputFC->name(), itFEATURE,_outputFC->source());
+    }
+
+    return true;
 }
 
 OperationImplementation *TransformCoordinates::create(quint64 metaid, const Ilwis::OperationExpression &expr)
@@ -65,7 +83,31 @@ quint64 TransformCoordinates::createMetadata()
 
 OperationImplementation::State TransformCoordinates::prepare(ExecutionContext *ctx, const SymbolTable &sym)
 {
-    return sPREPAREFAILED;
+    qDebug() << "In prepare";
+
+    QString points = _expression.parm(0).value();
+
+    if (!_inputFC.prepare(points, itFEATURE)) {
+        return sPREPAREFAILED;
+    }
+
+    QString csyName =  _expression.parm(1).value();
+    if (!_csy.prepare(csyName)) {
+        return sPREPAREFAILED;
+    }
+
+    QString outName =  _expression.parm(0, false).value();
+
+    OperationHelperFeatures helper;
+    IIlwisObject obj = helper.initialize(_inputFC.as<IlwisObject>(), itFEATURE, itUNKNOWN);
+    if ( !obj.isValid()) {
+        return sPREPAREFAILED;
+    }
+    _outputFC = obj.as<FeatureCoverage>();
+
+    _outputFC->name(outName);
+
+    return sPREPARED;
 }
 
 

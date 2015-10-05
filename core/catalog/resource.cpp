@@ -27,12 +27,22 @@ bool Ilwis::operator==(const Ilwis::Resource& resource1, const Ilwis::Resource& 
     return (resource1.url() == resource2.url()) && ( resource1.ilwisType() & resource2.ilwisType());
 }
 
+#ifdef __APPLE__
+bool Ilwis::operator<(const Ilwis::Resource& resource1, const Ilwis::Resource& resource2 ){
+    bool ok1 = resource1.url() < resource2.url();
+    if ( resource1.url() == resource2.url())
+        return resource1.ilwisType() < resource2.ilwisType();
+    return ok1;
+}
+#else
 inline bool Ilwis::operator<(const Ilwis::Resource& resource1, const Ilwis::Resource& resource2 ){
     bool ok1 = resource1.url() < resource2.url();
     if ( resource1.url() == resource2.url())
         return resource1.ilwisType() < resource2.ilwisType();
     return ok1;
 }
+#endif
+
 
 Resource::Resource() : _size(0), _ilwtype(itUNKNOWN), _extendedType(itUNKNOWN)
 {

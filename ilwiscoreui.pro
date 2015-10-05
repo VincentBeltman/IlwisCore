@@ -12,6 +12,7 @@ TEMPLATE = lib
 
 DEFINES += ILWISCOREUI_LIBRARY
 
+message($$PWD/../libraries/$$PLATFORM$$CONF/)
 LIBS += -L$$PWD/../libraries/$$PLATFORM$$CONF/ -lilwiscore
 
 INCLUDEPATH += $$PWD/../ilwiscore/core

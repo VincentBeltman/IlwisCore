@@ -8,6 +8,10 @@ import ".." as Modeller
 Modeller.ModellerWorkArea {
     property WorkflowModel workflow;
 
+    function run(){
+        workflow.run()
+    }
+
     Canvas {
 
         id : wfCanvas

@@ -307,12 +307,18 @@ IlwisTypes Workflow::ilwisType() const
 
 quint64 Workflow::createMetadata()
 {
+    qDebug() << "In createmetadata";
     parseInputParameters();
+    qDebug() << "parse input finished";
     parseOutputParameters();
+    qDebug() << "parse output finished";
     quint64 id = source().id();
+    qDebug() << id;
 
     mastercatalog()->updateItems({source()});
+    qDebug() << "Master catelog updated";
     commandhandler()->addOperation(id, WorkflowOperationImplementation::create);
+    qDebug() << "Commandhandler operation added";
     return id;
 }
 
@@ -356,6 +362,8 @@ void Workflow::parseInputParameters()
         // iterate over operation's pins
         IOperationMetaData meta = getOperationMetadata(inputNode);
         for (int i = 0; i < meta->getInputParameters().size() ; i++) {
+            qDebug() << "nr of inputparameters";
+            qDebug() << meta->getInputParameters().size();
             InputAssignment candidate = std::make_pair(inputNode, i);
 
             if ( !implicitAssignments.contains(candidate)) {
@@ -380,10 +388,10 @@ void Workflow::parseInputParameters()
                         }
                     }
                 }
-
                 addParameter(input); // not yet assigned
                 input->copyMetaToResourceOf(connector(), parameterIndex++);
 
+                qDebug()<<"Copymetatoresourceof fisished";
                 if (input->isOptional()) {
                     optionalInputs << term;
                 } else {
@@ -395,6 +403,7 @@ void Workflow::parseInputParameters()
             }
         }
     }
+    qDebug() << "For loop ended";
     QString inparameters = createParametersCountString(mandatoryInputs, optionalInputs);
     connector()->setProperty("inparameters", inparameters);
 
