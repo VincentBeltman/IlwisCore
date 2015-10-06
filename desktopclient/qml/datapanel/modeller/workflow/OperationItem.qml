@@ -156,7 +156,15 @@ Rectangle {
     function drawFlows(ctx){
         ctx.strokeStyle = "blue"
         for(var i =0; i < flowConnections.length; ++i){
+
             var item = flowConnections[i]
+
+            if(item.isSelected)
+            {
+                ctx.strokeStyle = "red"
+                ctx.lineWidth = 3;
+            }
+
             var startPoint = item.attachsource.center()
             var endPoint = item.attachtarget.center()
             var fromx = startPoint.x
@@ -193,7 +201,7 @@ Rectangle {
             if ( flowConnections[i].target == target && flowConnections[i].attachement == attachRect)
                 return // dont add duplicates
         }
-        flowConnections.push({"target" : target, "source" :operationItem ,"attachtarget": attachRect, "attachsource" : selectedAttach, "flowPoints" : flowPoints})
+        flowConnections.push({"target" : target, "source" :operationItem ,"attachtarget": attachRect, "attachsource" : selectedAttach, "flowPoints" : flowPoints, "isSelected" : false})
         workflow.addFlow(itemid, target.itemid, flowPoints)
         target.resetInputModel()
         wfCanvas.stopWorkingLine()

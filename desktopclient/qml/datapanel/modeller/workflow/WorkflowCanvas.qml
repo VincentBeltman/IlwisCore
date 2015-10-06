@@ -156,19 +156,55 @@ Modeller.ModellerWorkArea {
             hoverEnabled: wfCanvas.workingLineBegin.x !== -1
 
             onPressed: {
+                wfCanvas.canvasValid = false;
                 for(var i=0; i < wfCanvas.operationsList.length; ++i){
                     var item = wfCanvas.operationsList[i]
                     var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
+
+                    for(var j=0; j < item.flowConnections.length; j++)
+                    {
+                        var flow = item.flowConnections[j];
+
+                        // Retrieve basic X and Y positions of the line
+                        var startPoint = flow.attachsource.center();
+                        var endPoint = flow.attachtarget.center();
+                        var ax = startPoint.x;
+                        var ay = startPoint.y;
+                        var bx = endPoint.x;
+                        var by = endPoint.y;
+
+                        // Calculate distance to check mouse hits a line
+                        var distanceAC = Math.sqrt(Math.pow((ax-mouseX), 2) + Math.pow((ay-mouseY), 2));
+                        var distanceBC = Math.sqrt(Math.pow((bx-mouseX), 2) + Math.pow((by-mouseY), 2));
+                        var distanceAB = Math.sqrt(Math.pow((ax-bx), 2) + Math.pow((ay-by), 2));
+
+
+                        // Check if mouse intersects the line with offset of 10
+                        if((distanceAC + distanceBC) >= distanceAB &&
+                           (distanceAC + distanceBC) < (distanceAB + 10))
+                            flow.isSelected = true;
+                         else
+                            flow.isSelected = false;
+                    }
+
                     if ( isContained) {
                         wfCanvas.oldx = mouseX
                         wfCanvas.oldy = mouseY
                         wfCanvas.currentIndex = i;
                         item.isSelected = true
                         manager.showOperationForm(item.operation.id)
-                    }else
+                    } else
                         item.isSelected = false
                 }
             }
+
+            Keys.onEscapePressed: {
+                console.log("escape key");
+                wfCanvas.stopWorkingLine()
+            }
+
+
+
 
             onPositionChanged: {
                 if ( attachementForm.state == "invisible"){
