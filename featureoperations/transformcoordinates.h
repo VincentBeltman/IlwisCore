@@ -18,7 +18,10 @@ public:
     State prepare(ExecutionContext *ctx, const SymbolTable& sym);
 
     NEW_OPERATION(TransformCoordinates);
-
+private:
+    IFeatureCoverage _inputFeatures;
+    IFeatureCoverage _outputFeatures;
+    ICoordinateSystem _csy;
 };
 }
 }

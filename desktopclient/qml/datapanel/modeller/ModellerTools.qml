@@ -35,6 +35,9 @@ ToolBar{
 
                     source : iconsource("deleteoperation20.png")
                 }
+                onClicked: {
+                    modellerDataPane.deleteSelectedOperation()
+                }
             }
             Button {
                 id : conbut
@@ -56,6 +59,9 @@ ToolBar{
 
                     source : iconsource("zoomin20.png")
                 }
+                onClicked: {
+                    modellerDataPane.canvasZoomIn()
+                }
             }
             Button {
                 height : 25
@@ -65,6 +71,9 @@ ToolBar{
                     anchors.horizontalCenter: parent.horizontalCenter
 
                     source : iconsource("zoomout20.png")
+                }
+                onClicked: {
+                    modellerDataPane.canvasZoomOut()
                 }
             }
         }
