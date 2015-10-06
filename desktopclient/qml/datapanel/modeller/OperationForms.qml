@@ -16,8 +16,6 @@ Rectangle {
     property var operationid
 
     function newForm(metaid, title){
-        console.log("new form called, metaid:")
-        console.log(metaid)
         operationid = metaid
         var form= formbuilder.index2Form(metaid, false)
         console.log(form)
@@ -26,6 +24,13 @@ Rectangle {
         appFrame.opacity = 1
     }
 
+    /**
+      Executes the form
+      */
+    function executeForm() {
+        appFrame.doExecute(operationid)
+        return appFrame.currentAppForm.formresult
+    }
 
     Bench.ApplicationForm{
         id : appFrame

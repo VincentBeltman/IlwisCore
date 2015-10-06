@@ -8,8 +8,21 @@ import ".." as Modeller
 Modeller.ModellerWorkArea {
     property WorkflowModel workflow;
 
+    /**
+      Calls the WorkflowModel's run method
+      */
     function run(){
-        workflow.run()
+//        workflow.createMetadata()
+        workflow.run(manager.retrieveRunFormValues(workflow.id))
+    }
+
+    /**
+      Calls the create meta data method of the WorkflowModel and regenerates the form
+      */
+    function generateForm() {
+        workflow.createMetadata()
+        manager.showRunForm(workflow.id)
+
     }
 
     Canvas {
@@ -45,11 +58,10 @@ Modeller.ModellerWorkArea {
             var oper = operations.operation(id);
             return oper;
         }
+
         function invalidate() {
             canvasValid = false;
         }
-
-
 
         function draw(force){
             if (canvasValid == false || (force !== null && force)) {
@@ -88,7 +100,7 @@ Modeller.ModellerWorkArea {
                     console.log("Error creating object");
                 }
                 operationsList.push(currentItem)
-                workflow.addOperation(count, resource.id)
+//                workflow.addOperation(count, resource.id)
                 ++count
 
             } else if (component.status == Component.Error) {
@@ -145,6 +157,7 @@ Modeller.ModellerWorkArea {
                     wfCanvas.createItem(drag.x - 50, drag.y - 30,oper)
                     workflow.addOperation(wfCanvas.count, drag.source.ilwisobjectid)
 
+                    generateForm()
                 }
 
             }

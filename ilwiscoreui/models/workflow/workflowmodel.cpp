@@ -16,7 +16,7 @@ WorkflowModel::WorkflowModel()
 
 WorkflowModel::WorkflowModel(const Ilwis::Resource &source, QObject *parent) : OperationModel(source, parent)
 {
-
+    _workflow.prepare(source);
 }
 
 void WorkflowModel::addOperation(int index, const QString &id)
@@ -27,7 +27,7 @@ void WorkflowModel::addOperation(int index, const QString &id)
         kernel()->issues()->log(QString(TR("Invalid operation id used in workflow %1")).arg(name()));
         return ;
     }
-    auto vertex = _workflow.addOperation({opid});
+    auto vertex = _workflow->addOperation({opid});
     _operationNodes[index] = vertex;
 
 }
@@ -43,7 +43,7 @@ void WorkflowModel::addFlow(int operationIndex1, int operationIndex2, const QVar
             int outParamIndex = flowpoints["fromParameterIndex"].toInt();
             int inParamIndex = flowpoints["toParameterIndex"].toInt();
             EdgeProperties flowPoperties{outParamIndex, inParamIndex};
-            _workflow.addOperationFlow(fromOperationVertex,toOperationVertex,flowPoperties);
+            _workflow->addOperationFlow(fromOperationVertex,toOperationVertex,flowPoperties);
 
         }
     }
@@ -53,7 +53,7 @@ bool WorkflowModel::hasValueDefined(int operationindex, int parameterindex){
     auto vertexIter = _operationNodes.find(operationindex);
     if ( vertexIter != _operationNodes.end()){
         const OVertex& operationVertex = (*vertexIter).second;
-        return _workflow.hasValueDefined(operationVertex, parameterindex);
+        return _workflow->hasValueDefined(operationVertex, parameterindex);
     }
     return false;
 }
@@ -90,29 +90,40 @@ void WorkflowModel::deleteFlow(int operationIndex1, int operationIndex2, int ind
 }
 
 /**
- * Runs all the operations in the workflow and generates output
+ * Runs the createMetadata function on the workflow.
+ * The workflow will be put in the master catalog and will be usable.
  */
-void WorkflowModel::run()
+void WorkflowModel::createMetadata()
 {
-    qDebug() << _workflow.inputParameterCount();
-    qDebug() << _workflow.outputParameterCount();
+    _workflow->createMetadata();
+}
 
-    qDebug() << _workflow.getLongName();
+/**
+ * Runs all the operations in the workflow and generates output
+ * @param input the input parameters that will be passed to the workflow
+ */
+void WorkflowModel::run(const QString &input)
+{
+    QStringList inputList = input.split("|");
 
+    ExecutionContext ctx;
+    SymbolTable symbolTable;
+    QString executeString = QString("workflow_out=%1(").arg(_workflow->name());
 
-//    _workflow.getOperationMetadata(_operationNodes[0])->getOutputParameters()[0];
+    for(int i=0 ;i<inputList.size(); ++i) {
+       // executeString.append("\"");
+        executeString.append(inputList[i]);
+      // executeString.append("\"");
 
-    qDebug() << _workflow.createMetadata();
-    _workflow.debugPrintGraph();
-    _workflow.debugWorkflowMetadata();
+        if(i!= (inputList.size()-1)){
+            executeString.append(",");
+        }
+    }
+    executeString.append(")");
 
-
-//    ExecutionContext ctx;
-//    SymbolTable symbolTable;
-//    qDebug() << _workflow.name();
-//    QString executeString = QString("output=%1()").arg(_workflow.name());
-//    bool ok = commandhandler()->execute(executeString, &ctx, symbolTable);
-//    if ( !ok) {
-//        qDebug() << "Fail";
-//    }
+    qDebug() << executeString;
+    bool ok = commandhandler()->execute(executeString, &ctx, symbolTable);
+    if ( !ok) {
+        qDebug() << "Fail";
+    }
 }

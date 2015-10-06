@@ -38,9 +38,10 @@ public:
 
     Q_INVOKABLE bool hasValueDefined(int operationindex, int parameterindex);
 
-    Q_INVOKABLE void run();
+    Q_INVOKABLE void run(const QString &input);
+    Q_INVOKABLE void createMetadata();
 private:
-    Ilwis::Workflow _workflow;
+    Ilwis::IWorkflow _workflow;
     std::map<quint32, Ilwis::OVertex> _operationNodes;
 };
 

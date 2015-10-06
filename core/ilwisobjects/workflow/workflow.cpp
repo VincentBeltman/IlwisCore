@@ -307,18 +307,13 @@ IlwisTypes Workflow::ilwisType() const
 
 quint64 Workflow::createMetadata()
 {
-    qDebug() << "In createmetadata";
     parseInputParameters();
-    qDebug() << "parse input finished";
     parseOutputParameters();
-    qDebug() << "parse output finished";
     quint64 id = source().id();
-    qDebug() << id;
 
     mastercatalog()->updateItems({source()});
-    qDebug() << "Master catelog updated";
+    //mastercatalog()->addItems({source()});
     commandhandler()->addOperation(id, WorkflowOperationImplementation::create);
-    qDebug() << "Commandhandler operation added";
     return id;
 }
 

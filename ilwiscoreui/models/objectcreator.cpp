@@ -164,7 +164,7 @@ QString ObjectCreator::createObject(const QVariantMap &parms)
     QString name = parms["name"].toString();
     QString type = parms["type"].toString();
     if (  type == "workflow" ){
-        res = Resource(QUrl("ilwis://internalcatalog/" + name), itWORKFLOW);
+        res = Resource(QUrl("ilwis://operations/" + name), itWORKFLOW);
         res.prepare();
         obj.prepare(res);
     } else     if ( type == "numericdomain"){

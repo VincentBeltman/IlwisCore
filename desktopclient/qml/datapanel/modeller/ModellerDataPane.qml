@@ -61,9 +61,10 @@ Item {
         }
     }
 
+    /**
+      Calls the WorkflowCanvas's run method
+      */
     function run() {
-        console.log(canvas.workflow.id)
-//        manager.showRunForm(canvas.workflow.id)
         canvas.run()
     }
 
