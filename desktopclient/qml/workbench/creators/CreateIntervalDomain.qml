@@ -21,29 +21,48 @@ Controls.DropableItem{
         for(var i = 0; i < items.length; ++i){
             if ( items[i].name === "")
                 continue;
-            var duplicate = false
+            if ( items[i].minvalue > items[i].maxvalue){
+                console.debug("a")
+                continue;
+            }
+            var illegal = false
             for ( var j = 0; j < container.itemArray.length; ++j){
                 // double names allowed
                 if( items[i].name === container.itemArray[j].name){
-                    duplicate = true
+                    illegal = true
                 }
                 // no double codes allowed unless its empty
                 if( items[i].code !== "" && (items[i].code === container.itemArray[j].code)){
-                    duplicate = true
+                    illegal = true
                 }
-                if ( duplicate)
+                if ( items[i].minvalue < container.itemArray[j].minvalue){
+                    console.debug("b")
+                    illegal = true
+                }
+
+                if ( illegal)
                     break
             }
-            if ( !duplicate)
+            if ( !illegal)
                 container.itemArray.push(items[i])
         }
         commonpart.domitems.item.model = container.itemArray
     }
 
+    Component {
+        id : itemresolution
+        Controls.TextEditLabelPair{
+            labelText: qsTr("Resolution")
+            labelWidth: 100
+            height : 20
+            width : parent.width
+            regexvalidator: /^\d*(\.\d*)?$/
+        }
+    }
 
     Rectangle {
         id : container
-        height: 520
+        height: 550
         width : parent.width
         border.width : 1
         border.color : Global.edgecolor
@@ -51,15 +70,17 @@ Controls.DropableItem{
         property var parentDomain
         property var itemArray : []
 
+
+
         ItemDomainCommonPart{
             id : commonpart
             domaintype: "itemdomain"
-            valuetype: "Thematic class"
-            parentItemList : "SelectThematicItem.qml"
-            newItemEditor: "AddNewThematicItem.qml"
-            domitems.source : "ItemTable.qml"
+            valuetype: "Numeric Interval"
+            parentItemList : "SelectNumericInterval.qml"
+            newItemEditor: "AddNewNumericInterval.qml"
+            domitems.source : "IntervalTable.qml"
+            additionalFields.sourceComponent : itemresolution
         }
-
 
         Item {
             width : parent.width
@@ -76,18 +97,21 @@ Controls.DropableItem{
                 onClicked: {
                     dropItem.state = "invisible"
                     var itemstring = ""
-                    if ( commonpart.domitems.model){
-                        for(var i = 0; i < commonpart.domitems.model.length; ++i){
+                    if ( commonpart.domitems.item.model){
+                        for(var i = 0; i < commonpart.domitems.item.model.length; ++i){
                             if (itemstring !== "")
                                 itemstring += "|"
-                            itemstring += commonpart.domitems.model[i].name;
-                            if (  commonpart.parentdomain == ""){
-                                itemstring += "|"+ commonpart.domitems.model[i].code;
-                                itemstring += "|"+ commonpart.domitems.model[i].description;
+                            itemstring += commonpart.domitems.item.model[i].name;
+                            if (  commonpart.parentdomain == "" ){
+                                itemstring += "|"+ commonpart.domitems.item.model[i].minvalue;
+                                itemstring += "|"+ commonpart.domitems.item.model[i].maxvalue;
+                                itemstring += "|"+ commonpart.domitems.item.model[i].code;
+                                itemstring += "|"+ commonpart.domitems.item.model[i].description;
+
                             }
                         }
-
-                        var createInfo = {parentdomain : commonpart.parentdomain, type : "itemdomain", valuetype : "thematic", name :  commonpart.name, items : itemstring, description : commonpart.description,strict : commonpart.strict}
+                        var res = commonpart.additionalFields.item.content
+                        var createInfo = {parentdomain : commonpart.parentdomain, type : "itemdomain", valuetype : "interval", name :  commonpart.name, resolution : res,  items : itemstring, description : commonpart.description,strict : commonpart.strict}
                         var ilwisid = objectcreator.createObject(createInfo)
                     }
                 }
@@ -109,3 +133,7 @@ Controls.DropableItem{
     }
 
 }
+
+
+
+

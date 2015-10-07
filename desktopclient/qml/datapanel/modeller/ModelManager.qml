@@ -21,6 +21,11 @@ Rectangle {
         OperationForms{}
     }
 
+    Component {
+        id : runForms
+        OperationForms{}
+    }
+
     Component{
         id : metadataComp
         MetaData{
@@ -49,6 +54,29 @@ Rectangle {
         tab.item.setKeywords("")
     }
 
+    /**
+      * Shows the run form for the whole workflow
+      */
+    function showRunForm(workflowid){
+        if ( workflowid){
+            datapane.state = "smaller"
+            var tab= modellerProperties.getTab(2)
+            tab.active=true
+            tab.item.newForm(workflowid, qsTr("Set run values"))
+
+
+        }
+    }
+
+    /**
+      Calls the execute form methods of the OperationForms class, which returns the data the user put into the form.
+      */
+    function retrieveRunFormValues(workflowid){
+        if(workflowid){
+            var tab= modellerProperties.getTab(2)
+            return tab.item.executeForm()
+        }
+    }
 
     TabView{
         id : modellerProperties
@@ -76,6 +104,8 @@ Rectangle {
 
             addTab(qsTr("Operation Form"), operationForms)
             tab = addTab(qsTr("Metadata"), metadataComp)
+            addTab(qsTr("Workflow Form"), runForms)
+            tab = addTab(qsTr("Metadata"), metadata)
             tab.active = true // we need to be active as layers maybe added to it
         }
 

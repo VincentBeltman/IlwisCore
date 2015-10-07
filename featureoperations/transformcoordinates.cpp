@@ -112,5 +112,3 @@ OperationImplementation::State TransformCoordinates::prepare(ExecutionContext *c
 
     return sPREPARED;
 }
-
-

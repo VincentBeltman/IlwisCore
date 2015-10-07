@@ -24,15 +24,22 @@ win32{
     DEPENDPATH += $$PWD/../external/geos
 }
 unix{
+    INCLUDEPATH += $$PWD/../geos-3.5.0/include
+    DEPENDPATH += $$PWD/../geos-3.5.0/include
+
     BOOST=/usr/include
     GEOSINCL=/usr/include
-    GEOSLIB=/usr/lib
+    GEOSLIB=/usr/local/lib
     SHAREDEXT=so
     PREFIXSHARED=lib
     INCLUDEPATH += $$GEOSINCL
     DEPENDPATH += $$GEOSINCL
-    LIBS += -L$$GEOSLIB/ -lgeos-3.4.2
+    LIBS += -L$$GEOSLIB/ -lgeos
+
+    QMAKE_CXXFLAGS = -mmacosx-version-min=10.7 -std=c++11 -stdlib=libc++
+    CONFIG +=c++11
 }
+
 EXTERNAL=../external
 
 QT += sql network concurrent

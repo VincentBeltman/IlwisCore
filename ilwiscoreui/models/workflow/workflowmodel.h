@@ -37,8 +37,11 @@ public:
     Q_INVOKABLE void deleteFlow(int operationIndex1, int operationIndex2, int indexStart, int indexEnd);
 
     Q_INVOKABLE bool hasValueDefined(int operationindex, int parameterindex);
+
+    Q_INVOKABLE void run(const QString &input);
+    Q_INVOKABLE void createMetadata();
 private:
-    Ilwis::Workflow _workflow;
+    Ilwis::IWorkflow _workflow;
     std::map<quint32, Ilwis::OVertex> _operationNodes;
 };
 

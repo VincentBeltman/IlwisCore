@@ -18,11 +18,19 @@ Rectangle {
     function newForm(metaid, title){
         operationid = metaid
         var form= formbuilder.index2Form(metaid, false)
+        console.log(form)
         appFrame.formQML = form
         appFrame.formTitle = title
         appFrame.opacity = 1
     }
 
+    /**
+      Executes the form
+      */
+    function executeForm() {
+        appFrame.doExecute(operationid)
+        return appFrame.currentAppForm.formresult
+    }
 
     Bench.ApplicationForm{
         id : appFrame
