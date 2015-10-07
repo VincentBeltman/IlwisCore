@@ -50,19 +50,15 @@ Rectangle {
             var tab= modellerProperties.getTab(2)
             tab.active=true
             tab.item.newForm(workflowid, qsTr("Set run values"))
-
-
         }
     }
 
     /**
       Calls the execute form methods of the OperationForms class, which returns the data the user put into the form.
       */
-    function retrieveRunFormValues(workflowid){
-        if(workflowid){
-            var tab= modellerProperties.getTab(2)
-            return tab.item.executeForm()
-        }
+    function retrieveRunFormValues(){
+        var tab= modellerProperties.getTab(2)
+        return tab.item.executeForm()
     }
 
     TabView{
