@@ -43,7 +43,7 @@ Modeller.ModellerWorkArea {
       */
     function run(){
 //        workflow.createMetadata()
-        workflow.run(manager.retrieveRunFormValues(workflow.id))
+        workflow.run(manager.retrieveRunFormValues())
     }
 
     /**
