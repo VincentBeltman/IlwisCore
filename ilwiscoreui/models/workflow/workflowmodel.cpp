@@ -106,14 +106,14 @@ void WorkflowModel::run(const QString &input)
 {
     QStringList inputList = input.split("|");
 
+    _workflow->createMetadata();
+
     ExecutionContext ctx;
     SymbolTable symbolTable;
-    QString executeString = QString("workflow_out=%1(").arg(_workflow->name());
+    QString executeString = QString("%1_out=%2(").arg(_workflow->name()).arg(_workflow->name());
 
     for(int i=0 ;i<inputList.size(); ++i) {
-       // executeString.append("\"");
         executeString.append(inputList[i]);
-      // executeString.append("\"");
 
         if(i!= (inputList.size()-1)){
             executeString.append(",");
@@ -126,4 +126,20 @@ void WorkflowModel::run(const QString &input)
     if ( !ok) {
         qDebug() << "Fail";
     }
+
+    Symbol actual = symbolTable.getSymbol(QString("%1_out").arg(_workflow->name()));
+
+    if(actual.isValid() && actual._type & itCOVERAGE){
+        //    QVERIFY2(actual._type & itCOVERAGE, "ndvi result is not a raster.");
+
+
+        //    Ilwis::IRasterCoverage raster("ilwis://internalcatalog/ndvi_out");
+        //    QString outFile = makeOutputPath("ndvi_out.tiff");
+        //    qDebug() << "write ndvi result to " << outFile;
+        //    raster->connectTo(outFile, "GTiff","gdal",Ilwis::IlwisObject::cmOUTPUT);
+        //    raster->createTime(Ilwis::Time::now());
+        //    raster->store();
+    }
+
+
 }
