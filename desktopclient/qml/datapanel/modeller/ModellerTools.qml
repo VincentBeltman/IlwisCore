@@ -95,6 +95,10 @@ ToolBar{
 
                     source : iconsource("run20.png")
                 }
+                onClicked : {
+                    modellerDataPane.run()
+                }
+
             }
             Button {
                 height : 25

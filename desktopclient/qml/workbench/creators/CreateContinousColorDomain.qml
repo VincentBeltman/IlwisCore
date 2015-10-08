@@ -27,10 +27,6 @@ Controls.DropableItem{
                 if( items[i].name === container.itemArray[j].name){
                     duplicate = true
                 }
-                // no double codes allowed unless its empty
-                if( items[i].code !== "" && (items[i].code === container.itemArray[j].code)){
-                    duplicate = true
-                }
                 if ( duplicate)
                     break
             }
@@ -53,15 +49,14 @@ Controls.DropableItem{
 
         ItemDomainCommonPart{
             id : commonpart
-            domaintype: "itemdomain"
-            valuetype: "Thematic class"
-            parentItemList : "SelectThematicItem.qml"
-            newItemEditor: "AddNewThematicItem.qml"
-            domitems.source : "ItemTable.qml"
+            domaintype: "continouscolor"
+            valuetype: "Color"
+            parentItemList : "SelectColorRange.qml"
+            newItemEditor: "AddNewIdentifierItem.qml"
+            domitems.source : "ColorRangesList.qml"
         }
 
-
-        Item {
+         Item {
             width : parent.width
             height : 60
             anchors.bottom: parent.bottom
@@ -76,18 +71,14 @@ Controls.DropableItem{
                 onClicked: {
                     dropItem.state = "invisible"
                     var itemstring = ""
-                    if ( commonpart.domitems.model){
-                        for(var i = 0; i < commonpart.domitems.model.length; ++i){
+                    if ( commonpart.domitems.item.model){
+                        for(var i = 0; i < domainitems.item.model.length; ++i){
                             if (itemstring !== "")
                                 itemstring += "|"
-                            itemstring += commonpart.domitems.model[i].name;
-                            if (  commonpart.parentdomain == ""){
-                                itemstring += "|"+ commonpart.domitems.model[i].code;
-                                itemstring += "|"+ commonpart.domitems.model[i].description;
-                            }
+                            itemstring += commonpart.domitems.item.model[i].name;
                         }
 
-                        var createInfo = {parentdomain : commonpart.parentdomain, type : "itemdomain", valuetype : "thematic", name :  commonpart.name, items : itemstring, description : commonpart.description,strict : commonpart.strict}
+                        var createInfo = {parentdomain : commonpart.parentdomain, type : "itemdomain", valuetype : "identifier", name :  commonpart.name, items : itemstring, description : commonpart.description,strict : commonpart.strict}
                         var ilwisid = objectcreator.createObject(createInfo)
                     }
                 }
@@ -109,3 +100,7 @@ Controls.DropableItem{
     }
 
 }
+
+
+
+

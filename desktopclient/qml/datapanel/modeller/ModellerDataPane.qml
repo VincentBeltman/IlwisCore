@@ -85,6 +85,12 @@ Item {
         tform.yScale *=scaleFactor;
     }
 
+    /**
+      Calls the WorkflowCanvas's run method
+      */
+    function run() {
+        canvas.run()
+    }
 
     signal exit;
 

@@ -15,12 +15,12 @@ ObjectCreator::ObjectCreator(QObject *parent) : QObject(parent)
     _creators.append(new IlwisObjectCreatorModel("Numeric Domain",itNUMERICDOMAIN,"CreateNumDom.qml", 250, this));
     _creators.append(new IlwisObjectCreatorModel("Thematic Domain",itITEMDOMAIN | itTHEMATICITEM,"CreateThematicDom.qml", 520, this));
     _creators.append(new IlwisObjectCreatorModel("Identifier Domain",itITEMDOMAIN | itIDENTIFIERITEM,"CreateIdentifierDomain.qml", 520, this));
-    _creators.append(new IlwisObjectCreatorModel("Indexed Domain",itITEMDOMAIN | itINDEXEDITEM,"CreateNumDom.qml", 200, this));
-    _creators.append(new IlwisObjectCreatorModel("Interval Domain",itITEMDOMAIN | itNUMERICITEM,"CreateNumDom.qml", 200, this));
+    //_creators.append(new IlwisObjectCreatorModel("Indexed Domain",itITEMDOMAIN | itINDEXEDITEM,"CreateNumDom.qml", 200, this));
+    _creators.append(new IlwisObjectCreatorModel("Interval Domain",itITEMDOMAIN | itNUMERICITEM,"CreateIntervalDomain.qml", 550, this));
     _creators.append(new IlwisObjectCreatorModel("Time Domain",itTIME | itDOMAIN,"CreateNumDom.qml", 200, this));
     _creators.append(new IlwisObjectCreatorModel("Time Interval Domain",itTIMEITEM | itITEMDOMAIN,"CreateNumDom.qml", 200, this));
-    _creators.append(new IlwisObjectCreatorModel("Color Domain",itCOLORDOMAIN,"CreateNumDom.qml", 200, this));
-    _creators.append(new IlwisObjectCreatorModel("Color Palette Domain",itPALETTECOLOR | itITEMDOMAIN,"CreateNumDom.qml", 200, this));
+//    _creators.append(new IlwisObjectCreatorModel("Color Domain",itCOLORDOMAIN,"CreateNumDom.qml", 200, this));
+    _creators.append(new IlwisObjectCreatorModel("Color Palette Domain",itPALETTECOLOR | itITEMDOMAIN,"CreatePaletteDomain.qml", 560, this));
     _creators.append(new IlwisObjectCreatorModel("Corners Georeference",itGEOREF,"CreateNumDom.qml", 200, this));
     _creators.append(new IlwisObjectCreatorModel("Tiepoints Georeference",itGEOREF | itLOCATION,"CreateNumDom.qml", 200, this));
     _creators.append(new IlwisObjectCreatorModel("Projected Coordinate System",itCONVENTIONALCOORDSYSTEM,"CreateNumDom.qml", 200, this));
@@ -90,6 +90,35 @@ QString ObjectCreator::createItemDomain(const QVariantMap &parms){
             expression += ","+ parms["parentdomain"].toString();
         expression += ")";
     }
+    if( parms["valuetype"].toString() == "palette"){
+        if ( parms["name"].toString() == ""){
+            kernel()->issues()->log(TR("Domain must have a valid name"));
+            return QString::number(i64UNDEF);
+        }
+        expression = QString("script %1{format(stream,\"domain\")}=createpalettedomain(\"%2\",%3,%4")
+                .arg(parms["name"].toString())
+                .arg(parms["items"].toString())
+                .arg(parms["strict"].toBool() ? "yes" : "no")
+                .arg(parms["description"].toString());
+        if ( parms["parentdomain"].toString() != "")
+            expression += ","+ parms["parentdomain"].toString();
+        expression += ")";
+    }
+    if( parms["valuetype"].toString() == "interval"){
+        if ( parms["name"].toString() == ""){
+            kernel()->issues()->log(TR("Domain must have a valid name"));
+            return QString::number(i64UNDEF);
+        }
+        expression = QString("script %1{format(stream,\"domain\")}=createintervaldomain(\"%2\",%3,%4,%5")
+                .arg(parms["name"].toString())
+                .arg(parms["items"].toString())
+                .arg(parms["resolution"].toDouble())
+                .arg(parms["strict"].toBool() ? "yes" : "no")
+                .arg(parms["description"].toString());
+        if ( parms["parentdomain"].toString() != "")
+            expression += ","+ parms["parentdomain"].toString();
+        expression += ")";
+    }
 
     Ilwis::ExecutionContext ctx;
     Ilwis::SymbolTable syms;
@@ -135,7 +164,7 @@ QString ObjectCreator::createObject(const QVariantMap &parms)
     QString name = parms["name"].toString();
     QString type = parms["type"].toString();
     if (  type == "workflow" ){
-        res = Resource(QUrl("ilwis://internalcatalog/" + name), itWORKFLOW);
+        res = Resource(QUrl("ilwis://operations/" + name), itWORKFLOW);
         res.prepare();
         obj.prepare(res);
     } else     if ( type == "numericdomain"){
