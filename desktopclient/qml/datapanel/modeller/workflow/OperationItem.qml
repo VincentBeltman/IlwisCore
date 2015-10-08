@@ -154,16 +154,10 @@ Rectangle {
     }
 
     function drawFlows(ctx){
-        ctx.strokeStyle = "blue"
-        for(var i =0; i < flowConnections.length; ++i){
+
+        for(var i=0; i < flowConnections.length; i++){
 
             var item = flowConnections[i]
-
-            if(item.isSelected)
-            {
-                ctx.strokeStyle = "red"
-                ctx.lineWidth = 3;
-            }
 
             var startPoint = item.attachsource.center()
             var endPoint = item.attachtarget.center()
@@ -173,14 +167,26 @@ Rectangle {
             var toy = endPoint.y
             var headlen = 15;   // length of head in pixels
             var angle = Math.atan2(toy-fromy,tox-fromx);
+
+            ctx.beginPath();
             ctx.moveTo(fromx, fromy);
             ctx.lineTo(tox, toy);
             ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
             ctx.moveTo(tox, toy);
             ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
+
+            if(item.isSelected)
+            {
+                ctx.strokeStyle = "red"
+                ctx.lineWidth = 3
+            }else {
+                ctx.strokeStyle = "blue"
+                ctx.lineWidth = 1
+            }
+
             ctx.stroke()
 
-            if ( flowConnections[i].flowPoints){
+            if ( item.flowPoints){
                 var p1 = item.flowPoints.fromParameterIndex
                 var p2 = item.flowPoints.toParameterIndex
                 var xcenter = (fromx + tox) / 2
@@ -190,9 +196,7 @@ Rectangle {
                 ctx.fillRect(xcenter - 15 ,ycenter - 10,35,15);
                 ctx.fillStyle = "#000";
                 ctx.fillText(label, xcenter-10, ycenter + 2);
-
             }
-
         }
     }
 
@@ -220,6 +224,16 @@ Rectangle {
                wfCanvas.stopWorkingLine()
 
             wfCanvas.canvasValid = false
+        }
+    }
+
+    function deleteFlow(flow, edgeIndex)
+    {
+        var flow = flowConnections[edgeIndex]
+
+        for(var i=0; i < flowConnections.length; i++)
+        {
+
         }
     }
 
