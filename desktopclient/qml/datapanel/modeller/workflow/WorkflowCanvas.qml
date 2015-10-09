@@ -18,14 +18,14 @@ Modeller.ModellerWorkArea {
             var item = wfCanvas.operationsList[i]
             if (item.isSelected) {
                 deleteItemIndex = i
-                messageDialog.open()
+                deleteOperationDialog.open()
                 break
             }
         }
     }
 
     MessageDialog {
-        id: messageDialog
+        id: deleteOperationDialog
         title: "Deleting operation"
         text: "Are you sure you want to delete this operation?"
         standardButtons: StandardButton.Yes | StandardButton.No
