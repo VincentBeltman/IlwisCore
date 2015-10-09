@@ -13,6 +13,7 @@ Item {
     height : parent.height
     property TabModel tabmodel
     property ScenarioDesignerModel scenario
+    property double factor : 1.5
 
     function addDataSource(filter, sourceName, sourceType){
         if ( filter !== "" ){
@@ -65,6 +66,32 @@ Item {
         canvas.deleteSelectedOperation()
     }
 
+    function deleteSelectedEdge(){
+        canvas.deleteSelectedEdge()
+    }
+
+    function canvasZoomOut(){
+        scaleCanvas(1/factor);
+    }
+
+    function canvasZoomIn(){
+        scaleCanvas(factor);
+    }
+
+    function scaleCanvas(scaleFactor){
+        canvas.height /= scaleFactor;
+        canvas.width /= scaleFactor;
+        tform.xScale *=scaleFactor;
+        tform.yScale *=scaleFactor;
+    }
+
+    /**
+      Calls the WorkflowCanvas's run method
+      */
+    function run() {
+        canvas.run()
+    }
+
     signal exit;
 
     property bool canSeparate : true
@@ -90,6 +117,22 @@ Item {
             WorkFlow.WorkflowCanvas {
                 id: canvas
                 state : "visible"
+                transform : Scale{
+                    id : tform
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    propagateComposedEvents: true
+                    onWheel: {
+                        if(wheel.angleDelta.y > 0)  // zoom in
+                            modellerDataPane.canvasZoomIn();
+                        else                        // zoom out
+                            modellerDataPane.canvasZoomOut();
+                    }
+                    onPressed:{mouse.accepted = false}
+                    onPositionChanged:{mouse.accepted = false}
+                    onReleased:{mouse.accepted = false}
+                }
             }
             ModellerDefinitionView{ id : defview}
             ModellerTemplateBuilder{ id : templateBuilder}

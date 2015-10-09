@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.1;
 import "../../Global.js" as Global
 
 
+
 Rectangle {
     id : metadata
     width : parent.width

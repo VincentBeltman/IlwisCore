@@ -162,7 +162,6 @@ linux{
     LIBS += -L$$GEOSLIB/ -lgeos-3.4.2
 }
 
-
 INCLUDEPATH +=  $$ILWISCORE/core/ilwisobjects \
                 $$ILWISCORE/core/ilwisobjects/geometry \
                 $$ILWISCORE/core/util \
@@ -197,5 +196,19 @@ unix {
     qmldir.path = $$installPath
     target.path = $$installPath
     INSTALLS += target qmldir
+
+    NCLUDEPATH += $$PWD/../geos-3.5.0/include
+    DEPENDPATH += $$PWD/../geos-3.5.0/include
+
+    GEOSINCL=/usr/include
+    GEOSLIB=/usr/local/lib
+    SHAREDEXT=so
+    PREFIXSHARED=lib
+    INCLUDEPATH += $$GEOSINCL
+    DEPENDPATH += $$GEOSINCL
+    LIBS += -L$$GEOSLIB/ -lgeos
+
+    QMAKE_CXXFLAGS = -mmacosx-version-min=10.7 -std=c++11 -stdlib=libc++
+    CONFIG +=c++11
 }
 

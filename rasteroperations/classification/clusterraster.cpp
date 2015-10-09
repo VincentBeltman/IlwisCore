@@ -354,15 +354,15 @@ bool CompareHistRec::compareHistRec(const ClusterRaster::HistBandsRec &h1,const 
      case 1:
          return h1._combinations._comb  < h2._combinations._comb;
      case 2: {
-         const quint16 MaskBands[4] = { bMax, bMax << iShift, 0, 0 };
+         const quint16 MaskBands[4] = { (quint16)bMax, (quint16)(bMax << iShift), (quint16)0, (quint16)0 };
          return (h1._combinations._comb & MaskBands[sortBands]) < (h2._combinations._comb & MaskBands[sortBands]);
              }
      case 3: {
-         const quint16 MaskBands[4] = { bMax, bMax << iShift, bMax << (2 * iShift), 0 };
+         const quint16 MaskBands[4] = { (quint16)bMax, (quint16)(bMax << iShift), (quint16)(bMax << (2 * iShift)), (quint16)0 };
          return (h1._combinations._comb & MaskBands[sortBands]) < (h2._combinations._comb & MaskBands[sortBands]);
              }
      case 4: {
-         const quint16 MaskBands[4] = { bMax, bMax << iShift, bMax << (2 * iShift), bMax << (3 * iShift) };
+         const quint16 MaskBands[4] = { (quint16)bMax, (quint16)(bMax << iShift), (quint16)(bMax << (2 * iShift)), (quint16)(bMax << (3 * iShift)) };
          return (h1._combinations._comb & MaskBands[sortBands]) < (h2._combinations._comb & MaskBands[sortBands]);
              }
      }

@@ -37,6 +37,7 @@ ToolBar{
                 }
                 onClicked: {
                     modellerDataPane.deleteSelectedOperation()
+
                 }
             }
             Button {
@@ -49,6 +50,10 @@ ToolBar{
 
                     source : iconsource("deleteconnection20.png")
                 }
+                onClicked: {
+                    modellerDataPane.deleteSelectedEdge()
+
+                }
             }
             Button {
                 height : 25
@@ -59,6 +64,9 @@ ToolBar{
 
                     source : iconsource("zoomin20.png")
                 }
+                onClicked: {
+                    modellerDataPane.canvasZoomIn()
+                }
             }
             Button {
                 height : 25
@@ -68,6 +76,9 @@ ToolBar{
                     anchors.horizontalCenter: parent.horizontalCenter
 
                     source : iconsource("zoomout20.png")
+                }
+                onClicked: {
+                    modellerDataPane.canvasZoomOut()
                 }
             }
         }
@@ -84,6 +95,10 @@ ToolBar{
 
                     source : iconsource("run20.png")
                 }
+                onClicked : {
+                    modellerDataPane.run()
+                }
+
             }
             Button {
                 height : 25

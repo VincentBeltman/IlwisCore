@@ -10,7 +10,7 @@ import ".." as Modeller
 Modeller.ModellerWorkArea {
     property WorkflowModel workflow;
     property var deleteItemIndex;
-
+    property var deleteEdgeIndex;
 
 
     function deleteSelectedOperation(){
@@ -20,6 +20,25 @@ Modeller.ModellerWorkArea {
                 deleteItemIndex = i
                 deleteOperationDialog.open()
                 break
+            }
+        }
+    }
+
+    function deleteSelectedEdge(){
+        for(var i=0; i < wfCanvas.operationsList.length; ++i){
+            var item = wfCanvas.operationsList[i]
+
+            for(var j=0; j < item.flowConnections.length; j++)
+            {
+                var flow = item.flowConnections[j];
+
+                if(flow.isSelected)
+                {
+                    deleteItemIndex = i;
+                    deleteEdgeIndex = j;
+                    messageDialogEdge.open()
+                    break
+                }
             }
         }
     }
@@ -36,6 +55,43 @@ Modeller.ModellerWorkArea {
             workflow.deleteOperation(item)
         }
         Component.onCompleted: visible = false
+    }
+
+    MessageDialog {
+        id: messageDialogEdge
+        title: "Deleting edge"
+        text: "Are you sure you want to delete this edge?"
+        standardButtons: StandardButton.Yes | StandardButton.No
+        onYes: {
+            var flow = wfCanvas.operationsList[deleteItemIndex].flowConnections[deleteEdgeIndex]
+            var from = flow
+            var to = flow.attachtarget
+            wfCanvas.operationsList[deleteItemIndex].flowConnections.splice(deleteEdgeIndex, 1)
+            flow.destroy()
+            workflow.deleteFlow()
+            wfCanvas.canvasValid = false
+            wfCanvas.draw(true)
+        }
+        Component.onCompleted: {
+            wfCanvas.canvasValid = false
+            visible = false
+        }
+    }
+
+    /**
+      Calls the WorkflowModel's run method
+      */
+    function run(){
+        // workflow.createMetadata()
+        workflow.run(manager.retrieveRunFormValues())
+    }
+
+    /**
+      Calls the create meta data method of the WorkflowModel and regenerates the form
+      */
+    function generateForm() {
+        workflow.createMetadata()
+        manager.showRunForm(workflow.id)
     }
 
     Canvas {
@@ -77,15 +133,14 @@ Modeller.ModellerWorkArea {
             var oper = operations.operation(id);
             return oper;
         }
+
         function invalidate() {
             canvasValid = false;
         }
 
-
-
         function draw(force){
             if (canvasValid == false || (force !== null && force)) {
-                clear(ctx);
+                clear();
                 canvasValid = true
                 if ( workingLineBegin.x !== -1 && workingLineEnd.x !== -1){
                     ctx.beginPath();
@@ -95,7 +150,7 @@ Modeller.ModellerWorkArea {
                     ctx.lineTo(workingLineEnd.x, workingLineEnd.y);
                     ctx.stroke();
                 }
-                for( var i=0; i < operationsList.length; ++i){
+                for( var i=0; i < operationsList.length; i++){
                     operationsList[i].drawFlows(ctx)
                 }
                 //wfCanvas.requestPaint();
@@ -120,7 +175,7 @@ Modeller.ModellerWorkArea {
                     console.log("Error creating object");
                 }
                 operationsList.push(currentItem)
-                workflow.addOperation(count, resource.id)
+//                workflow.addOperation(count, resource.id)
                 ++count
 
             } else if (component.status == Component.Error) {
@@ -133,7 +188,7 @@ Modeller.ModellerWorkArea {
      * Clear the Canvas
      */
         function clear() {
-            if ( ctx){
+            if (ctx){
                 ctx.reset();
                 ctx.clearRect(0, 0, width, height);
                 ctx.stroke();
@@ -177,6 +232,7 @@ Modeller.ModellerWorkArea {
                     wfCanvas.createItem(drag.x - 50, drag.y - 30,oper)
                     workflow.addOperation(wfCanvas.count, drag.source.ilwisobjectid)
 
+                    generateForm()
                 }
 
             }
@@ -192,26 +248,61 @@ Modeller.ModellerWorkArea {
             hoverEnabled: wfCanvas.workingLineBegin.x !== -1
 
             onPressed: {
-                var pressed = -1, item, isContained
+                wfCanvas.canvasValid = false;
+
+                var selected = false;
+
                 for(var i=0; i < wfCanvas.operationsList.length; ++i){
-                    item = wfCanvas.operationsList[i]
-                    isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
-                    if ( isContained) {
-                        pressed = i
+
+                    var item = wfCanvas.operationsList[i]
+                    var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
+
+                    for(var j=0; j < item.flowConnections.length; j++)
+                    {
+                        var flow = item.flowConnections[j];
+
+                        // Retrieve basic X and Y positions of the line
+                        var startPoint = flow.attachsource.center();
+                        var endPoint = flow.attachtarget.center();
+                        var ax = startPoint.x;
+                        var ay = startPoint.y;
+                        var bx = endPoint.x;
+                        var by = endPoint.y;
+
+                        // Calculate distance to check mouse hits a line
+                        var distanceAC = Math.sqrt(Math.pow((ax-mouseX), 2) + Math.pow((ay-mouseY), 2));
+                        var distanceBC = Math.sqrt(Math.pow((bx-mouseX), 2) + Math.pow((by-mouseY), 2));
+                        var distanceAB = Math.sqrt(Math.pow((ax-bx), 2) + Math.pow((ay-by), 2));
+
+
+                        // Check if mouse intersects the line with offset of 10
+                        if(!selected && (distanceAC + distanceBC) >= distanceAB &&
+                           (distanceAC + distanceBC) < (distanceAB + 10))
+                        {
+                            selected = true;
+                            flow.isSelected = true;
+                        } else {
+                            flow.isSelected = false;
+                        }
                     }
-                    item.isSelected = false
+
+                    if ( isContained) {
+                        wfCanvas.oldx = mouseX
+                        wfCanvas.oldy = mouseY
+                        wfCanvas.currentIndex = i;
+                        item.isSelected = true
+                        manager.showOperationForm(item.operation.id)
+                        manager.showMetaData(item.operation)
+                    } else {
+                        item.isSelected = false
+                        manager.clearMetaData();
+                    }
                 }
-                wfCanvas.oldx = mouseX
-                wfCanvas.oldy = mouseY
-                if (pressed > -1) {
-                    wfCanvas.currentIndex = pressed;
-                    item = wfCanvas.operationsList[pressed]
-                    item.isSelected = true
-                    manager.showOperationForm(item.operation.id)
-                    manager.showMetaData(item.operation)
-                } else {
-                    manager.clearMetaData();
-                }
+            }
+
+            Keys.onEscapePressed: {
+                console.log("escape key");
+                wfCanvas.stopWorkingLine()
             }
 
             onPositionChanged: {
