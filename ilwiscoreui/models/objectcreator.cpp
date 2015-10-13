@@ -2,10 +2,13 @@
 #include "ilwisobjectcreatormodel.h"
 #include "ilwiscontext.h"
 #include "domain.h"
+#include "geometries.h"
+#include "georeference.h"
 #include "numericdomain.h"
 #include "symboltable.h"
 #include "commandhandler.h"
 #include "objectcreator.h"
+#include "operationmetadata.h"
 
 using namespace Ilwis;
 
@@ -21,7 +24,7 @@ ObjectCreator::ObjectCreator(QObject *parent) : QObject(parent)
     _creators.append(new IlwisObjectCreatorModel("Time Interval Domain",itTIMEITEM | itITEMDOMAIN,"CreateNumDom.qml", 200, this));
 //    _creators.append(new IlwisObjectCreatorModel("Color Domain",itCOLORDOMAIN,"CreateNumDom.qml", 200, this));
     _creators.append(new IlwisObjectCreatorModel("Color Palette Domain",itPALETTECOLOR | itITEMDOMAIN,"CreatePaletteDomain.qml", 560, this));
-    _creators.append(new IlwisObjectCreatorModel("Corners Georeference",itGEOREF,"CreateNumDom.qml", 200, this));
+    _creators.append(new IlwisObjectCreatorModel("Corners Georeference",itGEOREF,"CreateGeorefCorners.qml", 350, this));
     _creators.append(new IlwisObjectCreatorModel("Tiepoints Georeference",itGEOREF | itLOCATION,"CreateNumDom.qml", 200, this));
     _creators.append(new IlwisObjectCreatorModel("Projected Coordinate System",itCONVENTIONALCOORDSYSTEM,"CreateNumDom.qml", 200, this));
     _creators.append(new IlwisObjectCreatorModel("LatLon Coordinate System",itCONVENTIONALCOORDSYSTEM|itLOCATION,"CreateNumDom.qml", 200, this));
@@ -156,28 +159,60 @@ QString ObjectCreator::createNumericDomain(const QVariantMap &parms)
     return QString::number(i64UNDEF);
 }
 
+QString ObjectCreator::createGeoreference(const QVariantMap &parms){
+    QString expression;
+    if ( parms["subtype"].toString() == "corners")  {
+        expression = QString("script %1{format(stream,\"georeference\")}=createcornersgeoreference(%2,%3,%4,%5,%6,%7,%8,%9)").arg(parms["name"].toString())
+                .arg(parms["minx"].toDouble())
+                .arg(parms["miny"].toDouble())
+                .arg(parms["maxx"].toDouble())
+                .arg(parms["maxy"].toDouble())
+                .arg(parms["pixelsize"].toDouble())
+                .arg(parms["csy"].toString())
+                .arg(parms["centered"].toString())
+                .arg(parms["description"].toString());
+    }
+    Ilwis::ExecutionContext ctx;
+    Ilwis::SymbolTable syms;
+    if(Ilwis::commandhandler()->execute(expression,&ctx,syms) ) {
+        IGeoReference obj = syms.getSymbol(ctx._results[0])._var.value<IGeoReference>();
+        return QString::number(obj->id());
+    }
+    return QString::number(i64UNDEF);
+}
+
 QString ObjectCreator::createObject(const QVariantMap &parms)
 {
+    try {
     Resource res;
-    res.setDescription(parms["decription"].toString());
+    res.setDescription(parms["description"].toString());
     IIlwisObject obj;
     QString name = parms["name"].toString();
     QString type = parms["type"].toString();
     if (  type == "workflow" ){
-        res = Resource(QUrl("ilwis://operations/" + name), itWORKFLOW);
-        res.prepare();
-        obj.prepare(res);
-    } else     if ( type == "numericdomain"){
+        OperationResource res2 = OperationResource(QUrl("ilwis://operations/" + name), itWORKFLOW);
+        res2.setDescription(parms["description"].toString());
+        res2.setKeywords(parms["keywords"].toString());
+        res2.prepare();
+        obj.prepare(res2);
+    } else if ( type == "numericdomain"){
         return createNumericDomain(parms);
-    }
-    else     if ( type == "itemdomain"){
+    } else if ( type == "itemdomain"){
             return createItemDomain(parms);
+    } else if ( type == "georef"){
+        return createGeoreference(parms);
     }
 
 
 
 
     return QString::number(obj->id());
+    } catch (const ErrorObject& ){
+
+    } catch (std::exception& ex){
+        kernel()->issues()->log(ex.what());
+    }
+    return QString::number(i64UNDEF);
 }
 
 QQmlListProperty<IlwisObjectCreatorModel> ObjectCreator::activeCreators()
