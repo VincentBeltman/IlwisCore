@@ -68,15 +68,18 @@ void WorkflowModel::deleteOperation(int index)
 
 void WorkflowModel::deleteFlow(int operationIndex1, int operationIndex2, int indexStart, int indexEnd)
 {
-    //     for(auto iter = _flows.begin(); iter != _flows.end(); ++iter){
-    //         if ( (*iter)._beginOperation == operationIndex1 && (*iter)._endOperation == operationIndex2){
-    //             if ( (*iter)._inParam == indexStart && (*iter)._outParam == indexEnd){
-    //                _flows.erase(iter);
-    //                return;
-    //             }
-    //         }
+    Workflow.removeOperationFlow();
 
-    //     }
+    _workflow.removeOperationFlow();
+
+     for(auto iter = _flows.begin(); iter != _flows.end(); ++iter){
+         if ( (*iter)._beginOperation == operationIndex1 && (*iter)._endOperation == operationIndex2){
+             if ( (*iter)._inParam == indexStart && (*iter)._outParam == indexEnd){
+                _flows.erase(iter);
+                return;
+             }
+         }
+     }
 }
 
 /**

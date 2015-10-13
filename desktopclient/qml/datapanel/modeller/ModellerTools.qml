@@ -37,6 +37,7 @@ ToolBar{
                 }
                 onClicked: {
                     modellerDataPane.deleteSelectedOperation()
+
                 }
             }
             Button {
@@ -48,6 +49,10 @@ ToolBar{
                     anchors.horizontalCenter: parent.horizontalCenter
 
                     source : iconsource("deleteconnection20.png")
+                }
+                onClicked: {
+                    modellerDataPane.deleteSelectedEdge()
+
                 }
             }
             Button {

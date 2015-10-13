@@ -66,6 +66,10 @@ Item {
         canvas.deleteSelectedOperation()
     }
 
+    function deleteSelectedEdge(){
+        canvas.deleteSelectedEdge()
+    }
+
     function canvasZoomOut(){
         scaleCanvas(1/factor);
     }

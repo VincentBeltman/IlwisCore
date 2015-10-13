@@ -10,7 +10,7 @@ import ".." as Modeller
 Modeller.ModellerWorkArea {
     property WorkflowModel workflow;
     property var deleteItemIndex;
-
+    property var deleteEdgeIndex;
 
 
     function deleteSelectedOperation(){
@@ -20,6 +20,25 @@ Modeller.ModellerWorkArea {
                 deleteItemIndex = i
                 messageDialog.open()
                 break
+            }
+        }
+    }
+
+    function deleteSelectedEdge(){
+        for(var i=0; i < wfCanvas.operationsList.length; ++i){
+            var item = wfCanvas.operationsList[i]
+
+            for(var j=0; j < item.flowConnections.length; j++)
+            {
+                var flow = item.flowConnections[j];
+
+                if(flow.isSelected)
+                {
+                    deleteItemIndex = i;
+                    deleteEdgeIndex = j;
+                    messageDialogEdge.open()
+                    break
+                }
             }
         }
     }
@@ -38,11 +57,32 @@ Modeller.ModellerWorkArea {
         Component.onCompleted: visible = false
     }
 
+    MessageDialog {
+        id: messageDialogEdge
+        title: "Deleting edge"
+        text: "Are you sure you want to delete this edge?"
+        standardButtons: StandardButton.Yes | StandardButton.No
+        onYes: {
+            var flow = wfCanvas.operationsList[deleteItemIndex].flowConnections[deleteEdgeIndex]
+            var from = flow
+            var to = flow.attachtarget
+            wfCanvas.operationsList[deleteItemIndex].flowConnections.splice(deleteEdgeIndex, 1)
+            flow.destroy()
+            workflow.deleteFlow()
+            wfCanvas.canvasValid = false
+            wfCanvas.draw(true)
+        }
+        Component.onCompleted: {
+            wfCanvas.canvasValid = false
+            visible = false
+        }
+    }
+
     /**
       Calls the WorkflowModel's run method
       */
     function run(){
-//        workflow.createMetadata()
+        // workflow.createMetadata()
         workflow.run(manager.retrieveRunFormValues())
     }
 
@@ -52,7 +92,6 @@ Modeller.ModellerWorkArea {
     function generateForm() {
         workflow.createMetadata()
         manager.showRunForm(workflow.id)
-
     }
 
     Canvas {
@@ -101,7 +140,7 @@ Modeller.ModellerWorkArea {
 
         function draw(force){
             if (canvasValid == false || (force !== null && force)) {
-                clear(ctx);
+                clear();
                 canvasValid = true
                 if ( workingLineBegin.x !== -1 && workingLineEnd.x !== -1){
                     ctx.beginPath();
@@ -111,7 +150,7 @@ Modeller.ModellerWorkArea {
                     ctx.lineTo(workingLineEnd.x, workingLineEnd.y);
                     ctx.stroke();
                 }
-                for( var i=0; i < operationsList.length; ++i){
+                for( var i=0; i < operationsList.length; i++){
                     operationsList[i].drawFlows(ctx)
                 }
                 //wfCanvas.requestPaint();
@@ -149,7 +188,7 @@ Modeller.ModellerWorkArea {
      * Clear the Canvas
      */
         function clear() {
-            if ( ctx){
+            if (ctx){
                 ctx.reset();
                 ctx.clearRect(0, 0, width, height);
                 ctx.stroke();
@@ -210,7 +249,11 @@ Modeller.ModellerWorkArea {
 
             onPressed: {
                 wfCanvas.canvasValid = false;
+
+                var selected = false;
+
                 for(var i=0; i < wfCanvas.operationsList.length; ++i){
+
                     var item = wfCanvas.operationsList[i]
                     var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
 
@@ -233,11 +276,14 @@ Modeller.ModellerWorkArea {
 
 
                         // Check if mouse intersects the line with offset of 10
-                        if((distanceAC + distanceBC) >= distanceAB &&
+                        if(!selected && (distanceAC + distanceBC) >= distanceAB &&
                            (distanceAC + distanceBC) < (distanceAB + 10))
+                        {
+                            selected = true;
                             flow.isSelected = true;
-                         else
+                        } else {
                             flow.isSelected = false;
+                        }
                     }
 
                     if ( isContained) {
