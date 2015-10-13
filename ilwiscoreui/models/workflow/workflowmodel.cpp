@@ -106,6 +106,7 @@ void WorkflowModel::run(const QString &input)
         SymbolTable symbolTable;
         QString executeString = QString("%1_out=%2(").arg(_workflow->name()).arg(_workflow->name());
 
+//        Loop through all input parameters and add them to the execute string
         for(int i=0 ;i<inputList.size(); ++i) {
             if(inputList[i]!=""){
                 executeString.append(inputList[i]);
@@ -118,6 +119,7 @@ void WorkflowModel::run(const QString &input)
         executeString.append(")");
 
         qDebug() << executeString;
+
         bool ok = commandhandler()->execute(executeString, &ctx, symbolTable);
         if (!ok) {
             qDebug() << "Fail";
@@ -133,10 +135,12 @@ void WorkflowModel::run(const QString &input)
                 qDebug() << "write output result to " << raster->source().url().toString();
 
                 QUrl url;
-//                url = raster->source().url().toString();
 
+//                Generate the stream
                 raster->connectTo(url, "rastercoverage","stream",Ilwis::IlwisObject::cmOUTPUT);
+//                raster->connectTo(url, "GTiff","gdal",Ilwis::IlwisObject::cmOUTPUT); //generate tiff
                 raster->createTime(Ilwis::Time::now());
+//                raster->store();
                 raster->store({"storemode",Ilwis::IlwisObject::smMETADATA | Ilwis::IlwisObject::smBINARYDATA});
             }
         }

@@ -295,7 +295,7 @@ Modeller.ModellerWorkArea {
                         manager.showMetaData(item.operation)
                     } else {
                         item.isSelected = false
-                        manager.clearMetaData();
+//                        manager.clearMetaData();
                     }
                 }
             }
