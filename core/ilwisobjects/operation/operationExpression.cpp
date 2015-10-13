@@ -497,10 +497,10 @@ QString OperationExpression::toString(bool rightsideonly) const
         int count = 0;
         if (inputIsKeyword()){
             for(auto iter = _inParametersMap.begin(); iter != _inParametersMap.end(); iter++) {
-                const auto& parm = *iter;
+                const Parameter& parm = *iter;
                 if ( count++ != 0)
                     expression += ", ";
-                expression += parm.key() + "=" + parm.value();
+                expression += parm.value() + "=" + parm.value();
             }
         } else {
             for(const Parameter& parm : _inParameters) {
