@@ -60,7 +60,7 @@ Rectangle {
     function showRunForm(workflowid){
         if ( workflowid){
             datapane.state = "smaller"
-            var tab= modellerProperties.getTab(2)
+            var tab= modellerProperties.getTab(3)
             tab.active=true
             tab.item.newForm(workflowid, qsTr("Set run values"))
         }
@@ -70,7 +70,7 @@ Rectangle {
       Calls the execute form methods of the OperationForms class, which returns the data the user put into the form.
       */
     function retrieveRunFormValues(){
-        var tab= modellerProperties.getTab(2)
+        var tab= modellerProperties.getTab(3)
         return tab.item.executeForm()
     }
 
