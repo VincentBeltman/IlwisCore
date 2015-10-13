@@ -6,6 +6,7 @@
 #include "symboltable.h"
 #include "commandhandler.h"
 #include "objectcreator.h"
+#include "operationmetadata.h"
 
 using namespace Ilwis;
 
@@ -159,14 +160,16 @@ QString ObjectCreator::createNumericDomain(const QVariantMap &parms)
 QString ObjectCreator::createObject(const QVariantMap &parms)
 {
     Resource res;
-    res.setDescription(parms["decription"].toString());
+    res.setDescription(parms["description"].toString());
     IIlwisObject obj;
     QString name = parms["name"].toString();
     QString type = parms["type"].toString();
     if (  type == "workflow" ){
-        res = Resource(QUrl("ilwis://operations/" + name), itWORKFLOW);
-        res.prepare();
-        obj.prepare(res);
+        OperationResource res2 = OperationResource(QUrl("ilwis://operations/" + name), itWORKFLOW);
+        res2.setDescription(parms["description"].toString());
+        res2.setKeywords(parms["keywords"].toString());
+        res2.prepare();
+        obj.prepare(res2);
     } else     if ( type == "numericdomain"){
         return createNumericDomain(parms);
     }
