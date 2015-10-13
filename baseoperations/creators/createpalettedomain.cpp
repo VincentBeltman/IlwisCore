@@ -1,60 +1,64 @@
+#include <QColor>
 #include "kernel.h"
 #include "ilwisdata.h"
 #include "domain.h"
 #include "itemdomain.h"
 #include "identifieritem.h"
-#include "identifierrange.h"
+#include "coloritem.h"
+#include "colordomain.h"
 #include "symboltable.h"
 #include "operationExpression.h"
 #include "operationmetadata.h"
 #include "commandhandler.h"
 #include "operation.h"
-#include "createidentifierdomain.h"
+#include "createpalettedomain.h"
 
 using namespace Ilwis;
 using namespace BaseOperations;
 
-REGISTER_OPERATION(CreateIdentifierDomain)
+REGISTER_OPERATION(CreatePaletteDomain)
 
-CreateIdentifierDomain::CreateIdentifierDomain()
+CreatePaletteDomain::CreatePaletteDomain()
 {
 
 }
 
-CreateIdentifierDomain::CreateIdentifierDomain(quint64 metaid, const Ilwis::OperationExpression &expr) : OperationImplementation(metaid, expr)
+CreatePaletteDomain::CreatePaletteDomain(quint64 metaid, const Ilwis::OperationExpression &expr) : OperationImplementation(metaid, expr)
 {
 
 }
 
-bool CreateIdentifierDomain::execute(ExecutionContext *ctx, SymbolTable &symTable)
+bool CreatePaletteDomain::execute(ExecutionContext *ctx, SymbolTable &symTable)
 {
     if (_prepState == sNOTPREPARED)
         if((_prepState = prepare(ctx, symTable)) != sPREPARED)
             return false;
 
-    INamedIdDomain nameiddomain;
-    nameiddomain.prepare();
-    nameiddomain->setDescription(_domaindesc);
+    IColorDomain colordomain;
+    colordomain.prepare();
+    colordomain->setDescription(_domaindesc);
 
     if ( _parentdomain.isValid())
-        nameiddomain->setParent(_parentdomain);
-    for(int i=0; i < _items.size();++i){
-        nameiddomain->addItem(new NamedIdentifier(_items[i]));
+        colordomain->setParent(_parentdomain);
+    ColorPalette *palette = new ColorPalette();
+    for(int i=0; i < _items.size(); ++i){
+        palette->add(new ColorItem(_items[i]));
     }
+    colordomain->range(palette);
 
     QVariant value;
-    value.setValue<IDomain>(nameiddomain);
-    ctx->setOutput(symTable,value,nameiddomain->name(),itDOMAIN,nameiddomain->source());
+    value.setValue<IDomain>(colordomain);
+    ctx->setOutput(symTable,value,colordomain->name(),itDOMAIN,colordomain->source());
 
     return true;
 }
 
-Ilwis::OperationImplementation *CreateIdentifierDomain::create(quint64 metaid, const Ilwis::OperationExpression &expr)
+Ilwis::OperationImplementation *CreatePaletteDomain::create(quint64 metaid, const Ilwis::OperationExpression &expr)
 {
-    return new CreateIdentifierDomain(metaid, expr);
+    return new CreatePaletteDomain(metaid, expr);
 }
 
-Ilwis::OperationImplementation::State CreateIdentifierDomain::prepare(ExecutionContext *ctx, const SymbolTable &)
+Ilwis::OperationImplementation::State CreatePaletteDomain::prepare(ExecutionContext *ctx, const SymbolTable &)
 {
     if ( _expression.parameterCount() == 4){
         _parentdomain.prepare(_expression.input<QString>(3),{"mustexist", true});
@@ -84,11 +88,11 @@ Ilwis::OperationImplementation::State CreateIdentifierDomain::prepare(ExecutionC
     return sPREPARED;
 }
 
-quint64 CreateIdentifierDomain::createMetadata()
+quint64 CreatePaletteDomain::createMetadata()
 {
-    OperationResource resource({"ilwis://operations/createidentifierdomain"});
+    OperationResource resource({"ilwis://operations/createpalettedomain"});
     resource.setLongName("Create Identifier Domain");
-    resource.setSyntax("createidentifierdomain(itemdefintion, strict,description[,parentdomain])");
+    resource.setSyntax("createpalettedomain(itemdefintion, strict,description[,parentdomain])");
     resource.setInParameterCount({3,4});
     resource.addInParameter(0, itSTRING,TR("Item defintion"), TR("A '|' seperate list of item definition for the items of the domain"));
     resource.addInParameter(1, itBOOL,TR("Strictness"), TR("Indicates how strict the realtion between domain and parent is; true for all domains without parents"));
@@ -101,4 +105,5 @@ quint64 CreateIdentifierDomain::createMetadata()
     mastercatalog()->addItems({resource});
     return resource.id();
 }
+
 
