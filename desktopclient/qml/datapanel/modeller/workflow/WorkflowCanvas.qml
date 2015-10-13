@@ -50,9 +50,48 @@ Modeller.ModellerWorkArea {
         standardButtons: StandardButton.Yes | StandardButton.No
         onYes: {
             var item = wfCanvas.operationsList[deleteItemIndex]
+            var flows = item.flowConnections;
+
+            // First delete the operation at C++. THIS NEEDS TO BE DONE FIRST
+            workflow.deleteOperation(deleteItemIndex)
+
+            // This removes 1 (second param) from the operation list beginning from deleteItemIndex
             wfCanvas.operationsList.splice(deleteItemIndex, 1)
+
+            // Delete incomming connections of the operation which will be deleted
+            for (var i = 0; i < wfCanvas.operationsList.length; i++) {
+                var operation = wfCanvas.operationsList[i]
+                var deleteFlows = [];
+                // Search for deletable connections
+                for (var j = 0; j < operation.flowConnections.length; j++) {
+                    var flow = operation.flowConnections[j]
+                    // If target is same as deleted operation
+                    if (flow.target.itemid == item.itemid) {
+                        deleteFlows.push(j)
+                    }
+                }
+                // Delete the connections
+                for (var j = 0; j < deleteFlows.length; j++) {
+                    var deleteIndex = deleteFlows[j];
+                    wfCanvas.operationsList[i].flowConnections.splice(deleteIndex, 1)
+                }
+            }
+            // Loop through all operations after the deleted item. We need to reset their itemid
+            for (var i = deleteItemIndex; i < wfCanvas.operationsList.length; i++) {
+                operation.itemid = i
+            }
+
+            // Destroy the QML object.
             item.destroy()
-            workflow.deleteOperation(item)
+
+            // Reset all targets of the flows of the deleted operation
+            for (var i = 0; i < flows.length; i++) {
+                flows[i].target.resetInputModel()
+            }
+
+            // Redraw lines
+            wfCanvas.canvasValid = false
+            wfCanvas.draw(true)
         }
         Component.onCompleted: visible = false
     }
@@ -116,7 +155,6 @@ Modeller.ModellerWorkArea {
         property var component;
         property var currentItem;
         property var operationsList: []
-        property int count : 0
 
         Timer {
             interval: 30;
@@ -169,14 +207,12 @@ Modeller.ModellerWorkArea {
 
         function finishCreation(x,y,resource) {
             if (component.status == Component.Ready) {
-                currentItem = component.createObject(wfCanvas, {"x": x, "y": y, "operation" : resource,"itemid" : count});
+                currentItem = component.createObject(wfCanvas, {"x": x, "y": y, "operation" : resource,"itemid" : operationsList.length});
                 if (currentItem == null) {
                     // Error Handling
                     console.log("Error creating object");
                 }
                 operationsList.push(currentItem)
-//                workflow.addOperation(count, resource.id)
-                ++count
 
             } else if (component.status == Component.Error) {
                 // Error Handling
@@ -230,7 +266,7 @@ Modeller.ModellerWorkArea {
                 if (drag.source.type === "singleoperation") {
                     var oper = wfCanvas.getOperation(drag.source.ilwisobjectid)
                     wfCanvas.createItem(drag.x - 50, drag.y - 30,oper)
-                    workflow.addOperation(wfCanvas.count, drag.source.ilwisobjectid)
+                    workflow.addOperation(drag.source.ilwisobjectid)
 
                     generateForm()
                 }
@@ -250,7 +286,7 @@ Modeller.ModellerWorkArea {
             onPressed: {
                 wfCanvas.canvasValid = false;
 
-                var selected = false;
+                var selected = false, pressed = -1;
 
                 for(var i=0; i < wfCanvas.operationsList.length; ++i){
 
@@ -287,17 +323,23 @@ Modeller.ModellerWorkArea {
                     }
 
                     if ( isContained) {
-                        wfCanvas.oldx = mouseX
-                        wfCanvas.oldy = mouseY
-                        wfCanvas.currentIndex = i;
-                        item.isSelected = true
-                        manager.showOperationForm(item.operation.id)
-                        manager.showMetaData(item.operation)
-                    } else {
-                        item.isSelected = false
-                        manager.clearMetaData();
+                        pressed = i
                     }
+                    item.isSelected = false
                 }
+                wfCanvas.oldx = mouseX
+                wfCanvas.oldy = mouseY
+                if (pressed > -1) {
+                    wfCanvas.currentIndex = pressed;
+                    item = wfCanvas.operationsList[pressed]
+                    item.isSelected = true
+                    manager.showOperationForm(item.operation.id)
+                    manager.showMetaData(item.operation)
+                } else {
+                    manager.resetMetaData(workflow);
+                }
+
+
             }
 
             Keys.onEscapePressed: {
