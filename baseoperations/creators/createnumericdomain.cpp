@@ -89,14 +89,14 @@ quint64 CreateNumericDomain::createMetadata()
 {
     OperationResource resource({"ilwis://operations/createnumericdomain"});
     resource.setLongName("Create Numeric Domain");
-    resource.setSyntax("createnumericdomain(min,max,resolution, strict,description[,parentdomain]))");
+    resource.setSyntax("createnumericdomain(min,max,resolution, strict,description[,parentdomain])");
     resource.setInParameterCount({5,6});
     resource.addInParameter(0, itDOUBLE,TR("Minimum value"), TR("Lowest values in the numeric range"));
     resource.addInParameter(1, itDOUBLE,TR("Maximum value"), TR("Highest values in the numeric range"));
     resource.addInParameter(2, itDOUBLE,TR("Resolution"), TR("Numerical space between the numbers in the range"));
     resource.addInParameter(3, itBOOL,TR("Strictness"), TR("Indicates how strict the realtion between domain and parent is; true for all domains without parents"));
     resource.addInParameter(4, itSTRING,TR("Description"), TR("Extra information about the new domain"));
-    resource.addOptionalInParameter(5, itSTRING, TR("Parent domain"), TR("optional indication of a parent domain"));
+    resource.addOptionalInParameter(5, itDOMAIN, TR("Parent domain"), TR("optional indication of a parent domain"));
     resource.setOutParameterCount({1});
     resource.addOutParameter(0, itNUMERICDOMAIN, TR("output domain"), TR("The newly created domain"));
     resource.setKeywords("domain, create, numeric");

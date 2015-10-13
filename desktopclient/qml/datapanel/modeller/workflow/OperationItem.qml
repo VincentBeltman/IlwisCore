@@ -216,7 +216,6 @@ Rectangle {
             var flowPoints
             if ( operation.needChoice(target.operation)){
                  wfCanvas.showAttachementForm(true, target,attachRect)
-
             }
             else if ( operation.isLegalFlow(operation, target.operation, flowPoints)){
                 wfCanvas.operationsList[wfCanvas.currentIndex].setFlow(target,attachRect, null)

@@ -149,7 +149,7 @@ EdgeProperties Workflow::edgeProperties(const OEdge &e)
     return edgeIndex()[e];
 }
 
-// nodes where (some) pins do not match an in_edge
+// Gets all nodes which have input parameters which are open.
 QList<OVertex> Workflow::getNodesWithExternalInput()
 {
     if (_inputNodes.isEmpty()) {
@@ -283,10 +283,18 @@ void Workflow::updateEdgeProperties(OEdge e, const EdgeProperties &properties)
 
 bool Workflow::hasValueDefined(const OVertex &operationVertex, int parameterIndex)
 {
-    for (const InputAssignment& assignment : _inputAssignments.keys()) {
-        if (assignment.first == operationVertex && assignment.second == parameterIndex) {
-           auto s  =getImplicitInputAssignments(operationVertex);
-           return s.size() > 0;
+    boost::graph_traits<WorkflowGraph>::vertex_iterator vi, vi_end;
+    // Loop through all vertices
+    for (boost::tie(vi, vi_end) = boost::vertices(_wfGraph); vi != vi_end; ++vi) {
+        // Does it exist?
+        if ((*vi) == operationVertex) {
+            // Does it have an edge asigned to it?
+            for (const InputAssignment& assignment : getImplicitInputAssignments(operationVertex)) {
+                if (assignment.first == operationVertex && assignment.second == parameterIndex) {
+                   return true;
+                }
+            }
+            return _inputAssignments.value({operationVertex, parameterIndex})->value.isValid();
         }
     }
     return false;
@@ -296,7 +304,7 @@ OEdge Workflow::addOperationFlow(const OVertex &from, const OVertex &to, const E
 {
     // TODO allow multiple edges between v1 and v2?
 
-    removeInputAssignment(to, properties._inputIndexNextOperation);
+    //removeInputAssignment(to, properties._inputIndexNextOperation);
     return (boost::add_edge(from, to, properties, _wfGraph)).first;
 }
 
@@ -361,26 +369,21 @@ void Workflow::parseInputParameters()
             qDebug() << meta->getInputParameters().size();
             InputAssignment candidate = std::make_pair(inputNode, i);
 
-            if ( !implicitAssignments.contains(candidate)) {
+            if ( !implicitAssignments.contains(candidate) && !explicitAssignments.contains(candidate)) {
                 SPOperationParameter input = meta->getInputParameters().at(i);
 
                 QString term;
-                if (explicitAssignments.contains(candidate)) {
-                    continue;
+                if ( !hasInputAssignment(inputNode, i)) {
+                    term = inputTerms.at(i);
                 } else {
-                    if ( !hasInputAssignment(inputNode, i)) {
-                        term = inputTerms.at(i);
+                    SPAssignedInputData inputData = getAssignedInputData({inputNode, i});
+                    if (sharedInputs.contains(inputData)) {
+                        continue;
                     } else {
-                        SPAssignedInputData inputData = getAssignedInputData({inputNode, i});
-                        if (sharedInputs.contains(inputData)) {
-                            continue;
-                        } else {
-                            inputData->inputName = inputData->inputName.isEmpty()
-                                    ? inputTerms.at(i) :
-                                    inputData->inputName;
-                            term = inputData->inputName;
-                            sharedInputs.push_back(inputData);
-                        }
+                        inputData->inputName = inputData->inputName.isEmpty()
+                                ? inputTerms.at(i) : inputData->inputName;
+                        term = inputData->inputName;
+                        sharedInputs.push_back(inputData);
                     }
                 }
                 addParameter(input); // not yet assigned

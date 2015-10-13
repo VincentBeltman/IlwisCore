@@ -47,11 +47,11 @@ Rectangle {
         tab.item.setName(item.syntax)
         tab.item.setKeywords(item.keywords)
     }
-    function clearMetaData(){
+    function resetMetaData(workflow){
         var tab = modellerProperties.getTab(2)
-        tab.item.setDesc("")
-        tab.item.setName("")
-        tab.item.setKeywords("")
+        tab.item.setDesc(workflow.description)
+        tab.item.setName(workflow.name)
+        tab.item.setKeywords(workflow.keywords)
     }
 
     /**
@@ -101,7 +101,6 @@ Rectangle {
             addTab(qsTr("Operation Form"), operationForms)
             tab = addTab(qsTr("Metadata"), metadataComp)
             addTab(qsTr("Workflow Form"), runForms)
-            tab = addTab(qsTr("Metadata"), metadata)
             tab.active = true // we need to be active as layers maybe added to it
         }
 
