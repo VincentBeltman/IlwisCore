@@ -113,7 +113,7 @@ bool CommandHandler::execute(const QString &command, ExecutionContext *ctx, Symb
     if ( id != i64UNDEF) {
         QScopedPointer<OperationImplementation> oper(create( expr));
         if ( !oper.isNull() && oper->isValid()) {
-            return oper->execute(ctx, symTable);
+        return oper->execute(ctx, symTable);
         }
     }
     return false;

@@ -15,6 +15,8 @@
 #include "workflow.h"
 #include <QQmlListProperty>
 
+#include "rastercoverage.h"
+
 namespace Ilwis {
 class OperationMetaData;
 typedef IlwisData<OperationMetaData> IOperationMetaData;
@@ -43,6 +45,7 @@ public:
 private:
     Ilwis::IWorkflow _workflow;
     std::vector<Ilwis::OVertex> _operationNodes;
+    QString makeOutputPath(const QString& filename);
 };
 
 
