@@ -47,11 +47,11 @@ Rectangle {
         tab.item.setName(item.syntax)
         tab.item.setKeywords(item.keywords)
     }
-    function clearMetaData(){
+    function resetMetaData(workflow){
         var tab = modellerProperties.getTab(2)
-        tab.item.setDesc("")
-        tab.item.setName("")
-        tab.item.setKeywords("")
+        tab.item.setDesc(workflow.description)
+        tab.item.setName(workflow.name)
+        tab.item.setKeywords(workflow.keywords)
     }
 
     /**
@@ -60,7 +60,7 @@ Rectangle {
     function showRunForm(workflowid){
         if ( workflowid){
             datapane.state = "smaller"
-            var tab= modellerProperties.getTab(2)
+            var tab= modellerProperties.getTab(3)
             tab.active=true
             tab.item.newForm(workflowid, qsTr("Set run values"))
         }
@@ -70,7 +70,7 @@ Rectangle {
       Calls the execute form methods of the OperationForms class, which returns the data the user put into the form.
       */
     function retrieveRunFormValues(){
-        var tab= modellerProperties.getTab(2)
+        var tab= modellerProperties.getTab(3)
         return tab.item.executeForm()
     }
 
@@ -101,7 +101,6 @@ Rectangle {
             addTab(qsTr("Operation Form"), operationForms)
             tab = addTab(qsTr("Metadata"), metadataComp)
             addTab(qsTr("Workflow Form"), runForms)
-            tab = addTab(qsTr("Metadata"), metadata)
             tab.active = true // we need to be active as layers maybe added to it
         }
 

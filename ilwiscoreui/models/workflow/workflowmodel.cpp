@@ -19,7 +19,7 @@ WorkflowModel::WorkflowModel(const Ilwis::Resource &source, QObject *parent) : O
     _workflow.prepare(source);
 }
 
-void WorkflowModel::addOperation(int index, const QString &id)
+void WorkflowModel::addOperation(const QString &id)
 {
     bool ok;
     quint64 opid = id.toULongLong(&ok);
@@ -28,58 +28,62 @@ void WorkflowModel::addOperation(int index, const QString &id)
         return ;
     }
     auto vertex = _workflow->addOperation({opid});
-    _operationNodes[index] = vertex;
+    _operationNodes.push_back(vertex);
 
 }
 
 void WorkflowModel::addFlow(int operationIndex1, int operationIndex2, const QVariantMap& flowpoints)
 {
     if ( operationIndex1 >= 0 && operationIndex2 >= 0 && flowpoints.size() == 2) {
-        auto fromVertexIter = _operationNodes.find(operationIndex1);
-        auto toVertexIter  = _operationNodes.find(operationIndex2);
-        if ( fromVertexIter != _operationNodes.end() && toVertexIter != _operationNodes.end()){
-            const OVertex& fromOperationVertex = (*fromVertexIter).second;
-            const OVertex& toOperationVertex = (*toVertexIter).second;
+        try {
+            const OVertex& fromOperationVertex = _operationNodes[operationIndex1];
+            const OVertex& toOperationVertex = _operationNodes[operationIndex2];
             int outParamIndex = flowpoints["fromParameterIndex"].toInt();
             int inParamIndex = flowpoints["toParameterIndex"].toInt();
             EdgeProperties flowPoperties{outParamIndex, inParamIndex};
             _workflow->addOperationFlow(fromOperationVertex,toOperationVertex,flowPoperties);
-
+        } catch (std::out_of_range e) {
+           qDebug() << "False operation";
         }
     }
 }
 
 bool WorkflowModel::hasValueDefined(int operationindex, int parameterindex){
-    auto vertexIter = _operationNodes.find(operationindex);
-    if ( vertexIter != _operationNodes.end()){
-        const OVertex& operationVertex = (*vertexIter).second;
+    try {
+        const OVertex& operationVertex = _operationNodes[operationindex];
         return _workflow->hasValueDefined(operationVertex, parameterindex);
+    } catch (std::out_of_range e) {
+       return false;
     }
-    return false;
 }
 
 void WorkflowModel::deleteOperation(int index)
 {
-    if ( index < _operationNodes.size()){
-        _operationNodes.erase(index);
-        _workflow->removeOperation(_operationNodes.at(index));
+    try {
+        if ( index < _operationNodes.size()){
+            const OVertex& operationVertex = _operationNodes[index];
+            _workflow->removeOperation(operationVertex);
+            _operationNodes.erase(_operationNodes.begin() + index);
+        }
+    } catch (std::out_of_range e) {
+        qDebug() << "False operation";
     }
 }
 
 void WorkflowModel::deleteFlow(int operationIndex1, int operationIndex2, int indexStart, int indexEnd)
 {
-    Workflow.removeOperationFlow();
+//    Workflow.removeOperationFlow();
 
-    _workflow.removeOperationFlow();
+//    _workflow.removeOperationFlow();
 
-     for(auto iter = _flows.begin(); iter != _flows.end(); ++iter){
-         if ( (*iter)._beginOperation == operationIndex1 && (*iter)._endOperation == operationIndex2){
-             if ( (*iter)._inParam == indexStart && (*iter)._outParam == indexEnd){
-                _flows.erase(iter);
-                return;
-             }
-         }
-     }
+//     for(auto iter = _flows.begin(); iter != _flows.end(); ++iter){
+//         if ( (*iter)._beginOperation == operationIndex1 && (*iter)._endOperation == operationIndex2){
+//             if ( (*iter)._inParam == indexStart && (*iter)._outParam == indexEnd){
+//                _flows.erase(iter);
+//                return;
+//             }
+//         }
+//     }
 }
 
 /**
@@ -97,42 +101,52 @@ void WorkflowModel::createMetadata()
  */
 void WorkflowModel::run(const QString &input)
 {
-    QStringList inputList = input.split("|");
+    try{
+        QStringList inputList = input.split("|");
 
-    _workflow->createMetadata();
+        _workflow->createMetadata();
 
-    ExecutionContext ctx;
-    SymbolTable symbolTable;
-    QString executeString = QString("%1_out=%2(").arg(_workflow->name()).arg(_workflow->name());
+        ExecutionContext ctx;
+        SymbolTable symbolTable;
+        QString executeString = QString("%1_out=%2(").arg(_workflow->name()).arg(_workflow->name());
 
-    for(int i=0 ;i<inputList.size(); ++i) {
-        executeString.append(inputList[i]);
+        for(int i=0 ;i<inputList.size(); ++i) {
+            if(inputList[i]!=""){
+                executeString.append(inputList[i]);
 
-        if(i!= (inputList.size()-1)){
-            executeString.append(",");
+                if(i!= (inputList.size()-1)){
+                    executeString.append(",");
+                }
+            }
         }
+        executeString.append(")");
+
+        qDebug() << executeString;
+        bool ok = commandhandler()->execute(executeString, &ctx, symbolTable);
+        if (!ok) {
+            qDebug() << "Fail";
+        }
+
+        Symbol actual = symbolTable.getSymbol(QString("%1_out").arg(_workflow->name()));
+
+        if(actual.isValid()){
+            if(actual._type & itCOVERAGE){
+                Ilwis::IRasterCoverage raster;
+                raster.prepare("ilwis://internalcatalog/" + _workflow->name() + "_out" ,{"mustexist",true});
+
+                qDebug() << "write output result to " << raster->source().url().toString();
+
+                QUrl url;
+//                url = raster->source().url().toString();
+
+                raster->connectTo(url, "rastercoverage","stream",Ilwis::IlwisObject::cmOUTPUT);
+                raster->createTime(Ilwis::Time::now());
+                raster->store({"storemode",Ilwis::IlwisObject::smMETADATA | Ilwis::IlwisObject::smBINARYDATA});
+            }
+        }
+    } catch (const ErrorObject& err){
+
+    } catch ( const std::exception& ex){
+        kernel()->issues()->log(ex.what());
     }
-    executeString.append(")");
-
-    qDebug() << executeString;
-    bool ok = commandhandler()->execute(executeString, &ctx, symbolTable);
-    if ( !ok) {
-        qDebug() << "Fail";
-    }
-
-    Symbol actual = symbolTable.getSymbol(QString("%1_out").arg(_workflow->name()));
-
-    if(actual.isValid() && actual._type & itCOVERAGE){
-        //    QVERIFY2(actual._type & itCOVERAGE, "ndvi result is not a raster.");
-
-
-        //    Ilwis::IRasterCoverage raster("ilwis://internalcatalog/ndvi_out");
-        //    QString outFile = makeOutputPath("ndvi_out.tiff");
-        //    qDebug() << "write ndvi result to " << outFile;
-        //    raster->connectTo(outFile, "GTiff","gdal",Ilwis::IlwisObject::cmOUTPUT);
-        //    raster->createTime(Ilwis::Time::now());
-        //    raster->store();
-    }
-
-
 }
