@@ -128,6 +128,8 @@ Modeller.ModellerWorkArea {
             // Redraw lines
             wfCanvas.canvasValid = false
             wfCanvas.draw(true)
+
+            generateForm()
         }
         Component.onCompleted: visible = false
     }
@@ -139,16 +141,17 @@ Modeller.ModellerWorkArea {
         standardButtons: StandardButton.Yes | StandardButton.No
         onYes: {
             var flow = wfCanvas.operationsList[deleteItemIndex].flowConnections[deleteEdgeIndex]
-            var from = flow
-            var to = flow.attachtarget
+            var from = flow.source.itemid
+            var to = flow.target.itemid
+            var inputIndex = flow.flowPoints.toParameterIndex
+            var outputIndex = flow.flowPoints.fromParameterIndex
+
+            workflow.deleteFlow(from, to, outputIndex, inputIndex)
             wfCanvas.operationsList[deleteItemIndex].flowConnections.splice(deleteEdgeIndex, 1)
-            flow.destroy()
-            workflow.deleteFlow()
+            flow.target.resetInputModel()
             wfCanvas.canvasValid = false
-            wfCanvas.draw(true)
         }
         Component.onCompleted: {
-            wfCanvas.canvasValid = false
             visible = false
         }
     }
