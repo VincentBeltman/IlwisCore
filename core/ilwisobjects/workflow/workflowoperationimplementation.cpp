@@ -232,7 +232,7 @@ bool WorkflowOperationImplementation::reverseFollowExecutionPath(const OVertex &
     SymbolTable localSymTable;
     //InEdgeIterator ei, ei_end;
     for (/*boost::tie(ei,ei_end) = workflow->getInEdges(v)*/; ei != ei_end; ++ei) {
-        OVertex previous = workflow->getPreviousOperationNode(*ei);
+        OVertex previous = workflow->getSourceOperationNode(*ei);
         ok = reverseFollowExecutionPath(previous, &localCtx, localSymTable);
         if ( !ok) {
             return false;

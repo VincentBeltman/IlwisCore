@@ -97,6 +97,12 @@ public:
     void updateNodeProperties(OVertex v, const NodeProperties &properties);
     void updateEdgeProperties(OEdge e, const EdgeProperties &properties);
 
+    OVertex getSourceOperationNode(const OEdge &e);
+    OVertex getTargetOperationNode(const OEdge &e);
+
+    std::pair<InEdgeIterator, InEdgeIterator> getInEdges(const OVertex &v);
+    std::pair<OutEdgeIterator, OutEdgeIterator> getOutEdges(const OVertex &v);
+
     //------- Queries
     bool hasValueDefined(const OVertex& operationVertex, int parameterIndex);
 
@@ -136,11 +142,6 @@ private:
     QList<InputAssignment> getOpenInputAssignments(const OVertex &v) const;
     QList<InputAssignment> getImplicitInputAssignments(const OVertex &v);
     std::vector<quint16> getAssignedPouts(const OVertex &v);
-
-    OVertex getPreviousOperationNode(const OEdge &e);
-    OVertex getNextOperationNode(const OEdge &e);
-    std::pair<InEdgeIterator, InEdgeIterator> getInEdges(const OVertex &v);
-    std::pair<OutEdgeIterator, OutEdgeIterator> getOutEdges(const OVertex &v);
 };
 
 typedef IlwisData<Workflow> IWorkflow;

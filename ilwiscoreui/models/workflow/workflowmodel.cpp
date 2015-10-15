@@ -72,18 +72,25 @@ void WorkflowModel::deleteOperation(int index)
 
 void WorkflowModel::deleteFlow(int operationIndex1, int operationIndex2, int indexStart, int indexEnd)
 {
-//    Workflow.removeOperationFlow();
+    OVertex sourceNode = _operationNodes[operationIndex1];
+    boost::graph_traits<WorkflowGraph>::out_edge_iterator ei, ei_end;
+    for (boost::tie(ei,ei_end) = _workflow->getOutEdges(sourceNode); ei != ei_end; ++ei) {
 
-//    _workflow.removeOperationFlow();
+        OVertex targetNode = _workflow->getTargetOperationNode(*ei);
 
-//     for(auto iter = _flows.begin(); iter != _flows.end(); ++iter){
-//         if ( (*iter)._beginOperation == operationIndex1 && (*iter)._endOperation == operationIndex2){
-//             if ( (*iter)._inParam == indexStart && (*iter)._outParam == indexEnd){
-//                _flows.erase(iter);
-//                return;
-//             }
-//         }
-//     }
+        NodeProperties npNode = _workflow->nodeProperties(targetNode);
+        NodeProperties npTarget = _workflow->nodeProperties(_operationNodes[operationIndex2]);
+
+        if(npNode._operationid == npTarget._operationid)
+        {
+            EdgeProperties ep = _workflow->edgeProperties(*ei);
+
+            if(ep._outputIndexLastOperation == indexStart && ep._inputIndexNextOperation == indexEnd)
+            {
+                _workflow->removeOperationFlow(*ei);
+            }
+        }
+    }
 }
 
 /**
