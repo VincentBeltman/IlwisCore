@@ -108,6 +108,42 @@ Item {
         orientation: Qt.Vertical
         height : parent.height - modellertools.height
 
+
+        ModellerErrorView {
+            height: 0
+            id : errorview
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.right: parent.right
+
+            states: [
+                State { name: "smaller"
+
+                    PropertyChanges {
+                        target: errorview
+                        height : 0
+                    }
+                },
+                State {
+                    name : "bigger"
+                    PropertyChanges {
+                        target: errorview
+                        height : 80
+                    }
+                    PropertyChanges {
+                        target: datapane
+                        height : parent.height - modellertools.height - 170 - 80
+                    }
+                }
+
+            ]
+            transitions: [
+                Transition {
+                    NumberAnimation { properties: "height"; duration : 750 ; easing.type: Easing.InOutCubic }
+                }
+            ]
+        }
+
         Item {
             id : datapane
             width : parent.width

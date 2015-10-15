@@ -205,7 +205,12 @@ Rectangle {
             if ( flowConnections[i].target == target && flowConnections[i].attachement == attachRect)
                 return // dont add duplicates
         }
-        flowConnections.push({"target" : target, "source" :operationItem ,"attachtarget": attachRect, "attachsource" : selectedAttach, "flowPoints" : flowPoints, "isSelected" : false})
+        flowConnections.push({"target" : target,
+                              "source" :operationItem,
+                              "attachtarget" : attachRect,
+                              "attachsource" : selectedAttach,
+                              "flowPoints" : flowPoints,
+                              "isSelected" : false})
         workflow.addFlow(itemid, target.itemid, flowPoints)
         target.resetInputModel()
         wfCanvas.stopWorkingLine()

@@ -256,12 +256,12 @@ std::vector<quint16> Workflow::getAssignedPouts(const OVertex &v)
     return assignedPouts;
 }
 
-OVertex Workflow::getPreviousOperationNode(const OEdge &e)
+OVertex Workflow::getSourceOperationNode(const OEdge &e)
 {
     return boost::source(e, _wfGraph);
 }
 
-OVertex Workflow::getNextOperationNode(const OEdge &e)
+OVertex Workflow::getTargetOperationNode(const OEdge &e)
 {
     return boost::target(e, _wfGraph);
 }
