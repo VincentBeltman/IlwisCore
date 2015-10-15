@@ -113,6 +113,10 @@ Item {
             width : parent.width
             height : parent.height - modellertools.height - 170
 
+            function asignConstantInputData(vertexIndex, parameterIndex, value){
+                canvas.asignConstantInputData(vertexIndex, parameterIndex, value)
+            }
+
 
             WorkFlow.WorkflowCanvas {
                 id: canvas

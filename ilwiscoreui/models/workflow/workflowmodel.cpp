@@ -19,6 +19,12 @@ WorkflowModel::WorkflowModel(const Ilwis::Resource &source, QObject *parent) : O
     _workflow.prepare(source);
 }
 
+void WorkflowModel::asignConstantInputData(int operationIndex, int parameterIndex, QVariant value) {
+    OVertex vertex = _operationNodes[operationIndex];
+    SPAssignedInputData constantInput = _workflow->assignInputData(vertex, parameterIndex);
+    constantInput->value = value;
+}
+
 void WorkflowModel::addOperation(const QString &id)
 {
     bool ok;

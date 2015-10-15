@@ -37,6 +37,9 @@ Rectangle {
         x : parent.width / 4
         height : parent.height - 30 < 0 ?  0 : parent.height - 30
         opacity : 0
+        onFormQMLChanged: {
+            datapane.asignConstantInputData(operationid, 0, "asdf");
+        }
 
     }
 //    Bench.ApplicationForm{
