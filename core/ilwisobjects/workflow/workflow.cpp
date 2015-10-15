@@ -304,8 +304,14 @@ OEdge Workflow::addOperationFlow(const OVertex &from, const OVertex &to, const E
 {
     // TODO allow multiple edges between v1 and v2?
 
-    //removeInputAssignment(to, properties._inputIndexNextOperation);
+    removeInputAssignment(to, properties._inputIndexNextOperation);
     return (boost::add_edge(from, to, properties, _wfGraph)).first;
+}
+
+void Workflow::removeOperationFlow(OEdge edge) {
+    EdgeProperties edgeProps = edgeProperties(edge);
+    assignInputData(boost::target(edge, _wfGraph), edgeProps._inputIndexNextOperation);
+    boost::remove_edge(edge, _wfGraph);
 }
 
 IlwisTypes Workflow::ilwisType() const

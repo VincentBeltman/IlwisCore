@@ -92,6 +92,8 @@ Modeller.ModellerWorkArea {
             // Redraw lines
             wfCanvas.canvasValid = false
             wfCanvas.draw(true)
+
+            generateForm()
         }
         Component.onCompleted: visible = false
     }
