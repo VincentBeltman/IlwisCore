@@ -70,6 +70,10 @@ Item {
         canvas.deleteSelectedEdge()
     }
 
+    function alterSelectedEdge(){
+        canvas.alterSelectedEdge()
+    }
+
     function canvasZoomOut(){
         scaleCanvas(1/factor);
     }

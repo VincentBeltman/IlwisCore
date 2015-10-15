@@ -43,6 +43,42 @@ Modeller.ModellerWorkArea {
         }
     }
 
+    function alterSelectedEdge(){
+        var flow = getSelectedEdge()
+        if(flow != 0)
+        {
+            //Retrieve target and rectangle before deleting the edge
+            var target = flow.target;
+            var attachedRect = flow.attachtarget;
+
+            //Delete the edge
+            //deleteItemIndex = i;
+            //deleteEdgeIndex = j;
+            //wfCanvas.operationsList[deleteItemIndex].flowConnections.splice(deleteEdgeIndex, 1);
+            //flow.destroy();
+            //workflow.deleteFlow();
+
+            wfCanvas.showAttachmentForm(true, flow.target, flow.attachtarget);
+        }
+    }
+
+    function getSelectedEdge(){
+        for(var i=0; i < wfCanvas.operationsList.length; ++i){
+            var item = wfCanvas.operationsList[i]
+
+            for(var j=0; j < item.flowConnections.length; j++)
+            {
+                var flow = item.flowConnections[j];
+
+                if(flow.isSelected)
+                {
+                    return flow;
+                }
+            }
+        }
+        return 0;
+    }
+
     MessageDialog {
         id: deleteOperationDialog
         title: "Deleting operation"
@@ -240,7 +276,7 @@ Modeller.ModellerWorkArea {
             wfCanvas.canvasValid = true
         }
 
-        function showAttachementForm(yesno, target, attachRect){
+        function showAttachmentForm(yesno, target, attachRect){
             var fromOperation = operationsList[wfCanvas.currentIndex].operation
             attachementForm.operationFrom = fromOperation
             attachementForm.operationTo = target.operation

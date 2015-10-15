@@ -226,18 +226,37 @@ bool OperationModel::needChoice(OperationModel *other) const
 
 bool OperationModel::isLegalFlow(OperationModel *from, OperationModel *to, const QVariantMap &flow) const
 {
+
     if ( !to || !from)
         return false;
 
+    int outParamCount = from->outParamNames().size();
+    int inParamCount = to->inParamNames().size();
+    qDebug() << QString("test");
+    for(int i = 0; i < outParamCount; i++)
+    {
+        for(int j = 0; j < inParamCount ; j++)
+        {
+            qDebug() << "out:" << from->outputparameterType(i) << "| in: " << to->inputparameterType(j);
+            if(from->outputparameterType(i).compare(to->inputparameterType(j)) == 0)
+            {
+                return true;
+            }
+        }
+    }
+    /*
     if ( flow.size() == 0)    { // case were there is one output and one input but still they have to match
         quint64 tp1 = to->getProperty("pin_" + QString::number(1) + "_type").toULongLong();
         quint64 tp2 = from->getProperty("pout_" + QString::number(1) + "_type").toULongLong();
+        qDebug(tp1 + ":" + tp2);
         return hasType(tp1, tp2);
     }else {
         quint64 tp1 = to->getProperty("pin_" + QString::number(flow["toParameterIndex"].toInt() + 1) + "_type").toULongLong();
         quint64 tp2 = from->getProperty("pout_" + QString::number(flow["fromParameterIndex"].toInt() + 1) + "_type").toULongLong();
+        qDebug(tp1 + ":" + tp2);
         return hasType(tp1, tp2);
     }
+    */
     return false;
 }
 

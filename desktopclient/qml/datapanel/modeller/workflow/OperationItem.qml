@@ -212,15 +212,23 @@ Rectangle {
     }
 
     function attachFlow(target, attachRect){
+        //If not connected to itself
         if ( wfCanvas.operationsList[wfCanvas.currentIndex] !== target){
             var flowPoints
-            if ( operation.needChoice(target.operation)){
-                 wfCanvas.showAttachementForm(true, target,attachRect)
+
+            if( operation.isLegalFlow(wfCanvas.operationsList[wfCanvas.currentIndex].operation, target.operation, flowPoints))
+            {
+                if ( operation.needChoice(target.operation)){
+                    wfCanvas.showAttachmentForm(true, target,attachRect)
+                }
+                else{
+                    wfCanvas.operationsList[wfCanvas.currentIndex].setFlow(target,attachRect, null)
+                }
             }
-            else if ( operation.isLegalFlow(operation, target.operation, flowPoints)){
-                wfCanvas.operationsList[wfCanvas.currentIndex].setFlow(target,attachRect, null)
-            } else
-               wfCanvas.stopWorkingLine()
+            else
+            {
+                wfCanvas.stopWorkingLine()
+            }
 
             wfCanvas.canvasValid = false
         }
