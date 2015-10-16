@@ -25,21 +25,10 @@ Modeller.ModellerWorkArea {
     }
 
     function deleteSelectedEdge(){
-        for(var i=0; i < wfCanvas.operationsList.length; ++i){
-            var item = wfCanvas.operationsList[i]
-
-            for(var j=0; j < item.flowConnections.length; j++)
-            {
-                var flow = item.flowConnections[j];
-
-                if(flow.isSelected)
-                {
-                    deleteItemIndex = i;
-                    deleteEdgeIndex = j;
-                    messageDialogEdge.open()
-                    break
-                }
-            }
+        var flow = getSelectedEdge()
+        if(flow != 0)
+        {
+            messageDialogEdge.open()
         }
     }
 
@@ -52,12 +41,17 @@ Modeller.ModellerWorkArea {
             var attachedRect = flow.attachtarget;
 
             //Delete the edge
-            //deleteItemIndex = i;
-            //deleteEdgeIndex = j;
-            //wfCanvas.operationsList[deleteItemIndex].flowConnections.splice(deleteEdgeIndex, 1);
-            //flow.destroy();
-            //workflow.deleteFlow();
+            var from = flow.source.itemid
+            var to = flow.target.itemid
+            var inputIndex = flow.flowPoints.toParameterIndex
+            var outputIndex = flow.flowPoints.fromParameterIndex
 
+            workflow.deleteFlow(from, to, outputIndex, inputIndex)
+            wfCanvas.operationsList[deleteItemIndex].flowConnections.splice(deleteEdgeIndex, 1)
+            flow.target.resetInputModel()
+            wfCanvas.canvasValid = false
+
+            //Create a new edge
             wfCanvas.showAttachmentForm(true, flow.target, flow.attachtarget);
         }
     }
@@ -72,6 +66,8 @@ Modeller.ModellerWorkArea {
 
                 if(flow.isSelected)
                 {
+                    deleteItemIndex = i;
+                    deleteEdgeIndex = j;
                     return flow;
                 }
             }

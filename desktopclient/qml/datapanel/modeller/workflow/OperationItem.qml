@@ -201,8 +201,14 @@ Rectangle {
     }
 
     function setFlow(target, attachRect, flowPoints){
+        if(workflow.hasValueDefined(target.itemid, flowPoints.toParameterIndex))
+        {
+            //TODO: Error gooien.
+            return;
+        }
+
         for(var i =0; i < flowConnections.length; ++i){
-            if ( flowConnections[i].target == target && flowConnections[i].attachement == attachRect)
+            if ( flowConnections[i].target == target)
                 return // dont add duplicates
         }
         flowConnections.push({"target" : target,
@@ -221,7 +227,7 @@ Rectangle {
         if ( wfCanvas.operationsList[wfCanvas.currentIndex] !== target){
             var flowPoints
 
-            if( operation.isLegalFlow(wfCanvas.operationsList[wfCanvas.currentIndex].operation, target.operation, flowPoints))
+            if( operation.isLegalFlow(wfCanvas.operationsList[wfCanvas.currentIndex].operation, target.operation))
             {
                 if ( operation.needChoice(target.operation)){
                     wfCanvas.showAttachmentForm(true, target,attachRect)
@@ -236,16 +242,6 @@ Rectangle {
             }
 
             wfCanvas.canvasValid = false
-        }
-    }
-
-    function deleteFlow(flow, edgeIndex)
-    {
-        var flow = flowConnections[edgeIndex]
-
-        for(var i=0; i < flowConnections.length; i++)
-        {
-
         }
     }
 
