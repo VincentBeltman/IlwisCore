@@ -256,12 +256,12 @@ std::vector<quint16> Workflow::getAssignedPouts(const OVertex &v)
     return assignedPouts;
 }
 
-OVertex Workflow::getPreviousOperationNode(const OEdge &e)
+OVertex Workflow::getSourceOperationNode(const OEdge &e)
 {
     return boost::source(e, _wfGraph);
 }
 
-OVertex Workflow::getNextOperationNode(const OEdge &e)
+OVertex Workflow::getTargetOperationNode(const OEdge &e)
 {
     return boost::target(e, _wfGraph);
 }
@@ -306,6 +306,12 @@ OEdge Workflow::addOperationFlow(const OVertex &from, const OVertex &to, const E
 
     removeInputAssignment(to, properties._inputIndexNextOperation);
     return (boost::add_edge(from, to, properties, _wfGraph)).first;
+}
+
+void Workflow::removeOperationFlow(OEdge edge) {
+    EdgeProperties edgeProps = edgeProperties(edge);
+    assignInputData(boost::target(edge, _wfGraph), edgeProps._inputIndexNextOperation);
+    boost::remove_edge(edge, _wfGraph);
 }
 
 IlwisTypes Workflow::ilwisType() const

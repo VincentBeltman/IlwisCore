@@ -40,12 +40,20 @@ Rectangle {
 
     Bench.ApplicationForm{
         id : appFrame
-        width : parent.width / 2
-        x : parent.width / 4
+        width : parent.width/2
+        x : parent.width/4
         height : parent.height - 30 < 0 ?  0 : parent.height - 30
         opacity : 0
 
     }
+    Button {
+        id : pushThrough
+        text: "GOOGGO"
+        onClicked: {
+            console.log("trol", appFrame.currentAppForm.formresult)
+        }
+    }
+
 //    Bench.ApplicationForm{
 //        id : workflowFrame
 

@@ -56,6 +56,18 @@ ToolBar{
                 }
             }
             Button {
+                id : chanconbut
+                height : 25
+                width : 25
+                Image {
+
+                }
+                onClicked: {
+                    modellerDataPane.alterSelectedEdge()
+                }
+            }
+
+            Button {
                 height : 25
                 width : 25
                 Image {
@@ -128,6 +140,26 @@ ToolBar{
                     anchors.horizontalCenter: parent.horizontalCenter
 
                     source : iconsource("stop20.png")
+                }
+            }
+            Button {
+                height : 25
+                width : 25
+                Image {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    source : iconsource("error_sign.png")
+                }
+                onClicked: {
+
+                    if(errorview.state == "smaller")
+                    {
+                        errorview.state = "bigger"
+                    } else {
+                        errorview.state = "smaller"
+                    }
+
                 }
             }
         }

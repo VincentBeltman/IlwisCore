@@ -33,6 +33,7 @@ public:
     WorkflowModel();
     explicit WorkflowModel(const Ilwis::Resource &source, QObject *parent=0);
 
+    Q_INVOKABLE void asignConstantInputData(int operationIndex, int parameterIndex, const QVariant value);
     Q_INVOKABLE void addOperation(const QString& id);
     Q_INVOKABLE void addFlow(int indexStart, int operationIndex2, const QVariantMap &flowpoints);
     Q_INVOKABLE void deleteOperation(int index);
