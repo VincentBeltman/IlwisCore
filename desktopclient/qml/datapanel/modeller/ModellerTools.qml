@@ -56,6 +56,18 @@ ToolBar{
                 }
             }
             Button {
+                id : chanconbut
+                height : 25
+                width : 25
+                Image {
+
+                }
+                onClicked: {
+                    modellerDataPane.alterSelectedEdge()
+                }
+            }
+
+            Button {
                 height : 25
                 width : 25
                 Image {

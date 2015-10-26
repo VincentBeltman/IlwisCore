@@ -70,6 +70,10 @@ Item {
         canvas.deleteSelectedEdge()
     }
 
+    function alterSelectedEdge(){
+        canvas.alterSelectedEdge()
+    }
+
     function canvasZoomOut(){
         scaleCanvas(1/factor);
     }
@@ -148,6 +152,10 @@ Item {
             id : datapane
             width : parent.width
             height : parent.height - modellertools.height - 170
+
+            function asignConstantInputData(vertexIndex, parameterIndex, value){
+                canvas.asignConstantInputData(vertexIndex, parameterIndex, value)
+            }
 
 
             WorkFlow.WorkflowCanvas {

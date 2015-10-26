@@ -12,6 +12,9 @@ Modeller.ModellerWorkArea {
     property var deleteItemIndex;
     property var deleteEdgeIndex;
 
+    function asignConstantInputData(vertexIndex, parameterIndex, value) {
+        workflow.asignConstantInputData(vertexIndex, parameterIndex, value);
+    }
 
     function deleteSelectedOperation(){
         for(var i=0; i < wfCanvas.operationsList.length; ++i){
@@ -25,6 +28,38 @@ Modeller.ModellerWorkArea {
     }
 
     function deleteSelectedEdge(){
+        var flow = getSelectedEdge()
+        if(flow != 0)
+        {
+            messageDialogEdge.open()
+        }
+    }
+
+    function alterSelectedEdge(){
+        var flow = getSelectedEdge()
+        if(flow != 0)
+        {
+            //Retrieve target and rectangle before deleting the edge
+            var target = flow.target;
+            var attachedRect = flow.attachtarget;
+
+            //Delete the edge
+            var from = flow.source.itemid
+            var to = flow.target.itemid
+            var inputIndex = flow.flowPoints.toParameterIndex
+            var outputIndex = flow.flowPoints.fromParameterIndex
+
+            workflow.deleteFlow(from, to, outputIndex, inputIndex)
+            wfCanvas.operationsList[deleteItemIndex].flowConnections.splice(deleteEdgeIndex, 1)
+            flow.target.resetInputModel()
+            wfCanvas.canvasValid = false
+
+            //Create a new edge
+            wfCanvas.showAttachmentForm(true, flow.target, flow.attachtarget);
+        }
+    }
+
+    function getSelectedEdge(){
         for(var i=0; i < wfCanvas.operationsList.length; ++i){
             var item = wfCanvas.operationsList[i]
 
@@ -36,11 +71,11 @@ Modeller.ModellerWorkArea {
                 {
                     deleteItemIndex = i;
                     deleteEdgeIndex = j;
-                    messageDialogEdge.open()
-                    break
+                    return flow;
                 }
             }
         }
+        return 0;
     }
 
     MessageDialog {
@@ -243,7 +278,7 @@ Modeller.ModellerWorkArea {
             wfCanvas.canvasValid = true
         }
 
-        function showAttachementForm(yesno, target, attachRect){
+        function showAttachmentForm(yesno, target, attachRect){
             var fromOperation = operationsList[wfCanvas.currentIndex].operation
             attachementForm.operationFrom = fromOperation
             attachementForm.operationTo = target.operation

@@ -23,7 +23,7 @@ Controls.DropableItem{
         }
 
         width : parent.width - 5
-        height : 300
+        height : 280
         spacing : 4
         EditorHeader{}
         IlwisObjectCommon{
@@ -48,17 +48,6 @@ Controls.DropableItem{
                 canUse: dataarea.isCsy
                 readOnly: false
                 asName: false
-                onObjectidChanged: {
-                    csyBounds.opacity = content != ""
-                    var model = mastercatalog.id2object(csypart.objectid, csypart)
-                    if ( model){
-                        csyBounds.islatlon = !model.isProjected
-                        var bb = model.getProperty(model.isProjected ? "envelope" : "latlonenvelope")
-                        csyBounds.setBoundingBox(bb)
-
-                    }
-                }
-
             }
             Button {
                 height : 20
@@ -73,24 +62,14 @@ Controls.DropableItem{
             }
         }
         CheckBox{
-            id : cbcorners
-            text : qsTr("Center of Pixels")
+            id : cbsubpixel
+            text : qsTr("Sub pixel precision")
             style : Base.CheckBoxStyle1{}
         }
-        Controls.TextEditLabelPair{
-            id : pixsz
-            labelText: qsTr("Pixel size")
-            labelWidth: 120
-            width : parent.width
-            regexvalidator: /^\d*(\.\d*)?$/
-        }
 
-        Controls.CoordinateSystemBounds{
-            id : csyBounds
-            height : Global.rowHeight * 4
-            width : parent.width
-            opacity: 0
-            enabled : opacity != 0
+        Button{
+            id : createeditor
+            text : qsTr("Open tie point editor")
         }
 
     }
@@ -108,10 +87,9 @@ Controls.DropableItem{
             text : qsTr("Apply")
             onClicked: {
                 dropItem.state = "invisible"
-                var createinfo = { name : objectcommon.itemname, type : "georef", subtype : "corners", minx : csyBounds.minx, miny : csyBounds.miny,
-                    maxx : csyBounds.maxx, maxy : csyBounds.maxy, csy : csypart.content,
-                    centered : cbcorners.checked, pixelsize : pixsz.content,
-                    description :objectcommon.description}
+                var points
+                var createinfo = { name : objectcommon.itemname, type : "georef", subtype : "tiepoints", tiepoints : points, csy : csypart.content,
+                    subpixel : cbsubpixel, description :objectcommon.description}
                 objectcreator.createObject(createinfo)
             }
 
@@ -129,4 +107,5 @@ Controls.DropableItem{
         }
     }
 }
+
 
