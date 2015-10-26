@@ -16,8 +16,15 @@ Rectangle {
     property var operationid
 
     function newForm(metaid, title){
+        newFormWithOutput(metaid,title,false)
+    }
+
+    /**
+      Shows the operation's form. A boolean (showOutput) has to be passed to this method which decides whether an ouput form is shown.
+      */
+    function newFormWithOutput(metaid, title, showOutput){
         operationid = metaid
-        var form= formbuilder.index2Form(metaid, false)
+        var form= formbuilder.index2Form(metaid, showOutput)
         appFrame.formQML = form
         appFrame.formTitle = title
         appFrame.opacity = 1

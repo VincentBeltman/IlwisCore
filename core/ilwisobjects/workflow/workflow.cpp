@@ -420,7 +420,7 @@ void Workflow::parseOutputParameters()
 
     QStringList mandatoryOutputs;
     QStringList optionalOutputs;
-    quint16 parameterIndex = 1;
+    quint16 parameterIndex = 0;
     for (OVertex outputNode : getNodesWithExternalOutputs()) {
 
         // TODO more readable syntax terms

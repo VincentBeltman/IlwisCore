@@ -92,8 +92,6 @@ Modeller.ModellerWorkArea {
             // Redraw lines
             wfCanvas.canvasValid = false
             wfCanvas.draw(true)
-
-            generateForm()
         }
         Component.onCompleted: visible = false
     }
@@ -194,6 +192,7 @@ Modeller.ModellerWorkArea {
                     operationsList[i].drawFlows(ctx)
                 }
                 //wfCanvas.requestPaint();
+                generateForm()
             }
         }
 
