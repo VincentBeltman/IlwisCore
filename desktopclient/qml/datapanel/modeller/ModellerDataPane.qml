@@ -115,15 +115,9 @@ Item {
             anchors.left: parent.left
             anchors.leftMargin: 5
             anchors.right: parent.right
+            state: "smaller"
 
             states: [
-                State { name: "smaller"
-
-                    PropertyChanges {
-                        target: errorview
-                        height : 0
-                    }
-                },
                 State {
                     name : "bigger"
                     PropertyChanges {
@@ -134,8 +128,14 @@ Item {
                         target: datapane
                         height : parent.height - modellertools.height - 170 - 80
                     }
-                }
+                },
+                State { name: "smaller"
 
+                    PropertyChanges {
+                        target: errorview
+                        height : 0
+                    }
+                }
             ]
             transitions: [
                 Transition {
