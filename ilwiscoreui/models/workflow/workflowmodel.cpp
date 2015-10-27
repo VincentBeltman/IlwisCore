@@ -123,7 +123,8 @@ void WorkflowModel::run(const QString &inputAndOuput)
 
         ExecutionContext ctx;
         SymbolTable symbolTable;
-        QString executeString = QString("%1_out=%2(").arg(_workflow->name()).arg(_workflow->name());
+        QString outputs;
+        QString inputs;
 
         QStringList outputList;
 
@@ -131,17 +132,28 @@ void WorkflowModel::run(const QString &inputAndOuput)
         for(int i=0 ;i<inputOutputList.size(); ++i) {
             //Add to execute string if its not an output parameter
             if(i < inputOutputList.size()-_workflow->outputParameterCount()){
-                executeString.append(inputOutputList[i]);
-
-                //Check if its not the last input parameter
-                if(i!= ((inputOutputList.size()-_workflow->outputParameterCount())-1)){
-                    executeString.append(",");
+                //Check if its not the first input parameter
+                if(!inputs.isEmpty()){
+                    inputs.append(",");
                 }
+
+                inputs.append(inputOutputList[i]);
             }else{
+                //Check if its not the first output parameter
+                if(!outputs.isEmpty()){
+                    outputs.append(",");
+                }
+
+                //Put the outputs in a list (these will be used later)
                 outputList.push_back(inputOutputList[i]);
+
+                QStringList filenameAndFormat = outputList[i-_workflow->inputParameterCount()].split("@@");
+
+                outputs.append(filenameAndFormat[0]);
             }
         }
-        executeString.append(")");
+
+        QString executeString = QString("%1=%2(%3)").arg(outputs).arg(_workflow->name()).arg(inputs);
 
         bool ok = commandhandler()->execute(executeString, &ctx, symbolTable);
         if (!ok) {
@@ -149,9 +161,11 @@ void WorkflowModel::run(const QString &inputAndOuput)
             qDebug() << "Fail";
         }
 
-        Symbol actual = symbolTable.getSymbol(QString("%1_out").arg(_workflow->name()));
+        for(int i=0;i<outputList.size();++i){
+            QStringList filenameAndFormat = outputList[i].split("@@");
 
-        if(actual.isValid()){
+            Symbol actual = symbolTable.getSymbol(QString("%1").arg(filenameAndFormat[0]));
+
             QString format;
             //Check which type of output is generated
             if(actual._type & itRASTER){
@@ -161,33 +175,28 @@ void WorkflowModel::run(const QString &inputAndOuput)
             }else if(actual._type & itTABLE){
                 format = "table";
             }
+            //TODO add more else ifs with more formats
 
             //TODO show alert if format isnt supported
             if(format != NULL){
-                QString outputName = "ilwis://internalcatalog/" + _workflow->name() + "_out";
+                if(actual.isValid()){
 
-                Ilwis::IIlwisObject object;
-                object.prepare(outputName ,{"mustexist",true});
+                    QString outputName = "ilwis://internalcatalog/" + filenameAndFormat[0];
 
-                //TODO Ability output multiple files by adding multiple connecttos
-//                for(int i=0;i<outputList.size();++i){
-
-                    //TODO 0 should be i in the future
-                    QStringList filenameAndFormat = outputList[0].split("@@");
+                    Ilwis::IIlwisObject object;
+                    object.prepare(outputName ,{"mustexist",true});
 
                     //TODO do something with the type(memory, arc, jpeg etc.)
 
                     QUrl url = object->source().url(true).adjusted(QUrl::RemoveFilename).toString() + filenameAndFormat[0];
 
-                    qDebug() << "Location: " << url.toString();
                     //Generate the stream
                     object->connectTo(url, format,"stream",Ilwis::IlwisObject::cmOUTPUT);
-//                }
 
-                object->createTime(Ilwis::Time::now());
-                object->store({"storemode",Ilwis::IlwisObject::smMETADATA | Ilwis::IlwisObject::smBINARYDATA});
+                    object->createTime(Ilwis::Time::now());
+                    object->store({"storemode",Ilwis::IlwisObject::smMETADATA | Ilwis::IlwisObject::smBINARYDATA});
+                }
             }
-
         }
     } catch (const ErrorObject& err){
 
