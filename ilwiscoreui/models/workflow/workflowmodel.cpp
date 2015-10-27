@@ -6,6 +6,8 @@
 #include "workflowmodel.h"
 #include "symboltable.h"
 #include "commandhandler.h"
+#include "featurecoverage.h"
+#include "../../IlwisCore/core/ilwiscontext.h"
 
 using namespace Ilwis;
 using namespace boost;
@@ -110,55 +112,90 @@ void WorkflowModel::createMetadata()
 
 /**
  * Runs all the operations in the workflow and generates output
- * @param input the input parameters that will be passed to the workflow
+ * @param inputAndOuput the input and output parameters that the user filled in
  */
-void WorkflowModel::run(const QString &input)
+void WorkflowModel::run(const QString &inputAndOuput)
 {
     try{
-        QStringList inputList = input.split("|");
+        QStringList inputOutputList = inputAndOuput.split("|");
 
         _workflow->createMetadata();
 
         ExecutionContext ctx;
         SymbolTable symbolTable;
-        QString executeString = QString("%1_out=%2(").arg(_workflow->name()).arg(_workflow->name());
+        QString outputs;
+        QString inputs;
 
-//        Loop through all input parameters and add them to the execute string
-        for(int i=0 ;i<inputList.size(); ++i) {
-            if(inputList[i]!=""){
-                executeString.append(inputList[i]);
+        QStringList outputList;
 
-                if(i!= (inputList.size()-1)){
-                    executeString.append(",");
+        //Loop through all input and output parameters
+        for(int i=0 ;i<inputOutputList.size(); ++i) {
+            //Add to execute string if its not an output parameter
+            if(i < inputOutputList.size()-_workflow->outputParameterCount()){
+                //Check if its not the first input parameter
+                if(!inputs.isEmpty()){
+                    inputs.append(",");
                 }
+
+                inputs.append(inputOutputList[i]);
+            }else{
+                //Check if its not the first output parameter
+                if(!outputs.isEmpty()){
+                    outputs.append(",");
+                }
+
+                //Put the outputs in a list (these will be used later)
+                outputList.push_back(inputOutputList[i]);
+
+                QStringList filenameAndFormat = outputList[i-_workflow->inputParameterCount()].split("@@");
+
+                outputs.append(filenameAndFormat[0]);
             }
         }
-        executeString.append(")");
 
-        qDebug() << executeString;
+        QString executeString = QString("%1=%2(%3)").arg(outputs).arg(_workflow->name()).arg(inputs);
 
         bool ok = commandhandler()->execute(executeString, &ctx, symbolTable);
         if (!ok) {
+            //TODO show alert if the expresion did not execute.
             qDebug() << "Fail";
         }
 
-        Symbol actual = symbolTable.getSymbol(QString("%1_out").arg(_workflow->name()));
+        for(int i=0;i<outputList.size();++i){
+            QStringList filenameAndFormat = outputList[i].split("@@");
 
-        if(actual.isValid()){
-            if(actual._type & itCOVERAGE){
-                Ilwis::IRasterCoverage raster;
-                raster.prepare("ilwis://internalcatalog/" + _workflow->name() + "_out" ,{"mustexist",true});
+            Symbol actual = symbolTable.getSymbol(QString("%1").arg(filenameAndFormat[0]));
 
-                qDebug() << "write output result to " << raster->source().url().toString();
+            QString format;
+            //Check which type of output is generated
+            if(actual._type & itRASTER){
+                format = "rastercoverage";
+            }else if(actual._type & itFEATURE){
+                format = "featurecoverage";
+            }else if(actual._type & itTABLE){
+                format = "table";
+            }
+            //TODO add more else ifs with more formats
 
-                QUrl url;
+            //TODO show alert if format isnt supported
+            if(format != NULL){
+                if(actual.isValid()){
 
-//                Generate the stream
-                raster->connectTo(url, "rastercoverage","stream",Ilwis::IlwisObject::cmOUTPUT);
-//                raster->connectTo(url, "GTiff","gdal",Ilwis::IlwisObject::cmOUTPUT); //generate tiff
-                raster->createTime(Ilwis::Time::now());
-//                raster->store();
-                raster->store({"storemode",Ilwis::IlwisObject::smMETADATA | Ilwis::IlwisObject::smBINARYDATA});
+                    QString outputName = "ilwis://internalcatalog/" + filenameAndFormat[0];
+
+                    Ilwis::IIlwisObject object;
+                    object.prepare(outputName ,{"mustexist",true});
+
+                    //TODO do something with the type(memory, arc, jpeg etc.)
+
+                    QUrl url = object->source().url(true).adjusted(QUrl::RemoveFilename).toString() + filenameAndFormat[0];
+
+                    //Generate the stream
+                    object->connectTo(url, format,"stream",Ilwis::IlwisObject::cmOUTPUT);
+
+                    object->createTime(Ilwis::Time::now());
+                    object->store({"storemode",Ilwis::IlwisObject::smMETADATA | Ilwis::IlwisObject::smBINARYDATA});
+                }
             }
         }
     } catch (const ErrorObject& err){
