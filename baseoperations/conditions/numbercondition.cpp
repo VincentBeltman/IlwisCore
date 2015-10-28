@@ -118,7 +118,7 @@ quint64 NumberCondition::createMetadata()
     operation.setOutParameterCount({2});
     operation.addOutParameter(0,itNUMBER, TR("first inputvalue"), TR("the first inputparameter"));
     operation.addOutParameter(1,itNUMBER, TR("second inputvalue"), TR("the second inputparameter"));
-    operation.setKeywords("condition,number,internal");
+    operation.setKeywords("condition, number, internal");
 
     mastercatalog()->addItems({operation});
     return operation.id();
