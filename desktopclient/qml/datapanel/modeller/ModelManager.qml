@@ -32,12 +32,12 @@ Rectangle {
         }
     }
 
-    function showOperationForm(operationid){
+    function showOperationForm(operationid, itemId){
         if ( operationid){
             datapane.state = "smaller"
             var tab= modellerProperties.getTab(1)
             tab.active=true
-            tab.item.newForm(operationid, qsTr("Set default values"))
+            tab.item.newForm(operationid, qsTr("Set default values"), itemId)
         }
     }
 
@@ -62,7 +62,7 @@ Rectangle {
             datapane.state = "smaller"
             var tab= modellerProperties.getTab(3)
             tab.active=true
-            tab.item.newForm(workflowid, qsTr("Set run values"))
+            tab.item.newFormWithOutput(workflowid, qsTr("Set run values"), true)
         }
     }
 

@@ -66,10 +66,7 @@ std::vector<ApplicationFormExpressionParser::FormParameter> ApplicationFormExpre
     if ( outparms == "0")
         return parameters;
 
-    QStringList parms = outparms.split(",");
-    if ( parms.size() == 0)
-        return parameters;
-    for ( int order = 0; order < parms.size(); ++order){
+    for ( int order = 0; order < outparms.toInt(); ++order){
         QString prefix = "pout_" + QString::number(order + 1) + "_";
        FormParameter parm;
        parm._fieldType = isService ? ftTEXTAREA :  ftTEXTEDIT;
@@ -224,7 +221,7 @@ QString ApplicationFormExpressionParser::setInputIcons(const QString& iconField1
     return imagePart;
 }
 
-QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vector<FormParameter>& parameters, bool input, QString& results) const{
+QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vector<FormParameter>& parameters, bool input, QString& results, bool showEmptyOptionInList) const{
     QString rowBodyText = "Rectangle{height : 20;width : parent.width;color : \"white\";%1Text { x:%5 + %6;text: qsTr(\"%2\"); id:label_pin_%4; width : %3 - %5 - %6;wrapMode:Text.Wrap }";
     QString textField = "DropArea{ x : %2; height : 20; width : parent.width - label_pin_%1.width - 5 - %3 - %4 - %5; keys: [%6];\
                onDropped : { pin_%1.text = drag.source.message }\
@@ -312,6 +309,8 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
             for(auto choiceString : parameters[i]._choiceList){
                 if ( choices.size() > 1)
                     choices += ",";
+                else if ( showEmptyOptionInList )
+                    choices += "\" \",";
                 if ( choiceString[0] == '!'){
                     choiceString = choiceString.mid(1);
                 }
@@ -328,14 +327,15 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     }
     if ( !input){
         formRows.replace("pin_","pout_");
-        formRows.replace("optionalOutputMarker",";text : outputfield_0;onTextChanged:{ if( text !== outputfield_0){ outputfield_0=text}}");
+        formRows.replace("optionalOutputMarker",";");
+//        formRows.replace("optionalOutputMarker",";text : outputfield_0;onTextChanged:{ if( text !== outputfield_0){ outputfield_0=text}}");
     }else {
         formRows.replace("optionalOutputMarker","");
     }
     return formRows;
 }
 
-QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showoutputformat) const {
+QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showoutputformat, bool showEmptyOptionInList) const {
     Resource resource = mastercatalog()->id2Resource(metaid);
     std::vector<FormParameter> parameters = getParameters(resource);
     std::vector<FormParameter> outparameters = getOutputParameters(resource);
@@ -350,11 +350,11 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
     width *= 10;
     width = std::min(100, width);
 
-    QString inputpart = makeFormPart(width, parameters, true, results);
+    QString inputpart = makeFormPart(width, parameters, true, results, showEmptyOptionInList);
     QString outputPart;
     QString seperator;
     if ( showoutputformat){
-        outputPart = makeFormPart(width, outparameters, false, results);
+        outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList);
         results = "property var outputFormats;property string formresult : " + results;
         for(int i = 0; i < outparameters.size(); ++i){
             results += QString(";property string outputfield_%1").arg(i);
@@ -391,7 +391,7 @@ QString ApplicationFormExpressionParser::createWorkflowForm(quint64 metaid) cons
     width = std::min(100, width);
 
     QString results;
-    QString inputpart = makeFormPart(width, parameters, true, results);
+    QString inputpart = makeFormPart(width, parameters, true, results, false);
     results = "property string formresult : " + results + ";property string outputfield_0;";
     columnStart = QString(columnStart).arg(results);
 
