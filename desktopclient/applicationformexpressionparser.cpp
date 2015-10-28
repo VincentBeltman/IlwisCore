@@ -66,10 +66,7 @@ std::vector<ApplicationFormExpressionParser::FormParameter> ApplicationFormExpre
     if ( outparms == "0")
         return parameters;
 
-    QStringList parms = outparms.split(",");
-    if ( parms.size() == 0)
-        return parameters;
-    for ( int order = 0; order < parms.size(); ++order){
+    for ( int order = 0; order < outparms.toInt(); ++order){
         QString prefix = "pout_" + QString::number(order + 1) + "_";
        FormParameter parm;
        parm._fieldType = isService ? ftTEXTAREA :  ftTEXTEDIT;
@@ -330,7 +327,8 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     }
     if ( !input){
         formRows.replace("pin_","pout_");
-        formRows.replace("optionalOutputMarker",";text : outputfield_0;onTextChanged:{ if( text !== outputfield_0){ outputfield_0=text}}");
+        formRows.replace("optionalOutputMarker",";");
+//        formRows.replace("optionalOutputMarker",";text : outputfield_0;onTextChanged:{ if( text !== outputfield_0){ outputfield_0=text}}");
     }else {
         formRows.replace("optionalOutputMarker","");
     }

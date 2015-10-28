@@ -14,16 +14,22 @@ Rectangle {
     width : 210
     height : parent.height
     property var operationid
-    property var itemId
+    property int itemId: -1
 
     function newForm(metaid, title, newItemId){
-        operationid = metaid
+        newFormWithOutput(metaid,title,false, newItemId)
         itemId = newItemId
-        var form= formbuilder.index2Form(metaid, false, true)
+    }
+
+    /**
+      Shows the operation's form. A boolean (showOutput) has to be passed to this method which decides whether an ouput form is shown.
+      */
+    function newFormWithOutput(metaid, title, showOutput){
+        operationid = metaid
+        var form= formbuilder.index2Form(metaid, showOutput)
         appFrame.formQML = form
         appFrame.formTitle = title
         appFrame.opacity = 1
-//        appFrame.formResultChanged.connect(asignConstantInputData)
     }
 
     /**
