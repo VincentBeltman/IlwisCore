@@ -31,10 +31,22 @@ Rectangle {
         operationInParameters.model = operation.inParamNames
     }
 
+    function getBackground() {
+        var keywords = operation.keywords.split(', ')
+        if (keywords.indexOf('workflow') > -1) {
+            return iconsource("workflowitem.png")
+        } else if (keywords.indexOf('condition') > -1) {
+            return iconsource("conditionitem.png")
+        } else {
+            return iconsource("operationitem.png")
+        }
+
+    }
+
     Image {
         id : box
         anchors.fill: parent
-        source : iconsource("operationitem.png")
+        source : getBackground()
     }
     Text{
         id : operationName
