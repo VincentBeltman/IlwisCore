@@ -114,9 +114,8 @@ void WorkflowModel::createMetadata()
  * Runs all the operations in the workflow and generates output
  * @param inputAndOuput the input and output parameters that the user filled in
  */
-void WorkflowModel::run(const QString &inputAndOuput)
-{
-    try{
+void WorkflowModel::run(const QString &inputAndOuput) {
+    try {
         QStringList inputOutputList = inputAndOuput.split("|");
 
         _workflow->createMetadata();
@@ -129,18 +128,18 @@ void WorkflowModel::run(const QString &inputAndOuput)
         QStringList outputList;
 
         //Loop through all input and output parameters
-        for(int i=0 ;i<inputOutputList.size(); ++i) {
+        for (int i=0; i<inputOutputList.size(); ++i) {
             //Add to execute string if its not an output parameter
-            if(i < inputOutputList.size()-_workflow->outputParameterCount()){
+            if (i < (inputOutputList.size() - _workflow->outputParameterCount())) {
                 //Check if its not the first input parameter
-                if(!inputs.isEmpty()){
+                if (!inputs.isEmpty()) {
                     inputs.append(",");
                 }
 
                 inputs.append(inputOutputList[i]);
-            }else{
+            } else {
                 //Check if its not the first output parameter
-                if(!outputs.isEmpty()){
+                if (!outputs.isEmpty()) {
                     outputs.append(",");
                 }
 
@@ -161,26 +160,30 @@ void WorkflowModel::run(const QString &inputAndOuput)
             qDebug() << "Fail";
         }
 
-        for(int i=0;i<outputList.size();++i){
+        for (int i=0; i<outputList.size(); ++i) {
             QStringList filenameAndFormat = outputList[i].split("@@");
 
             Symbol actual = symbolTable.getSymbol(QString("%1").arg(filenameAndFormat[0]));
 
             QString format;
             //Check which type of output is generated
-            if(actual._type & itRASTER){
-                format = "rastercoverage";
-            }else if(actual._type & itFEATURE){
-                format = "featurecoverage";
-            }else if(actual._type & itTABLE){
-                format = "table";
+
+            switch (actual._type) {
+                case itRASTER:
+                    format = "rastercoverage";
+                    break;
+                case itFEATURE:
+                    format = "featurecoverage";
+                    break;
+                case itTABLE:
+                    format = "table";
+                    break;
+                //TODO add more cases with more formats
             }
-            //TODO add more else ifs with more formats
 
             //TODO show alert if format isnt supported
-            if(format != NULL){
-                if(actual.isValid()){
-
+            if (format != NULL) {
+                if (actual.isValid()) {
                     QString outputName = "ilwis://internalcatalog/" + filenameAndFormat[0];
 
                     Ilwis::IIlwisObject object;
@@ -198,9 +201,9 @@ void WorkflowModel::run(const QString &inputAndOuput)
                 }
             }
         }
-    } catch (const ErrorObject& err){
+    } catch (const ErrorObject& err) {
 
-    } catch ( const std::exception& ex){
+    } catch (const std::exception& ex) {
         kernel()->issues()->log(ex.what());
     }
 }

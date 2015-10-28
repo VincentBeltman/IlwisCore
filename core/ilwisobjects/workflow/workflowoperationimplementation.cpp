@@ -66,21 +66,20 @@ bool WorkflowOperationImplementation::execute(ExecutionContext *globalCtx, Symbo
     parseInputNodeArguments(inputNodes, workflow);
 
     QList<OVertex> outputNodes = workflow->getNodesWithExternalOutputs();
-    for (int i = 0; i<outputNodes.size();++i) {
+    for (int i = 0; i<outputNodes.size(); ++i) {
         ExecutionContext ctx;
         SymbolTable symTable;
         bool ok = reverseFollowExecutionPath(outputNodes[i], &ctx, symTable);
-        if ( !ok) {
+        if (!ok) {
             ERROR0("workflow execution failed when executing!");
             return false;
         }
 
-
-//        for (int i = 0 ; i < _expression.parameterCount(false) ; i++) {
-            Parameter parameter = _expression.parm(i, false);
-            Symbol symbol = symTable.getSymbol(ctx._results[0]);
-            copyToContext(symbol, parameter.value(), globalCtx, globalSymTable);
-//        }
+        //for (int i = 0 ; i < _expression.parameterCount(false) ; i++) {
+        Parameter parameter = _expression.parm(i, false);
+        Symbol symbol = symTable.getSymbol(ctx._results[0]);
+        copyToContext(symbol, parameter.value(), globalCtx, globalSymTable);
+        //}
     }
     return true;
 }
