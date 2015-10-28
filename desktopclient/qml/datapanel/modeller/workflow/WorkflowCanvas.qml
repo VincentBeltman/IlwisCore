@@ -12,8 +12,9 @@ Modeller.ModellerWorkArea {
     property var deleteItemIndex;
     property var deleteEdgeIndex;
 
-    function asignConstantInputData(vertexIndex, parameterIndex, value) {
-        workflow.asignConstantInputData(vertexIndex, parameterIndex, value);
+    function asignConstantInputData(inputData, itemId) {
+        workflow.asignConstantInputData(inputData, itemId)
+        wfCanvas.operationsList[itemId].resetInputModel()
     }
 
     function deleteSelectedOperation(){
@@ -371,7 +372,7 @@ Modeller.ModellerWorkArea {
                     wfCanvas.currentIndex = pressed;
                     item = wfCanvas.operationsList[pressed]
                     item.isSelected = true
-                    manager.showOperationForm(item.operation.id)
+                    manager.showOperationForm(item.operation.id, pressed)
                     manager.showMetaData(item.operation)
                 } else {
                     manager.resetMetaData(workflow);
