@@ -123,15 +123,9 @@ Item {
             anchors.left: parent.left
             anchors.leftMargin: 5
             anchors.right: parent.right
+            state: "smaller"
 
             states: [
-                State { name: "smaller"
-
-                    PropertyChanges {
-                        target: errorview
-                        height : 0
-                    }
-                },
                 State {
                     name : "bigger"
                     PropertyChanges {
@@ -142,8 +136,14 @@ Item {
                         target: datapane
                         height : parent.height - modellertools.height - 170 - 80
                     }
-                }
+                },
+                State { name: "smaller"
 
+                    PropertyChanges {
+                        target: errorview
+                        height : 0
+                    }
+                }
             ]
             transitions: [
                 Transition {
@@ -172,10 +172,12 @@ Item {
                     anchors.fill: parent
                     propagateComposedEvents: true
                     onWheel: {
-                        if(wheel.angleDelta.y > 0)  // zoom in
+                        if(wheel.angleDelta.y > 0){  // zoom in
                             modellerDataPane.canvasZoomIn();
-                        else                        // zoom out
+                        }
+                        else{                        // zoom out
                             modellerDataPane.canvasZoomOut();
+                        }
                     }
                     onPressed:{mouse.accepted = false}
                     onPositionChanged:{mouse.accepted = false}
