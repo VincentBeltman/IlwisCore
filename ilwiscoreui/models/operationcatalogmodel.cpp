@@ -271,12 +271,27 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
 
     QString expression;
     QStringList parms = parameters.split("|");
+    bool hasMissingParameters = false;
 
-    for(int i = 0; i < parms.size() - operationresource["outparameters"].toInt(); ++ i){ //The last parameters are the output parameters
-        if ( expression.size() != 0)
-            expression += ",";
-        expression += parms[i];
+    for(int i = 0; i < parms.size(); ++ i){ // -1 because the last is the output parameter
+        if (operationresource.ilwisType() & itWORKFLOW && parms[i].size() == 0){
+            if (operationresource[QString("pout_%1_optional").arg(i)] == "false" && i < operationresource["outparameters"].toInt()) {
+                qDebug() << "Param " << i << " is undefined with name " << operationresource[QString("pout_%1_name").arg(i)].toString();
+                hasMissingParameters = true;
+            }
+            if (operationresource[QString("pin_%1_optional").arg(i)] == "false" && i < operationresource["inparameters"].toInt()) {
+                qDebug() << "Param " << i << " is undefined with name " << operationresource[QString("pin_%1_name").arg(i)].toString();
+                hasMissingParameters = true;
+            }
+        }
+        if(i<operationresource["inparameters"].toInt()){
+            if ( expression.size() != 0)
+                expression += ",";
+            expression += parms[i];
+        }
     }
+
+    if (hasMissingParameters) return sUNDEF;
 
     QString allOutputsString;
 
@@ -381,6 +396,14 @@ OperationModel *OperationCatalogModel::operation(const QString &id)
 WorkflowModel *OperationCatalogModel::createWorkFlow(const QString &filter)
 {
     return 0;
+}
+
+void OperationCatalogModel::refresh()
+{
+    _currentOperations = QList<OperationModel *>();
+    _refresh = true;
+    emit operationsChanged();
+
 }
 
 

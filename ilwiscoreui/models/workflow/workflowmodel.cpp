@@ -21,10 +21,14 @@ WorkflowModel::WorkflowModel(const Ilwis::Resource &source, QObject *parent) : O
     _workflow.prepare(source);
 }
 
-void WorkflowModel::asignConstantInputData(int operationIndex, int parameterIndex, QVariant value) {
-    OVertex vertex = _operationNodes[operationIndex];
-    SPAssignedInputData constantInput = _workflow->assignInputData(vertex, parameterIndex);
-    constantInput->value = value;
+void WorkflowModel::asignConstantInputData(QString inputData, int operationIndex) {
+    QStringList inputParameters = inputData.split('|');
+    for (int i = 0; i < inputParameters.length(); ++i) {
+        QString value = inputParameters[i];
+        OVertex vertex = _operationNodes[operationIndex];
+        SPAssignedInputData constantInput = _workflow->getAssignedInputData({vertex, i});
+        constantInput->value = value.trimmed().isEmpty() ? QVariant::Invalid : value;
+    }
 }
 
 void WorkflowModel::addOperation(const QString &id)
@@ -56,10 +60,10 @@ void WorkflowModel::addFlow(int operationIndex1, int operationIndex2, const QVar
     }
 }
 
-bool WorkflowModel::hasValueDefined(int operationindex, int parameterindex){
+bool WorkflowModel::hasValueDefined(int operationIndex, int parameterIndex){
     try {
-        const OVertex& operationVertex = _operationNodes[operationindex];
-        return _workflow->hasValueDefined(operationVertex, parameterindex);
+        const OVertex& operationVertex = _operationNodes[operationIndex];
+        return _workflow->hasValueDefined(operationVertex, parameterIndex);
     } catch (std::out_of_range e) {
        return false;
     }

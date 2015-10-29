@@ -143,6 +143,11 @@ Controls.DropableItem{
                             }
                             keywrds += item.trim()
                         }
+                        if ( keywrds === ""){
+                            keywrds = "workflow"
+                        } else {
+                            keywrds += "|workflow"
+                        }
 
                         var createInfo = {type : "workflow", name : nameedit.content, keywords : keywrds, description : descedit.content}
                         var ilwisid = objectcreator.createObject(createInfo)

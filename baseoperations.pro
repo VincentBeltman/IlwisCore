@@ -52,7 +52,8 @@ HEADERS += \
     baseoperations/creators/createintervaldomain.h \
     baseoperations/creators/createpalettedomain.h \
     baseoperations/creators/createcornersgeoreference.h \
-    baseoperations/creators/createprojectedcoordinatesystem.h
+    baseoperations/creators/createprojectedcoordinatesystem.h \
+    baseoperations/conditions/numbercondition.h
 
 SOURCES += \
     baseoperations/baseoperationsmodule.cpp \
@@ -91,7 +92,8 @@ SOURCES += \
     baseoperations/creators/createintervaldomain.cpp \
     baseoperations/creators/createpalettedomain.cpp \
     baseoperations/creators/createcornersgeoreference.cpp \
-    baseoperations/creators/createprojectedcoordinatesystem.cpp
+    baseoperations/creators/createprojectedcoordinatesystem.cpp \
+    baseoperations/conditions/numbercondition.cpp
 
 OTHER_FILES += \
     baseoperations/baseoperations.json
