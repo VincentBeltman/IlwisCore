@@ -288,6 +288,11 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             QString format;
             QStringList parts = output.split("@@");
             output = parts[0];
+
+            //TODO check if ouput name is valid
+//            QString datalocation = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/internalcatalog";
+//            DIR *dir = opendir(datalocation);
+
             QString formatName = parts[1];
             if ( hasType(outputtype, itTABLE)){
                 if ( formatName == "Memory"){
