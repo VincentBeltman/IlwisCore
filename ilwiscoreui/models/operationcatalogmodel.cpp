@@ -257,6 +257,10 @@ QString OperationCatalogModel::modifyTableOutputUrl(const QString& output, const
 
 }
 
+/**
+ * Executes an operation (or workflow) and generates output
+ * @param parameters the input and output parameters that the user filled in
+ */
 QString OperationCatalogModel::executeoperation(quint64 operationid, const QString& parameters) {
     if ( operationid == 0 || parameters == "")
         return sUNDEF;
@@ -268,63 +272,83 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
     QString expression;
     QStringList parms = parameters.split("|");
 
-    for(int i = 0; i < parms.size() - 1; ++ i){ // -1 because the last is the output parameter
+    for(int i = 0; i < parms.size() - operationresource["outparameters"].toInt(); ++ i){ //The last parameters are the output parameters
         if ( expression.size() != 0)
             expression += ",";
         expression += parms[i];
     }
-    QString output = parms[parms.size() - 1];
-    IlwisTypes outputtype = operationresource["pout_1_type"].toULongLong();
-    if ( output.indexOf("@@") != -1 ){
-        QString format;
-        QStringList parts = output.split("@@");
-        output = parts[0];
-        QString formatName = parts[1];
-        if ( hasType(outputtype, itTABLE)){
-            if ( formatName == "Memory"){
-                output = modifyTableOutputUrl(output, parms);
-            }else
-                output = parms[0] + "[" + output + "]";
-        }
-        if ( formatName == "Keep original"){
-            IIlwisObject obj;
-            obj.prepare(parms[0], operationresource["pin_1_type"].toULongLong());
-            if ( obj.isValid())
-                format = "{format(" + obj->provider() + ",\"" + obj->formatCode() + "\")}";
-        }
-        if ( formatName != "Memory"){ // special case
-            if ( format == "") {
-                QString query = "name='" + formatName + "'";
-                std::multimap<QString, Ilwis::DataFormat>  formats = Ilwis::DataFormat::getSelectedBy(Ilwis::DataFormat::fpNAME, query);
-                if ( formats.size() == 1){
-                    format = "{format(" + (*formats.begin()).second.property(DataFormat::fpCONNECTOR).toString() + ",\"" +
-                            (*formats.begin()).second.property(DataFormat::fpCODE).toString() + "\")}";
-                }
-            }
-            if ( output.indexOf("://") == -1)
-                output = context()->workingCatalog()->source().url().toString() + "/" + output + format;
-            else
-                output = output + format;
-        }else{
 
-            if ( hasType(outputtype,itRASTER))
-                format = "{format(stream,\"rastercoverage\")}";
-            else if (hasType(outputtype, itFEATURE))
-                format = "{format(stream,\"featurecoverage\")}";
-            else if (hasType(outputtype, itTABLE)){
-                format = "{format(stream,\"table\")}";
+    QString allOutputsString;
+
+    for(int i=(parms.size() - operationresource["outparameters"].toInt()); i<parms.size(); ++i){
+        QString output = parms[i];
+
+        IlwisTypes outputtype = operationresource["pout_1_type"].toULongLong();
+        if ( output.indexOf("@@") != -1 ){
+            QString format;
+            QStringList parts = output.split("@@");
+            output = parts[0];
+            QString formatName = parts[1];
+            if ( hasType(outputtype, itTABLE)){
+                if ( formatName == "Memory"){
+                    output = modifyTableOutputUrl(output, parms);
+                }else
+                    output = parms[0] + "[" + output + "]";
             }
-            output = output + format;
+            if ( formatName == "Keep original"){
+                IIlwisObject obj;
+                obj.prepare(parms[0], operationresource["pin_1_type"].toULongLong());
+                if ( obj.isValid())
+                    format = "{format(" + obj->provider() + ",\"" + obj->formatCode() + "\")}";
+            }
+            if ( formatName != "Memory"){ // special case
+                if ( format == "") {
+                    QString query = "name='" + formatName + "'";
+                    std::multimap<QString, Ilwis::DataFormat>  formats = Ilwis::DataFormat::getSelectedBy(Ilwis::DataFormat::fpNAME, query);
+                    if ( formats.size() == 1){
+                        format = "{format(" + (*formats.begin()).second.property(DataFormat::fpCONNECTOR).toString() + ",\"" +
+                                (*formats.begin()).second.property(DataFormat::fpCODE).toString() + "\")}";
+                    }
+                }
+                if ( output.indexOf("://") == -1)
+                    output = context()->workingCatalog()->source().url().toString() + "/" + output + format;
+                else
+                    output = output + format;
+            }else{
+                if ( hasType(outputtype,itRASTER)){
+                    format = "{format(stream,\"rastercoverage\")}";
+                }else if (hasType(outputtype, itFEATURE)){
+                    format = "{format(stream,\"featurecoverage\")}";
+                }else if (hasType(outputtype, itTABLE)){
+                    format = "{format(stream,\"table\")}";
+                }else if (hasType(outputtype, itCATALOG)){
+                    format = "{format(stream,\"catalog\")}";
+                }else if (hasType(outputtype, itDOMAIN)){
+                    format = "{format(stream,\"domain\")}";
+                }else if (hasType(outputtype, itCOORDSYSTEM)){
+                    format = "{format(stream,\"coordinatesystem\")}";
+                }else if (hasType(outputtype, itGEOREF)){
+                    format = "{format(stream,\"georeference\")}";
+                }
+
+                output = output + format;
+            }
         }
+
+        if(!allOutputsString.isEmpty()){
+            allOutputsString.append(",");
+        }
+        allOutputsString += output;
     }
-    if ( output == "")
+
+    if ( allOutputsString == "")
         expression = QString("script %1(%2)").arg(operationresource.name()).arg(expression);
     else
-        expression = QString("script %1=%2(%3)").arg(output).arg(operationresource.name()).arg(expression);
+        expression = QString("script %1=%2(%3)").arg(allOutputsString).arg(operationresource.name()).arg(expression);
+
+    qDebug() << "Expression: " << expression;
 
     OperationExpression opExpr(expression);
-
-
 
     try {
         QThread* thread = new QThread;
@@ -337,7 +361,7 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
         thread->start();
 
 
-    return "TODO";
+        return "TODO";
     } catch (const ErrorObject& err){
         emit error(err.message());
     }
