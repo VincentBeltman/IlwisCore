@@ -271,9 +271,8 @@ void OperationExpression::parseFunctionExpression(const QString &txt, const Symb
             if ( c == '}' && quoteCount == 0){
                 blockCount--;
             }
-
             if ( c == ',' || blockCount == 1)
-                outputParams.push_back(count++);
+                outputParams.push_back(count);
             ++count;
         }
         qint32 shift = 0;

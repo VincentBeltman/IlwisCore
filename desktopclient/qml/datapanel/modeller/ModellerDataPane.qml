@@ -89,6 +89,10 @@ Item {
         tform.yScale *=scaleFactor;
     }
 
+    function asignConstantInputData(inputData, operationid) {
+        canvas.asignConstantInputData(inputData, operationid);
+    }
+
     /**
       Calls the WorkflowCanvas's run method
       */

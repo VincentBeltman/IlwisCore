@@ -407,7 +407,6 @@ void Workflow::parseInputParameters()
             }
         }
     }
-    qDebug() << "For loop ended";
     QString inparameters = createParametersCountString(mandatoryInputs, optionalInputs);
     connector()->setProperty("inparameters", inparameters);
 
@@ -426,7 +425,7 @@ void Workflow::parseOutputParameters()
 
     QStringList mandatoryOutputs;
     QStringList optionalOutputs;
-    quint16 parameterIndex = 1;
+    quint16 parameterIndex = 0;
     for (OVertex outputNode : getNodesWithExternalOutputs()) {
 
         // TODO more readable syntax terms
