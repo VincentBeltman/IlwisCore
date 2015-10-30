@@ -407,7 +407,6 @@ void Workflow::parseInputParameters()
             }
         }
     }
-    qDebug() << "For loop ended";
     QString inparameters = createParametersCountString(mandatoryInputs, optionalInputs);
     connector()->setProperty("inparameters", inparameters);
 

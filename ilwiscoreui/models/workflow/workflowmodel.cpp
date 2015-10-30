@@ -27,12 +27,17 @@ void WorkflowModel::asignConstantInputData(QString inputData, int operationIndex
         QString value = inputParameters[i];
         OVertex vertex = _operationNodes[operationIndex];
         SPAssignedInputData constantInput = _workflow->getAssignedInputData({vertex, i});
-        constantInput->value = value.trimmed().isEmpty() ? QVariant::Invalid : value;
+        if (value.trimmed().isEmpty()) {
+            constantInput->value = QVariant::Invalid;
+        } else {
+            constantInput->value = value;
+        }
     }
 }
 
 void WorkflowModel::addOperation(const QString &id)
 {
+    _workflow->debugWorkflowMetadata();
     bool ok;
     quint64 opid = id.toULongLong(&ok);
     if (!ok){
@@ -76,6 +81,8 @@ void WorkflowModel::deleteOperation(int index)
             const OVertex& operationVertex = _operationNodes[index];
             _workflow->removeOperation(operationVertex);
             _operationNodes.erase(_operationNodes.begin() + index);
+        } else {
+            qDebug() << "There are no operations";
         }
     } catch (std::out_of_range e) {
         qDebug() << "False operation";
