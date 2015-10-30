@@ -32,6 +32,7 @@
 #include "models/uicontextmodel.h"
 #include "models/projectionparametermodel.h"
 #include "models/workflow/workflowmodel.h"
+#include "models/workflow/workflowerrormodel.h"
 #include "models/workflow/scenariobuildermodel.h"
 #include "models/visualattributemodel.h"
 #include "models/tablemodel.h"
@@ -116,7 +117,7 @@ int main(int argc, char *argv[])
         qmlRegisterType<ObjectCreator>("ObjectCreator", 1,0,"ObjectCreator");
         qmlRegisterType<IlwisObjectCreatorModel>("IlwisObjectCreatorModel", 1,0,"IlwisObjectCreatorModel");
         qmlRegisterType<ScenarioDesignerModel>("ScenarioDesignerModel", 1,0,"ScenarioDesignerModel");
-
+        //qmlRegisterType<WorkflowErrorModel>("WorkflowErrorModel", 1,0,"WorkflowErrorModel");
 
         MasterCatalogModel mastercatalogmodel(ctx);
 

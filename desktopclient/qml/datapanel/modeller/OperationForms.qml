@@ -14,9 +14,11 @@ Rectangle {
     width : 210
     height : parent.height
     property var operationid
+    property int itemId: -1
 
-    function newForm(metaid, title){
-        newFormWithOutput(metaid,title,false)
+    function newForm(metaid, title, newItemId){
+        newFormWithOutput(metaid,title,false, newItemId)
+        itemId = newItemId
     }
 
     /**
@@ -40,27 +42,17 @@ Rectangle {
 
     Bench.ApplicationForm{
         id : appFrame
-        width : parent.width/2
-        x : parent.width/4
+        width : parent.width
         height : parent.height - 30 < 0 ?  0 : parent.height - 30
         opacity : 0
-
     }
-    Button {
-        id : pushThrough
-        text: "GOOGGO"
-        onClicked: {
-            console.log("trol", appFrame.currentAppForm.formresult)
+    Component.onCompleted: {
+        appFrame.formResultChanged.connect(asignConstantInputData)
+    }
+    function asignConstantInputData() {
+        if (itemId > -1){
+            modellerDataPane.asignConstantInputData(appFrame.currentAppForm.formresult, itemId)
         }
     }
-
-//    Bench.ApplicationForm{
-//        id : workflowFrame
-
-//        width : parent.width / 2
-//        height : parent.height - 30 < 0 ?  0 : parent.height - 30
-//        opacity : 0
-
-//    }
 }
 

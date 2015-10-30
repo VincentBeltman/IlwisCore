@@ -21,14 +21,23 @@ WorkflowModel::WorkflowModel(const Ilwis::Resource &source, QObject *parent) : O
     _workflow.prepare(source);
 }
 
-void WorkflowModel::asignConstantInputData(int operationIndex, int parameterIndex, QVariant value) {
-    OVertex vertex = _operationNodes[operationIndex];
-    SPAssignedInputData constantInput = _workflow->assignInputData(vertex, parameterIndex);
-    constantInput->value = value;
+void WorkflowModel::asignConstantInputData(QString inputData, int operationIndex) {
+    QStringList inputParameters = inputData.split('|');
+    for (int i = 0; i < inputParameters.length(); ++i) {
+        QString value = inputParameters[i];
+        OVertex vertex = _operationNodes[operationIndex];
+        SPAssignedInputData constantInput = _workflow->getAssignedInputData({vertex, i});
+        if (value.trimmed().isEmpty()) {
+            constantInput->value = QVariant::Invalid;
+        } else {
+            constantInput->value = value;
+        }
+    }
 }
 
 void WorkflowModel::addOperation(const QString &id)
 {
+    _workflow->debugWorkflowMetadata();
     bool ok;
     quint64 opid = id.toULongLong(&ok);
     if (!ok){
@@ -56,10 +65,10 @@ void WorkflowModel::addFlow(int operationIndex1, int operationIndex2, const QVar
     }
 }
 
-bool WorkflowModel::hasValueDefined(int operationindex, int parameterindex){
+bool WorkflowModel::hasValueDefined(int operationIndex, int parameterIndex){
     try {
-        const OVertex& operationVertex = _operationNodes[operationindex];
-        return _workflow->hasValueDefined(operationVertex, parameterindex);
+        const OVertex& operationVertex = _operationNodes[operationIndex];
+        return _workflow->hasValueDefined(operationVertex, parameterIndex);
     } catch (std::out_of_range e) {
        return false;
     }
@@ -72,6 +81,8 @@ void WorkflowModel::deleteOperation(int index)
             const OVertex& operationVertex = _operationNodes[index];
             _workflow->removeOperation(operationVertex);
             _operationNodes.erase(_operationNodes.begin() + index);
+        } else {
+            qDebug() << "There are no operations";
         }
     } catch (std::out_of_range e) {
         qDebug() << "False operation";
