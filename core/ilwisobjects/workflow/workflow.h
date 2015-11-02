@@ -26,6 +26,15 @@ struct AssignedOutputData {
     QString outputName;
 };
 
+struct Operation {
+    Operation() {}
+    quint16 vertexIndex;
+    QString resourceUrl;
+    QString resourceProvider;
+    quint16 x;
+    quint16 y;
+};
+
 typedef std::shared_ptr<AssignedInputData> SPAssignedInputData;
 typedef std::shared_ptr<AssignedOutputData> SPAssignedOutputData;
 
@@ -110,6 +119,10 @@ public:
     IOperationMetaData getOperationMetadata(const OVertex &v);
     IlwisTypes ilwisType() const;
     quint64 createMetadata();
+
+    // ------ Methods for saving
+    QMap<InputAssignment, SPAssignedInputData> getAllInputAssignments() { return _inputAssignments; }
+    QList<Operation> getAllInputAssignments() { return _inputAssignments; }
 
     // ------ for debugging
     void debugPrintGraph();

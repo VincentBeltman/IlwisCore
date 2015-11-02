@@ -158,7 +158,6 @@ Modeller.ModellerWorkArea {
       Calls the WorkflowModel's run method
       */
     function run(){
-        // workflow.createMetadata()
         workflow.run(manager.retrieveRunFormValues())
     }
 
@@ -166,8 +165,10 @@ Modeller.ModellerWorkArea {
       Calls the create meta data method of the WorkflowModel and regenerates the form
       */
     function generateForm() {
-        workflow.createMetadata()
-        manager.showRunForm(workflow.id)
+        if (workflow){
+            workflow.createMetadata()
+            manager.showRunForm(workflow.id)
+        }
     }
 
     Canvas {
@@ -197,7 +198,9 @@ Modeller.ModellerWorkArea {
             interval: 30;
             running: true;
             repeat: true
-            onTriggered: wfCanvas.draw()
+            onTriggered: {
+                wfCanvas.draw()
+            }
         }
 
 
@@ -234,6 +237,7 @@ Modeller.ModellerWorkArea {
         }
 
         function createItem(x,y, resource) {
+            console.log(resource)
             component = Qt.createComponent("OperationItem.qml");
 
             if (component.status == Component.Ready)
@@ -300,14 +304,13 @@ Modeller.ModellerWorkArea {
             id: canvasDropArea
             anchors.fill: wfCanvas
             onDropped: {
-                if (drag.source.type === "singleoperation") {
+                if (drag.source.type === "singleoperation" || drag.source.type === "workflow") {
                     var oper = wfCanvas.getOperation(drag.source.ilwisobjectid)
                     wfCanvas.createItem(drag.x - 50, drag.y - 30,oper)
                     workflow.addOperation(drag.source.ilwisobjectid)
 
                     generateForm()
                 }
-
             }
         }
         FlowParametersChoiceForm{
@@ -377,6 +380,24 @@ Modeller.ModellerWorkArea {
                 }
 
 
+            }
+
+            onDoubleClicked: {
+                var pressed = -1, item = 0;
+                for(var i=0; i < wfCanvas.operationsList.length; ++i){
+
+                    item = wfCanvas.operationsList[i]
+                    var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
+
+                    if ( isContained) {
+                        pressed = i
+                    }
+                }
+                if (pressed > -1) {
+                    var resource = mastercatalog.id2Resource(item.operation.id)
+                    var filter = "itemid=" + resource.id
+                    bigthing.newCatalog(filter, "workflow",resource.url,"other")
+                }
             }
 
             Keys.onEscapePressed: {

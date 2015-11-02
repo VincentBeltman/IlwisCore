@@ -35,13 +35,14 @@ Rectangle {
         var keywords = operation.keywords.split(', ')
         if (keywords.indexOf('workflow') > -1) {
             return iconsource("workflowitem.png")
-        } else if (keywords.indexOf('condition') > -1) {
-            return iconsource("conditionitem.png")
         } else {
             return iconsource("operationitem.png")
         }
 
     }
+
+
+
 
     Image {
         id : box
@@ -58,7 +59,6 @@ Rectangle {
         x : 15
         text : operation ? operation.name : "?"
         font.bold : true
-
     }
     Text {
         id : labelInput
