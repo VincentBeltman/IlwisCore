@@ -8,7 +8,11 @@
 #include "georeference.h"
 #include "numericdomain.h"
 #include "symboltable.h"
+#include "operationmetadata.h"
+#include "workflow.h"
 #include "commandhandler.h"
+#include "uicontextmodel.h"
+#include "operationcatalogmodel.h"
 #include "objectcreator.h"
 #include "operationmetadata.h"
 
@@ -260,21 +264,34 @@ QString ObjectCreator::createProjectedCoordinateSystem(const QVariantMap &parms)
     return QString::number(i64UNDEF);
 }
 
+QString ObjectCreator::createWorkflow(const QVariantMap &parms)
+{
+    QString name = parms["name"].toString();
+    OperationResource res(QUrl("ilwis://operations/" + name), itWORKFLOW);
+    res.setDescription(parms["description"].toString());
+    res.setKeywords(parms["keywords"].toString());
+    res.prepare();
+    mastercatalog()->addItems({res});
+    QVariant opercatalog = uicontext()->rootContext()->contextProperty("operations");
+    if ( opercatalog.isValid()){
+        OperationCatalogModel *ocmodel = opercatalog.value<OperationCatalogModel *>();
+        if (ocmodel){
+            ocmodel->refresh();
+        }
+    }
+    return QString::number(res.id());
+}
+
 QString ObjectCreator::createObject(const QVariantMap &parms)
 {
     try {
     Resource res;
-    res.setDescription(parms["description"].toString());
-    IIlwisObject obj;
-    QString name = parms["name"].toString();
+    res.setDescription(parms["decription"].toString());
+
     QString type = parms["type"].toString();
     if (  type == "workflow" ){
-        OperationResource res2 = OperationResource(QUrl("ilwis://operations/" + name), itWORKFLOW);
-        res2.setDescription(parms["description"].toString());
-        res2.setKeywords(parms["keywords"].toString());
-        res2.prepare();
-        obj.prepare(res2);
-    } else if ( type == "numericdomain"){
+        return createWorkflow(parms);
+    } else     if ( type == "numericdomain"){
         return createNumericDomain(parms);
     } else if ( type == "itemdomain"){
             return createItemDomain(parms);
@@ -287,7 +304,7 @@ QString ObjectCreator::createObject(const QVariantMap &parms)
 
 
 
-    return QString::number(obj->id());
+    return QString::number(i64UNDEF);
     } catch (const ErrorObject& ){
 
     } catch (std::exception& ex){
