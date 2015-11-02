@@ -235,10 +235,9 @@ Modeller.ModellerWorkArea {
             }
         }
 
-
-
         function createItem(x,y, resource) {
             component = Qt.createComponent("OperationItem.qml");
+
             if (component.status == Component.Ready)
                 finishCreation(x,y,resource);
             else

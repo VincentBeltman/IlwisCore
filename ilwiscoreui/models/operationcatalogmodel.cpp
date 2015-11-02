@@ -472,8 +472,3 @@ void OperationCatalogModel::refresh()
     emit operationsChanged();
 
 }
-
-
-
-
-

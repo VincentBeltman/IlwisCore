@@ -39,12 +39,16 @@ Rectangle {
         appFrame.doExecute(operationid)
         return appFrame.currentAppForm.formresult
     }
+    ScrollView{
+        id: operationFormScrollView
+        anchors.fill: parent
 
-    Bench.ApplicationForm{
-        id : appFrame
-        width : parent.width
-        height : parent.height - 30 < 0 ?  0 : parent.height - 30
-        opacity : 0
+        Bench.ApplicationForm{
+            id : appFrame
+            width : operationForm.width - 15
+            height : operationForm.height - 30 < 0 ?  0 : operationForm.height - 30
+            opacity : 0
+        }
     }
     Component.onCompleted: {
         appFrame.formResultChanged.connect(asignConstantInputData)

@@ -35,6 +35,8 @@ Rectangle {
             create.checked = status === "on"
         if ( buttonname === "info")
             info.checked = status === "on"
+        if ( buttonname === "preferences")
+            preferences.checked = status === "on"
 
     }
     function toggle(button, visibility) {
@@ -111,7 +113,7 @@ Rectangle {
             onTriggered : {
                 toggle(preferences)
                 transitionInfoPane("preferences","toggle")
-                mastercatalog.longAction()
+
             }
 
         }
@@ -174,9 +176,13 @@ Rectangle {
                 style: ProgressBarStyle {
                      background: Rectangle {
                          radius: 2
-                         color: "lightgreen"
+                         color: "grey"
                          border.color: "gray"
                          border.width: 1
+                     }
+                     progress: Rectangle {
+                         color: "red"
+                         border.color: "steelblue"
                      }
                 }
 
@@ -191,7 +197,7 @@ Rectangle {
             id : preferences
             action : prefClicked
             iconname : "preferencesCS1.png"
-            label: qsTr("Preferences")
+            label: qsTr("Settings")
 
         }
         WorkBenchButton{
