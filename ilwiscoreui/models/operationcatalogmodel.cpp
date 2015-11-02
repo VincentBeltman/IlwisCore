@@ -5,6 +5,9 @@
 #include <QSqlRecord>
 #include <QQmlContext>
 #include <QThread>
+#include <QDir>
+#include <QStandardPaths>
+#include "dirent.h"
 #include "kernel.h"
 #include "connectorinterface.h"
 #include "resource.h"
@@ -295,6 +298,8 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
 
     QString allOutputsString;
 
+    QStringList duplicateFileNames;
+
     for(int i=(parms.size() - operationresource["outparameters"].toInt()); i<parms.size(); ++i){
         QString output = parms[i];
 
@@ -304,11 +309,61 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             QStringList parts = output.split("@@");
             output = parts[0];
 
-            //TODO check if ouput name is valid
-//            QString datalocation = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/internalcatalog";
-//            DIR *dir = opendir(datalocation);
+            //Check if user didnt put the same output name in another output field
+            int occurences = 0;
+            for(int j=(parms.size() - operationresource["outparameters"].toInt()); j<parms.size(); ++j){
+                QString compareString = parms[j].split("@@")[0];
+                if(output == compareString){
+                    occurences++;
+                }
+            }
+
+            //Add the duplicate name to the list of duplicate names
+            if(occurences>1 && !duplicateFileNames.contains(output)){
+                duplicateFileNames.push_back(output);
+            }
 
             QString formatName = parts[1];
+
+            QStringList existingFileNames;
+
+            DIR *directory;
+
+            if(formatName == "Memory" && operationresource.ilwisType() & itWORKFLOW){
+                if(operationresource.ilwisType() & itWORKFLOW){
+                    //Get all files in the internal catalog
+                    QString dataLocation = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/internalcatalog";
+                    directory = opendir(dataLocation.toStdString().c_str());
+                }
+            }else if(formatName != "Memory" && operationresource.ilwisType() & itWORKFLOW){
+                //Get all files in the directory
+                QString dataLocation = output;
+                QUrl url = QUrl(output);
+                url.adjusted(QUrl::RemoveFilename);
+                url.adjusted(QUrl::StripTrailingSlash);
+
+                qDebug() << "url: " << url.toString();
+
+                directory = opendir(dataLocation.toStdString().c_str());
+            }
+
+            struct dirent *file;
+
+            //Put the existing file names in a list for later use
+            while ((file = readdir (directory)) != NULL) {
+                existingFileNames.push_back(file->d_name);
+                qDebug() << file->d_name;
+            }
+
+            closedir(directory);
+
+            //Check if a file with the same name doesnt already exist
+            for(int j=0;j<existingFileNames.size();++j){
+                if(existingFileNames[j] == output) {
+                    duplicateFileNames.push_back(output);
+                }
+            }
+
             if ( hasType(outputtype, itTABLE)){
                 if ( formatName == "Memory"){
                     output = modifyTableOutputUrl(output, parms);
@@ -361,32 +416,39 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
         allOutputsString += output;
     }
 
-    if ( allOutputsString == "")
-        expression = QString("script %1(%2)").arg(operationresource.name()).arg(expression);
-    else
-        expression = QString("script %1=%2(%3)").arg(allOutputsString).arg(operationresource.name()).arg(expression);
+    if(duplicateFileNames.isEmpty()){
+        if ( allOutputsString == "")
+            expression = QString("script %1(%2)").arg(operationresource.name()).arg(expression);
+        else
+            expression = QString("script %1=%2(%3)").arg(allOutputsString).arg(operationresource.name()).arg(expression);
 
-    qDebug() << "Expression: " << expression;
+        qDebug() << "Expression: " << expression;
 
-    OperationExpression opExpr(expression);
+        OperationExpression opExpr(expression);
 
-    try {
-        QThread* thread = new QThread;
-        OperationWorker* worker = new OperationWorker(opExpr);
-        worker->moveToThread(thread);
-        thread->connect(thread, &QThread::started, worker, &OperationWorker::process);
-        thread->connect(worker, &OperationWorker::finished, thread, &QThread::quit);
-        thread->connect(worker, &OperationWorker::finished, worker, &OperationWorker::deleteLater);
-        thread->connect(thread, &QThread::finished, thread, &QThread::deleteLater);
-        thread->start();
+        try {
+            QThread* thread = new QThread;
+            OperationWorker* worker = new OperationWorker(opExpr);
+            worker->moveToThread(thread);
+            thread->connect(thread, &QThread::started, worker, &OperationWorker::process);
+            thread->connect(worker, &OperationWorker::finished, thread, &QThread::quit);
+            thread->connect(worker, &OperationWorker::finished, worker, &OperationWorker::deleteLater);
+            thread->connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+            thread->start();
 
-
-        return "TODO";
-    } catch (const ErrorObject& err){
-        emit error(err.message());
+            return "TODO";
+        } catch (const ErrorObject& err){
+            emit error(err.message());
+        }
+        return sUNDEF;
+    }else{
+        //TODO replace qDebugs with errors
+        qDebug() << "Duplicate files:";
+        for(int i=0;i<duplicateFileNames.size();++i){
+            qDebug() << duplicateFileNames[i];
+        }
+        return sUNDEF;
     }
-    return sUNDEF;
-
 }
 
 OperationModel *OperationCatalogModel::operation(const QString &id)
