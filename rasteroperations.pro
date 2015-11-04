@@ -30,6 +30,10 @@ SOURCES += \
     rasteroperations/classification/clusterraster.cpp \
     rasteroperations/filter/timesat_nrs.cpp \
     rasteroperations/SEBS/smac.cpp
+    rasteroperations/pointtoraster.cpp\
+    rasteroperations/movingaverage.cpp\
+    rasteroperations/polygontoraster.cpp\
+    rasteroperations/filter/timesat_nrs.cpp
 
 
 HEADERS += \
@@ -45,8 +49,10 @@ HEADERS += \
     rasteroperations/filter/linearrasterfilter.h \
     rasteroperations/mirrorrotateraster.h \
     rasteroperations/classification/clusterraster.h \
-    rasteroperations/filter/timesat_nrs.h \
-    rasteroperations/SEBS/smac.h
+    rasteroperations/pointtoraster.h\
+    rasteroperations/movingaverage.h\
+    rasteroperations/polygontoraster.h\
+    rasteroperations/filter/timesat_nrs.h\
 
 
 OTHER_FILES += \ 
