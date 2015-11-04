@@ -28,7 +28,8 @@ SOURCES += \
     rasteroperations/filter/linearrasterfilter.cpp \
     rasteroperations/mirrorrotateraster.cpp \
     rasteroperations/classification/clusterraster.cpp \
-    rasteroperations/filter/timesat_nrs.cpp
+    rasteroperations/filter/timesat_nrs.cpp \
+    rasteroperations/SEBS/smac.cpp
 
 
 HEADERS += \
@@ -44,7 +45,8 @@ HEADERS += \
     rasteroperations/filter/linearrasterfilter.h \
     rasteroperations/mirrorrotateraster.h \
     rasteroperations/classification/clusterraster.h \
-    rasteroperations/filter/timesat_nrs.h
+    rasteroperations/filter/timesat_nrs.h \
+    rasteroperations/SEBS/smac.h
 
 
 OTHER_FILES += \ 
