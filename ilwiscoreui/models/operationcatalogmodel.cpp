@@ -303,7 +303,10 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
     for(int i=(parms.size() - operationresource["outparameters"].toInt()); i<parms.size(); ++i){
         QString output = parms[i];
 
-        IlwisTypes outputtype = operationresource["pout_1_type"].toULongLong();
+
+        QString pout = QString("pout_%1_type").arg((i-operationresource["inparameters"].toInt() + 1));
+
+        IlwisTypes outputtype = operationresource[pout].toULongLong();
         if ( output.indexOf("@@") != -1 ){
             QString format;
             QStringList parts = output.split("@@");
@@ -329,6 +332,9 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
 
             DIR *directory;
 
+            //If not memory
+            QString fileName;
+
             if(formatName == "Memory" && operationresource.ilwisType() & itWORKFLOW){
                 if(operationresource.ilwisType() & itWORKFLOW){
                     //Get all files in the internal catalog
@@ -338,11 +344,29 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             }else if(formatName != "Memory" && operationresource.ilwisType() & itWORKFLOW){
                 //Get all files in the directory
                 QString dataLocation = output;
-                QUrl url = QUrl(output);
-                url.adjusted(QUrl::RemoveFilename);
-                url.adjusted(QUrl::StripTrailingSlash);
+                dataLocation.remove("file:///");
 
-                qDebug() << "url: " << url.toString();
+                QStringList splitUrl = dataLocation.split("/");
+
+                if(fileName.isEmpty()){
+                    fileName = splitUrl.last();
+
+                    QString query = "name='" + formatName + "'";
+                    std::multimap<QString, Ilwis::DataFormat>  formats = Ilwis::DataFormat::getSelectedBy(Ilwis::DataFormat::fpNAME, query);
+                    if ( formats.size() == 1){
+                         QString connector = (*formats.begin()).second.property(DataFormat::fpCONNECTOR).toString();
+                         QString code = (*formats.begin()).second.property(DataFormat::fpCODE).toString();
+
+                         QVariantList extensions = Ilwis::DataFormat::getFormatProperties(DataFormat::fpEXTENSION,outputtype, connector, code);
+
+                         fileName += ".";
+                         fileName += extensions[0].toString();
+                    }
+                }
+
+                splitUrl.removeLast();
+
+                dataLocation = splitUrl.join("/");
 
                 directory = opendir(dataLocation.toStdString().c_str());
             }
@@ -357,10 +381,16 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
 
             closedir(directory);
 
-            //Check if a file with the same name doesnt already exist
+            //Check if a file with the same name already exist
             for(int j=0;j<existingFileNames.size();++j){
-                if(existingFileNames[j] == output) {
-                    duplicateFileNames.push_back(output);
+                if(formatName == "Memory"){
+                    if(existingFileNames[j] == output) {
+                        duplicateFileNames.push_back(output);
+                    }
+                }else if(formatName != "Memory"){
+                    if(existingFileNames[j] == fileName){
+                        duplicateFileNames.push_back(fileName);
+                    }
                 }
             }
 
