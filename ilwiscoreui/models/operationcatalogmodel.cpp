@@ -272,11 +272,13 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
     for(int i = 0; i < parms.size() - 1; ++ i){ // -1 because the last is the output parameter
         if (operationresource.ilwisType() & itWORKFLOW && parms[i].size() == 0){
             if (operationresource[QString("pout_%1_optional").arg(i)] == "false" && i < operationresource["outparameters"].toInt()) {
-                qDebug() << "Param " << i << " is undefined with name " << operationresource[QString("pout_%1_name").arg(i)].toString();
+                em->addError(1, "Error message 1");
+                //qDebug() << "Param " << i << " is undefined with name " << operationresource[QString("pout_%1_name").arg(i)].toString();
                 hasMissingParameters = true;
             }
             if (operationresource[QString("pin_%1_optional").arg(i)] == "false" && i < operationresource["inparameters"].toInt()) {
-                qDebug() << "Param " << i << " is undefined with name " << operationresource[QString("pin_%1_name").arg(i)].toString();
+                em->addError(2, "Error message 2");
+                //qDebug() << "Param " << i << " is undefined with name " << operationresource[QString("pin_%1_name").arg(i)].toString();
                 hasMissingParameters = true;
             }
         }

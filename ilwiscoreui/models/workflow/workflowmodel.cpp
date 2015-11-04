@@ -7,6 +7,7 @@
 #include "symboltable.h"
 #include "commandhandler.h"
 #include "featurecoverage.h"
+#include "workflowerrormodel.h"
 #include "../../IlwisCore/core/ilwiscontext.h"
 
 using namespace Ilwis;
