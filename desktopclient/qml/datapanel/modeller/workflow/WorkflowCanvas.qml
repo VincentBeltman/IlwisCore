@@ -171,6 +171,53 @@ Modeller.ModellerWorkArea {
         }
     }
 
+    /**
+      Draws canvas from the workflow
+      */
+    function drawFromWorkflow() {
+        var nodes = workflow.getNodes(), node, resource, edges, edge, fromItemid,
+                toItemId, fromOperation=false, toOperation=false, flowPoints;
+        for (var i = 0; i < nodes.length; i++) {
+            node = nodes[i];
+            resource = mastercatalog.id2Resource(node.operationId)
+
+            wfCanvas.createItem(node.x, node.y, resource);
+            edges = workflow.getEdges(node)
+            for (var j = 0; j < edges.length; j++) {
+                edge = edges[j]
+                fromItemid = workflow.vertex2ItemID(node.vertex) //TODO: Temporary
+                toItemId = workflow.vertex2ItemID(edge.toVertex) //TODO: Temporary
+
+                for (var k = 0; k < wfCanvas.operationsList.length; k++) {
+                    if (wfCanvas.operationsList[k].itemid == fromItemid && !fromOperation) {
+                        fromOperation = wfCanvas.operationsList[k]
+                    } else if (wfCanvas.operationsList[k].itemid == toItemId && !toOperation) {
+                        toOperation = wfCanvas.operationsList[k]
+                    }
+                }
+
+                if (fromOperation && toOperation){
+                    flowPoints = {
+                        "fromParameterIndex" : edge.fromParameter,
+                        "toParameterIndex" : edge.toParameter
+                    }
+                    fromOperation.flowConnections.push({
+                       "target" : toOperation,
+                       "source" : fromOperation,
+                       "attachtarget" : toOperation.index2Rectangle(edge.toRect),
+                       "attachsource" : fromOperation.index2Rectangle(edge.fromRect),
+                       "flowPoints" : flowPoints,
+                       "isSelected" : false
+                    })
+                }
+
+                fromOperation = false
+                toOperation = false
+            }
+        }
+        wfCanvas.draw(true)
+    }
+
     Canvas {
         Keys.onDeletePressed: {
             deleteSelectedOperation()
@@ -237,7 +284,6 @@ Modeller.ModellerWorkArea {
         }
 
         function createItem(x,y, resource) {
-            console.log(resource)
             component = Qt.createComponent("OperationItem.qml");
 
             if (component.status == Component.Ready)

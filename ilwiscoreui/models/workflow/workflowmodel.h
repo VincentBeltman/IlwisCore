@@ -16,7 +16,7 @@
 #include <QQmlListProperty>
 
 #include "rastercoverage.h"
-
+using namespace Ilwis;
 namespace Ilwis {
 class OperationMetaData;
 typedef IlwisData<OperationMetaData> IOperationMetaData;
@@ -35,11 +35,17 @@ public:
 
     Q_INVOKABLE void asignConstantInputData(QString inputData, int operationIndex);
     Q_INVOKABLE void addOperation(const QString& id);
-    Q_INVOKABLE void addFlow(int indexStart, int operationIndex2, const QVariantMap &flowpoints);
+    Q_INVOKABLE void addFlow(int indexStart, int operationIndex2, const QVariantMap &flowpoints, int outRectIndex, int inRectIndex);
     Q_INVOKABLE void deleteOperation(int index);
     Q_INVOKABLE void deleteFlow(int operationIndex1, int operationIndex2, int indexStart, int indexEnd);
 
     Q_INVOKABLE bool hasValueDefined(int operationIndex, int parameterIndex);
+
+//    Q_INVOKABLE QList<NodePropObject> getNodes();
+//    Q_INVOKABLE QList<EdgeProperties> getEdgesByNode();
+    Q_INVOKABLE int vertex2ItemID(int vertex);
+
+    Q_INVOKABLE int store(int vertex);
 
     Q_INVOKABLE void run(const QString &inputAndOuput);
     Q_INVOKABLE void createMetadata();
