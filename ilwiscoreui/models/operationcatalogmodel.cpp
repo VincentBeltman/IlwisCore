@@ -298,7 +298,7 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
 
     QString allOutputsString;
 
-    QStringList duplicateFileNames;
+    bool duplicateFileNames = false;
 
     for(int i=(parms.size() - operationresource["outparameters"].toInt()); i<parms.size(); ++i){
         QString output = parms[i];
@@ -322,8 +322,9 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             }
 
             //Add the duplicate name to the list of duplicate names
-            if(occurences>1 && !duplicateFileNames.contains(output)){
-                duplicateFileNames.push_back(output);
+            if(occurences>1){
+                duplicateFileNames = true;
+                qDebug() << "Duplicate files:";
             }
 
             QString formatName = parts[1];
@@ -336,32 +337,28 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             QString fileName;
 
             if(formatName == "Memory" && operationresource.ilwisType() & itWORKFLOW){
-                if(operationresource.ilwisType() & itWORKFLOW){
-                    //Get all files in the internal catalog
-                    QString dataLocation = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/internalcatalog";
-                    directory = opendir(dataLocation.toStdString().c_str());
-                }
-            }else if(formatName != "Memory" && operationresource.ilwisType() & itWORKFLOW){
+                //Get all files in the internal catalog
+                QString dataLocation = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/internalcatalog";
+                directory = opendir(dataLocation.toStdString().c_str());
+            }else if(operationresource.ilwisType() & itWORKFLOW){
                 //Get all files in the directory
                 QString dataLocation = output;
                 dataLocation.remove("file:///");
 
                 QStringList splitUrl = dataLocation.split("/");
 
-                if(fileName.isEmpty()){
-                    fileName = splitUrl.last();
+                fileName = splitUrl.last();
 
-                    QString query = "name='" + formatName + "'";
-                    std::multimap<QString, Ilwis::DataFormat>  formats = Ilwis::DataFormat::getSelectedBy(Ilwis::DataFormat::fpNAME, query);
-                    if ( formats.size() == 1){
-                         QString connector = (*formats.begin()).second.property(DataFormat::fpCONNECTOR).toString();
-                         QString code = (*formats.begin()).second.property(DataFormat::fpCODE).toString();
+                QString query = "name='" + formatName + "'";
+                std::multimap<QString, Ilwis::DataFormat>  formats = Ilwis::DataFormat::getSelectedBy(Ilwis::DataFormat::fpNAME, query);
+                if ( formats.size() == 1){
+                     QString connector = (*formats.begin()).second.property(DataFormat::fpCONNECTOR).toString();
+                     QString code = (*formats.begin()).second.property(DataFormat::fpCODE).toString();
 
-                         QVariantList extensions = Ilwis::DataFormat::getFormatProperties(DataFormat::fpEXTENSION,outputtype, connector, code);
+                     QVariantList extensions = Ilwis::DataFormat::getFormatProperties(DataFormat::fpEXTENSION,outputtype, connector, code);
 
-                         fileName += ".";
-                         fileName += extensions[0].toString();
-                    }
+                     fileName += ".";
+                     fileName += extensions[0].toString();
                 }
 
                 splitUrl.removeLast();
@@ -385,11 +382,13 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             for(int j=0;j<existingFileNames.size();++j){
                 if(formatName == "Memory"){
                     if(existingFileNames[j] == output) {
-                        duplicateFileNames.push_back(output);
+                        qDebug() << "Duplicate files:";
+                        duplicateFileNames = true;
                     }
-                }else if(formatName != "Memory"){
+                }else{
                     if(existingFileNames[j] == fileName){
-                        duplicateFileNames.push_back(fileName);
+                        qDebug() << "Duplicate files:";
+                        duplicateFileNames = true;
                     }
                 }
             }
@@ -446,7 +445,7 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
         allOutputsString += output;
     }
 
-    if(duplicateFileNames.isEmpty()){
+    if(!duplicateFileNames){
         if ( allOutputsString == "")
             expression = QString("script %1(%2)").arg(operationresource.name()).arg(expression);
         else
@@ -469,13 +468,6 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             return "TODO";
         } catch (const ErrorObject& err){
             emit error(err.message());
-        }
-        return sUNDEF;
-    }else{
-        //TODO replace qDebugs with errors
-        qDebug() << "Duplicate files:";
-        for(int i=0;i<duplicateFileNames.size();++i){
-            qDebug() << duplicateFileNames[i];
         }
         return sUNDEF;
     }
