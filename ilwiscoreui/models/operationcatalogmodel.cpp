@@ -326,7 +326,7 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             //Add the duplicate name to the list of duplicate names
             if(occurences>1){
                 duplicateFileNames = true;
-                qDebug() << "Duplicate files:";
+                em->addError(111, "Workflow did not execute, multiple occurences of an output name");
             }
 
             QString formatName = parts[1];
@@ -375,7 +375,6 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             //Put the existing file names in a list for later use
             while ((file = readdir (directory)) != NULL) {
                 existingFileNames.push_back(file->d_name);
-                qDebug() << file->d_name;
             }
 
             closedir(directory);
@@ -384,13 +383,13 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             for(int j=0;j<existingFileNames.size();++j){
                 if(formatName == "Memory"){
                     if(existingFileNames[j] == output) {
-                        qDebug() << "Duplicate files:";
                         duplicateFileNames = true;
+                        em->addError(1, "Workflow did not execute duplicate name: " + output + ". Please change this name.");
                     }
                 }else{
                     if(existingFileNames[j] == fileName){
-                        qDebug() << "Duplicate files:";
                         duplicateFileNames = true;
+                        em->addError(1, "Workflow did not execute duplicate name: " + fileName + ". Please change this name.");
                     }
                 }
             }
