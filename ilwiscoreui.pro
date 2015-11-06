@@ -84,7 +84,8 @@ HEADERS += ilwiscoreui/ilwiscoreui_global.h \
     ilwiscoreui/propertyeditors/layeropacitysetter.h \
     ilwiscoreui/models/workflow/scenariodesignermodel.h \
     ilwiscoreui/models/workflow/scenariobuildermodel.h \
-    ilwiscoreui/models/workflow/workflowerrormodel.h
+    ilwiscoreui/models/workflowerrormodel.h \
+    ilwiscoreui/models/workflow/errormodel.h
 
 unix {
     target.path = /usr/lib
@@ -153,7 +154,8 @@ SOURCES += \
     ilwiscoreui/propertyeditors/layeropacitysetter.cpp \
     ilwiscoreui/models/workflow/scenariodesignermodel.cpp \
     ilwiscoreui/models/workflow/scenariobuildermodel.cpp \
-    ilwiscoreui/models/workflow/workflowerrormodel.cpp
+    ilwiscoreui/models/workflowerrormodel.cpp \
+    ilwiscoreui/models/workflow/errormodel.cpp
 
 DESTDIR = $$PWD/../libraries/$$PLATFORM$$CONF
 
