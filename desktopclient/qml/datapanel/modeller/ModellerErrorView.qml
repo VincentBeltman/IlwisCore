@@ -6,19 +6,20 @@ import QtQuick.Dialogs 1.1
 
 Rectangle {
 
+    /*
     Timer {
         interval: 1000;
         running: true;
         repeat: true
         onTriggered: {
-            errormodel.addError(1, "Testing");
+            //errormodel.addError(1, "Testing");
 
             errors.model = errormodel.errorlist;
             console.log("error aangemaakt")
         }
 
     }
-
+*/
 
     id: modellerErrorView
     width: parent.width
