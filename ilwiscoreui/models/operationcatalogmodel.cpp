@@ -251,10 +251,10 @@ QString OperationCatalogModel::modifyTableOutputUrl(const QString& output, const
         firstTable = firstTable.mid(index + 1);
         index =  firstTable.indexOf(".");
         if ( index != -1)
-            firstTable = firstTable.left(index) + ".ilwis";
+            firstTable = firstTable.left(index) ;
     }
     QString internalPath = context()->persistentInternalCatalog().toString();
-    QString outpath = internalPath + "/" + firstTable + "[" + columnName + "]";
+    QString outpath = internalPath + "/" + output;
 
     return outpath;
 
