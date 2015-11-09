@@ -45,7 +45,7 @@ public:
 //    Q_INVOKABLE QList<EdgeProperties> getEdgesByNode();
     Q_INVOKABLE int vertex2ItemID(int vertex);
 
-    Q_INVOKABLE int store(int vertex);
+    //Q_INVOKABLE int store(int vertex);
 
     Q_INVOKABLE void run(const QString &inputAndOuput);
     Q_INVOKABLE void createMetadata();

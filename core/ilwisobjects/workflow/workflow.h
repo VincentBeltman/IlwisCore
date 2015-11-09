@@ -11,6 +11,7 @@
 
 #include "kernel_global.h"
 #include "ilwistypes.h"
+#include "operationmetadata.h"
 
 namespace Ilwis {
 
