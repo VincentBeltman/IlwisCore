@@ -20,7 +20,9 @@ Item {
             if ( sourceType === "workflow")            {
                 scenario = scenarios.create()
                 var wf = scenario.addWorkflow(filter)
+                //TODO: mastercatalog id2resource
                 canvas.workflow = wf;
+                canvas.drawFromWorkflow()
             }
         }
     }

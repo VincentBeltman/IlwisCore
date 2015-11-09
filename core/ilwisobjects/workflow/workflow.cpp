@@ -121,6 +121,7 @@ void Workflow::removeOutputDataProperties(const OVertex &v, quint16 index)
 OVertex Workflow::addOperation(const NodeProperties &properties)
 {
     OVertex v = boost::add_vertex(properties, _wfGraph);
+
     IOperationMetaData meta = getOperationMetadata(v);
     std::vector<SPOperationParameter> inputs = meta->getInputParameters();
     for (int i = 0 ; i < inputs.size() ; i++) {
@@ -204,7 +205,7 @@ QList<InputAssignment> Workflow::getImplicitInputAssignments(const OVertex &v)
     boost::graph_traits<WorkflowGraph>::in_edge_iterator ei, ei_end;
     for (boost::tie(ei,ei_end) = getInEdges(v); ei != ei_end; ++ei) {
         // internal pins
-        InputAssignment assignment = std::make_pair(v, edgeProperties(*ei)._inputIndexNextOperation);
+        InputAssignment assignment = std::make_pair(v, edgeProperties(*ei)._inputParameterIndex);
         assignedPins.push_back(assignment);
     }
     return assignedPins;
@@ -247,7 +248,7 @@ std::vector<quint16> Workflow::getAssignedPouts(const OVertex &v)
     boost::graph_traits<WorkflowGraph>::out_edge_iterator ei, ei_end;
     for (boost::tie(ei,ei_end) = getOutEdges(v); ei != ei_end; ++ei) {
         // implicitly assigned pins via edges
-        assignedPouts.push_back(edgeProperties(*ei)._outputIndexLastOperation);
+        assignedPouts.push_back(edgeProperties(*ei)._outputParameterIndex);
     }
     for (SPAssignedOutputData output : _outputProperties[v]) {
         // explicitly assigned pins via edges
@@ -304,13 +305,13 @@ OEdge Workflow::addOperationFlow(const OVertex &from, const OVertex &to, const E
 {
     // TODO allow multiple edges between v1 and v2?
 
-    removeInputAssignment(to, properties._inputIndexNextOperation);
+    removeInputAssignment(to, properties._inputParameterIndex);
     return (boost::add_edge(from, to, properties, _wfGraph)).first;
 }
 
 void Workflow::removeOperationFlow(OEdge edge) {
     EdgeProperties edgeProps = edgeProperties(edge);
-    assignInputData(boost::target(edge, _wfGraph), edgeProps._inputIndexNextOperation);
+    assignInputData(boost::target(edge, _wfGraph), edgeProps._inputParameterIndex);
     boost::remove_edge(edge, _wfGraph);
 }
 

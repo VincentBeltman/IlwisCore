@@ -3,6 +3,7 @@
 
 #include <QPoint>
 #include <QMap>
+#include <QUrl>
 
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -26,30 +27,45 @@ struct AssignedOutputData {
     QString outputName;
 };
 
-struct Operation {
-    Operation() {}
-    quint16 vertexIndex;
-    QString resourceUrl;
-    QString resourceProvider;
-    quint16 x;
-    quint16 y;
-};
-
 typedef std::shared_ptr<AssignedInputData> SPAssignedInputData;
 typedef std::shared_ptr<AssignedOutputData> SPAssignedOutputData;
 
 struct NodeProperties {
     NodeProperties(){}
-    NodeProperties(quint64 opid) : _operationid(opid){}
-    quint64 _operationid = i64UNDEF;
+    NodeProperties(quint64 opid, Resource resource) : _operationid(opid){
+        _resourceUrl = resource.url();
+        _resourceProvider = resource["namespace"].toString();
+    }
+    NodeProperties(QUrl url, QString provider, quint16 x, quint16 y) {
+        _resourceUrl = url;
+        _resourceProvider = provider;
+        _x = x;
+        _y = y;
+        _operationid = mastercatalog()->url2id(url, itSINGLEOPERATION);
+    }
+    quint64 _operationid = i64UNDEF;/*
+    QUrl _resourceUrl = *(new QUrl(""));
+    QString _resourceProvider = "";
+    quint16 _x = 0;
+    quint16 _y = 0;*/
+    QUrl _resourceUrl;
+    QString _resourceProvider;
+    quint16 _x;
+    quint16 _y;
 };
 
 struct EdgeProperties {
-    EdgeProperties(int out, int in) : _outputIndexLastOperation(out), _inputIndexNextOperation(in){}
+    EdgeProperties(int outParm, int inParm, int inRect, int outRect) :
+        _outputParameterIndex(outParm),
+        _inputParameterIndex(inParm),
+        _outputRectangleIndex(inRect),
+        _inputRectangleIndex(outRect){}
     QString outputName;
     bool temporary = true;
-    int _outputIndexLastOperation;
-    int _inputIndexNextOperation;
+    int _outputParameterIndex;
+    int _inputParameterIndex;
+    int _outputRectangleIndex;
+    int _inputRectangleIndex;
 };
 
 typedef boost::property<boost::vertex_index1_t, NodeProperties> NodeProperty;
@@ -65,6 +81,8 @@ typedef boost::graph_traits<WorkflowGraph>::edge_descriptor OEdge;
 
 typedef boost::graph_traits<WorkflowGraph>::in_edge_iterator InEdgeIterator;
 typedef boost::graph_traits<WorkflowGraph>::out_edge_iterator OutEdgeIterator;
+
+typedef boost::graph_traits<WorkflowGraph>::vertex_iterator VertexIterator;
 
 typedef std::pair<OVertex, int> InputAssignment;
 
@@ -122,7 +140,7 @@ public:
 
     // ------ Methods for saving
     QMap<InputAssignment, SPAssignedInputData> getAllInputAssignments() { return _inputAssignments; }
-    QList<Operation> getAllInputAssignments() { return _inputAssignments; }
+    std::pair<VertexIterator, VertexIterator> getNodeIterators() { return boost::vertices(_wfGraph); }
 
     // ------ for debugging
     void debugPrintGraph();
@@ -138,8 +156,6 @@ private:
 
     QMap<InputAssignment, SPAssignedInputData> _inputAssignments;
     QMap<OVertex, QList<SPAssignedOutputData>> _outputProperties;
-    //QList<NodeRenderingProperties> _nodeRenderingProperties;
-    //QList<EdgeRenderingProperties> _edgeRenderingProperties;
 
     NodePropertyMap nodeIndex();
     EdgePropertyMap edgeIndex();
