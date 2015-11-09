@@ -9,6 +9,7 @@ import ".." as Modeller
 
 Modeller.ModellerWorkArea {
     property WorkflowModel workflow;
+    property OperationCatalogModel operationCatalog;
     property var deleteItemIndex;
     property var deleteEdgeIndex;
 
@@ -158,7 +159,7 @@ Modeller.ModellerWorkArea {
       Calls the WorkflowModel's run method
       */
     function run(){
-        workflow.run(manager.retrieveRunFormValues())
+        operationCatalog.executeoperation(workflow.createMetadata(), manager.retrieveRunFormValues())
     }
 
     /**

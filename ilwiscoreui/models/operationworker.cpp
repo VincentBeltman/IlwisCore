@@ -1,6 +1,7 @@
 #include <QCoreApplication>
 #include "operationworker.h"
 #include "raster.h"
+#include "table.h"
 #include "commandhandler.h"
 #include "operation.h"
 #include "ilwiscontext.h"
@@ -31,6 +32,10 @@ void OperationWorker::process(){
                             IRasterCoverage raster = symbol._var.value<IRasterCoverage>();
                             if ( raster.isValid())
                                 result = raster->source().url().toString();
+                        }else if(symbol._type == itTABLE){
+                            ITable table = symbol._var.value<ITable>();
+                            if(table.isValid())
+                                result = table->source().url().toString();
                         }
                     }
                 }

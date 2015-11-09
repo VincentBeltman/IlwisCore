@@ -16,7 +16,7 @@
 
 using namespace Ilwis;
 
-Workflow::Workflow(): OperationMetaData()
+Workflow::Workflow (): OperationMetaData()
 {
 }
 
