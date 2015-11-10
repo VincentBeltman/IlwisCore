@@ -237,7 +237,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     QString iconField2 = "Image{width : 14; height:14;source:\"../images/%1\";fillMode: Image.PreserveAspectFit}";
     QString comboField = "ComboBox{id : pin_%1; x : %2;width : parent.width - label_pin_%1.width - 5 - %3;model : %4";
     QString rowBodyChoiceHeader = "Row{ width : parent.width;Text { text: qsTr(\"%1\"); width : %2; } Column{ExclusiveGroup { id: exclusivegroup_pin_%3} %4}}";
-    QString rowChoiceOption = "RadioButton{id:choice_pin_%1;text:qsTr(\"%2\");checked:%3;exclusiveGroup:exclusivegroup_pin_%4}";
+    QString rowChoiceOption = "RadioButton{id:choice_pin_%1;text:qsTr(\"%2\");checked:%3;exclusiveGroup:exclusivegroup_pin_%4;property string value:qsTr(\"%5\")}";
     QString formRows;
     int oldOptionGroup = -1;
     int xshift = 0;
@@ -289,19 +289,22 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
         }
         if ( parameters[i]._fieldType == ftRADIOBUTTON){
             QString buttons;
+            QString state = "true";
+            if ( showEmptyOptionInList ) {
+                buttons += QString(rowChoiceOption).arg("empty_value").arg("- (empty)").arg("true").arg(i).arg("");
+            }
             for(auto choiceString : parameters[i]._choiceList){
                 QString choice = choiceString, state="false";
                 if (choice[0] == '!'){
                     choice = choice.mid(1);
-                    state = "true";
+                    if (buttons.isEmpty()) state = "true";
                 }
-                QString button = QString(rowChoiceOption).arg(choice).arg(choice).arg(state).arg(i);
-                buttons += button;
+                buttons += QString(rowChoiceOption).arg(choice).arg(choice).arg(state).arg(i).arg(choice);
             }
             formRows += QString(rowBodyChoiceHeader).arg(parameters[i]._label).arg(width).arg(i).arg(buttons);
             if ( results != "")
                 results +=  "+ \"|\" +";
-            QString field = QString("exclusivegroup_pin_%1.current.text").arg(i);
+            QString field = QString("exclusivegroup_pin_%1.current.value").arg(i);
             results += field;
         }
         if ( parameters[i]._fieldType == ftCOMBOBOX){

@@ -52,6 +52,15 @@ void OperationCatalogModel::nameFilter(const QString &filter)
     emit operationsChanged();
 }
 
+void OperationCatalogModel::refresh()
+{
+    CatalogModel::refresh();
+    _currentOperations.clear();
+    _operationsByKey.clear();
+    _refresh = true;
+    emit operationsChanged();
+}
+
 void OperationCatalogModel::filter(const QString &filterString)
 {
     CatalogModel::filter(filterString);
@@ -168,7 +177,7 @@ void OperationCatalogModel::gatherItems() {
             lst << location.toString();
             res.addProperty("locations", lst);
             res.addProperty("type", "operation" );
-            res.addProperty("filter",QString("type=%1 or type=%2").arg(itSINGLEOPERATION).arg(itWORKFLOW));
+            res.addProperty("filter",QString("(type=%1 or type=%2)").arg(itSINGLEOPERATION).arg(itWORKFLOW));
             res.setDescription(descr);
             setView(CatalogView(res));
 
@@ -180,7 +189,7 @@ void OperationCatalogModel::gatherItems() {
             lst << location.toString();
             res.addProperty("locations", lst);
             res.addProperty("type", "operation" );
-            res.addProperty("filter",QString("type=%1 and keyword='service'").arg(itSINGLEOPERATION));
+            res.addProperty("filter",QString("(type=%1 and keyword='service')").arg(itSINGLEOPERATION));
             res.setDescription(descr);
             CatalogView view(res);
             view.prepare();
@@ -251,10 +260,10 @@ QString OperationCatalogModel::modifyTableOutputUrl(const QString& output, const
         firstTable = firstTable.mid(index + 1);
         index =  firstTable.indexOf(".");
         if ( index != -1)
-            firstTable = firstTable.left(index) + ".ilwis";
+            firstTable = firstTable.left(index) ;
     }
     QString internalPath = context()->persistentInternalCatalog().toString();
-    QString outpath = internalPath + "/" + firstTable + "[" + columnName + "]";
+    QString outpath = internalPath + "/" + output;
 
     return outpath;
 
@@ -276,20 +285,18 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
     QStringList parms = parameters.split("|");
     bool hasMissingParameters = false;
 
-    for(int i = 0; i < parms.size(); ++ i){ // -1 because the last is the output parameter
+    for(int i = 0; i < parms.size(); ++ i){
         if (operationresource.ilwisType() & itWORKFLOW && parms[i].size() == 0){
             if (operationresource[QString("pout_%1_optional").arg(i)] == "false" && i < operationresource["outparameters"].toInt()) {
-                em->addError(1, "Error message 1");
-                //qDebug() << "Param " << i << " is undefined with name " << operationresource[QString("pout_%1_name").arg(i)].toString();
+                em->addError(1, "Param " + QString::number(i) + " is undefined with name " +  operationresource[QString("pout_%1_name").arg(i)].toString());
                 hasMissingParameters = true;
             }
             if (operationresource[QString("pin_%1_optional").arg(i)] == "false" && i < operationresource["inparameters"].toInt()) {
-                em->addError(2, "Error message 2");
-                //qDebug() << "Param " << i << " is undefined with name " << operationresource[QString("pin_%1_name").arg(i)].toString();
+                em->addError(1, "Param " + QString::number(i) + " is undefined with name " +  operationresource[QString("pin_%1_name").arg(i)].toString());
                 hasMissingParameters = true;
             }
         }
-        if(i<operationresource["inparameters"].toInt()){
+        if(i < operationresource["inparameters"].toInt()){
             if ( expression.size() != 0)
                 expression += ",";
             expression += parms[i];
@@ -326,7 +333,7 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             //Add the duplicate name to the list of duplicate names
             if(occurences>1){
                 duplicateFileNames = true;
-                qDebug() << "Duplicate files:";
+                em->addError(111, "Workflow did not execute, multiple occurences of an output name");
             }
 
             QString formatName = parts[1];
@@ -375,7 +382,6 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             //Put the existing file names in a list for later use
             while ((file = readdir (directory)) != NULL) {
                 existingFileNames.push_back(file->d_name);
-                qDebug() << file->d_name;
             }
 
             closedir(directory);
@@ -384,13 +390,13 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             for(int j=0;j<existingFileNames.size();++j){
                 if(formatName == "Memory"){
                     if(existingFileNames[j] == output) {
-                        qDebug() << "Duplicate files:";
                         duplicateFileNames = true;
+                        em->addError(1, "Workflow did not execute duplicate name: " + output + ". Please change this name.");
                     }
                 }else{
                     if(existingFileNames[j] == fileName){
-                        qDebug() << "Duplicate files:";
                         duplicateFileNames = true;
+                        em->addError(1, "Workflow did not execute duplicate name: " + fileName + ". Please change this name.");
                     }
                 }
             }
@@ -471,8 +477,8 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
         } catch (const ErrorObject& err){
             emit error(err.message());
         }
-        return sUNDEF;
     }
+    return sUNDEF;
 }
 
 OperationModel *OperationCatalogModel::operation(const QString &id)
@@ -487,12 +493,4 @@ OperationModel *OperationCatalogModel::operation(const QString &id)
 WorkflowModel *OperationCatalogModel::createWorkFlow(const QString &filter)
 {
     return 0;
-}
-
-void OperationCatalogModel::refresh()
-{
-    _currentOperations = QList<OperationModel *>();
-    _refresh = true;
-    emit operationsChanged();
-
 }

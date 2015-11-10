@@ -135,25 +135,26 @@ Controls.DropableItem{
                     width : 110
                     height : 18
                     onClicked: {
-                        var keywrds = ""
+                        var keywords = ""
                         for( var i=0; i < keyitems.model.length; ++i){
                             var item = keyitems.model[i]
-                            if ( keywrds != ""){
-                                keywrds += "|"
+                            if ( keywords != ""){
+                                keywords += ", "
                             }
-                            keywrds += item.trim()
+                            keywords += item.trim()
                         }
-                        if ( keywrds === ""){
-                            keywrds = "workflow"
+                        if ( keywords === ""){
+                            keywords = "workflow"
                         } else {
-                            keywrds += "|workflow"
+                            keywords += ", workflow"
                         }
 
-                        var createInfo = {type : "workflow", name : nameedit.content, keywords : keywrds, description : descedit.content}
+                        var createInfo = {type : "workflow", name : nameedit.content, keywords : keywords, description : descedit.content}
                         var ilwisid = objectcreator.createObject(createInfo)
                         var resource = mastercatalog.id2Resource(ilwisid)
                         if (resource){
                             var filter = "itemid=" + resource.id
+                            operations.refresh()
                             bigthing.newCatalog(filter, "workflow",resource.url,"other")
                         }
                     }

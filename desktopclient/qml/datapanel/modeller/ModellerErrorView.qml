@@ -6,7 +6,9 @@ import ErrorModel 1.0
 
 Rectangle {
 
+
     property variant errormodel: errorWrapper.errorModel;
+
 
     id: modellerErrorView
     width: parent.width

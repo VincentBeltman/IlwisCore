@@ -35,13 +35,14 @@ Rectangle {
         var keywords = operation.keywords.split(', ')
         if (keywords.indexOf('workflow') > -1) {
             return iconsource("workflowitem.png")
-        } else if (keywords.indexOf('condition') > -1) {
-            return iconsource("conditionitem.png")
         } else {
             return iconsource("operationitem.png")
         }
 
     }
+
+
+
 
     Image {
         id : box
@@ -58,7 +59,6 @@ Rectangle {
         x : 15
         text : operation ? operation.name : "?"
         font.bold : true
-
     }
     Text {
         id : labelInput
@@ -223,13 +223,21 @@ Rectangle {
             if ( flowConnections[i].target == target)
                 return // dont add duplicates
         }
-        flowConnections.push({"target" : target,
-                              "source" :operationItem,
-                              "attachtarget" : attachRect,
-                              "attachsource" : selectedAttach,
-                              "flowPoints" : flowPoints,
-                              "isSelected" : false})
-        workflow.addFlow(itemid, target.itemid, flowPoints)
+        flowConnections.push({
+            "target" : target,
+            "source" :operationItem,
+            "attachtarget" : attachRect,
+            "attachsource" : selectedAttach,
+            "flowPoints" : flowPoints,
+            "isSelected" : false
+        })
+        workflow.addFlow(
+            itemid,
+            target.itemid,
+            flowPoints,
+            attachRect.index,
+            selectedAttach.index
+        )
         target.resetInputModel()
         wfCanvas.stopWorkingLine()
     }
@@ -255,6 +263,16 @@ Rectangle {
 
             wfCanvas.canvasValid = false
         }
+    }
+
+    function index2Rectangle(index) {
+        for (var i = 0; i < operationItem.children.length; i++) {
+            var child = operationItem.children[i];
+            if(child.hasOwnProperty("index") && child.index == index){
+                return child
+            }
+        }
+        return 0
     }
 
     AttachmentRectangle{

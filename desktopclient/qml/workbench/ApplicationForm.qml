@@ -23,6 +23,7 @@ Rectangle {
 
     function doExecute(operationid) {
         if ( currentAppForm != null) {
+            console.log(currentAppForm.formresult);
             operations.executeoperation(operationid,currentAppForm.formresult)
         }
     }
