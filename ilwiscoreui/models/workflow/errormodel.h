@@ -8,6 +8,22 @@
 #include <QAbstractListModel>
 #include "ilwiscoreui_global.h"
 
+
+class Message {
+
+public:
+    Message(int id, QString msg);
+    ~Message();
+
+    int id();
+    QString msg();
+
+private:
+    int _id;
+    QString _msg;
+};
+
+
 class ILWISCOREUISHARED_EXPORT ErrorModel : public QObject
 {
     Q_OBJECT
@@ -21,6 +37,8 @@ public:
     QStringList errorlist();
 
     Q_INVOKABLE void addError(int id, QString msg);
+    Q_INVOKABLE void clearList();
+
 
 private:
     static bool instanceFlag;

@@ -8,6 +8,7 @@
 #include <QAbstractListModel>
 #include "ilwiscoreui_global.h"
 #include "workflow/errormodel.h"
+#include <map>
 
 class ILWISCOREUISHARED_EXPORT WorkflowErrorModel : public QObject
 {
