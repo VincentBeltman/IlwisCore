@@ -17,16 +17,20 @@ Rectangle {
     property int itemId: -1
 
     function newForm(metaid, title, newItemId){
-        newFormWithOutput(metaid,title,false, newItemId)
+        fillAppFrame(metaid, title, false, true)
         itemId = newItemId
     }
 
     /**
       Shows the operation's form. A boolean (showOutput) has to be passed to this method which decides whether an ouput form is shown.
       */
-    function newFormWithOutput(metaid, title, showOutput){
+    function newFormWithOutput(metaid, title){
+        fillAppFrame(metaid, title, true, false)
+    }
+
+    function fillAppFrame(metaid, title, output, showEmpty) {
+        var form= formbuilder.index2Form(metaid, output, showEmpty)
         operationid = metaid
-        var form= formbuilder.index2Form(metaid, showOutput)
         appFrame.formQML = form
         appFrame.formTitle = title
         appFrame.opacity = 1
