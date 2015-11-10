@@ -335,7 +335,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     return formRows;
 }
 
-QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showoutputformat, bool showEmptyOptionInList) const {
+QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showoutputformat, bool showEmptyOptionInList, std::vector<int> hiddenFieldIndexes) const {
     Resource resource = mastercatalog()->id2Resource(metaid);
     std::vector<FormParameter> parameters = getParameters(resource);
     std::vector<FormParameter> outparameters = getOutputParameters(resource);
