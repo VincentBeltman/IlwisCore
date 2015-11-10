@@ -289,13 +289,15 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
         }
         if ( parameters[i]._fieldType == ftRADIOBUTTON){
             QString buttons;
-            if ( showEmptyOptionInList )
-                buttons += QString(rowChoiceOption).arg("empty_value").arg("- (empty)").arg("false").arg(i).arg("");
+            QString state = "true";
+            if ( showEmptyOptionInList ) {
+                buttons += QString(rowChoiceOption).arg("empty_value").arg("- (empty)").arg("true").arg(i).arg("");
+            }
             for(auto choiceString : parameters[i]._choiceList){
                 QString choice = choiceString, state="false";
                 if (choice[0] == '!'){
                     choice = choice.mid(1);
-                    state = "true";
+                    if (buttons.isEmpty()) state = "true";
                 }
                 buttons += QString(rowChoiceOption).arg(choice).arg(choice).arg(state).arg(i).arg(choice);
             }
