@@ -13,6 +13,7 @@
 #include "ilwistypes.h"
 #include "operationmetadata.h"
 #include "workflow.h"
+#include "nodepropobject.h"
 #include <QQmlListProperty>
 
 #include "rastercoverage.h"
@@ -41,7 +42,7 @@ public:
 
     Q_INVOKABLE bool hasValueDefined(int operationIndex, int parameterIndex);
 
-//    Q_INVOKABLE QList<NodePropObject> getNodes();
+    Q_INVOKABLE QList<NodePropObject*> getNodes();
 //    Q_INVOKABLE QList<EdgeProperties> getEdgesByNode();
     Q_INVOKABLE int vertex2ItemID(int vertex);
 

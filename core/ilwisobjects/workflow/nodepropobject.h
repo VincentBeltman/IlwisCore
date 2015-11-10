@@ -18,14 +18,14 @@ class KERNELSHARED_EXPORT NodePropObject : public QObject
     Q_PROPERTY(quint32 vertex MEMBER _vertex)
     Q_PROPERTY(quint64 operationId MEMBER _operationId)
 public:
-    explicit NodePropObject(QObject *parent = 0);
+    NodePropObject(QObject *parent = 0);
     void setProps(const Ilwis::NodeProperties& props, int v);
 
 private:
-    quint16 _x;
-    quint16 _y;
-    quint32 _vertex;
-    quint64 _operationId;
+    quint16 _x = 0;
+    quint16 _y = 0;
+    quint32 _vertex = 0;
+    quint64 _operationId = 0;
 };
 
 #endif // NODEPROPOBJECT_H

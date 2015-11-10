@@ -6,8 +6,7 @@
 
 using namespace Ilwis;
 
-NodePropObject::NodePropObject(QObject *parent) :
-    QObject(parent)
+NodePropObject::NodePropObject(QObject *p) : QObject(p)
 {
 }
 

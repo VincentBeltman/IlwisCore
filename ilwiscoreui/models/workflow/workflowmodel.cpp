@@ -116,20 +116,20 @@ void WorkflowModel::deleteFlow(int operationIndex1, int operationIndex2, int ind
     }
 }
 
-///**
-// * Returns the nodes of the workflow
-// */
-//QList<NodePropObject> WorkflowModel::getNodes()
-//{
-//    std::pair<VertexIterator, VertexIterator> nodeIterators = _workflow->getNodeIterators();
-//    QList<NodePropObject> *nodeProps = new QList<NodePropObject>();
-//    for (auto &iter = nodeIterators.first; iter < nodeIterators.second; ++iter) {
-//        NodePropObject *nodeProp = new NodePropObject();
-//        nodeProp->setProps(_workflow->nodeProperties(*iter), *iter);
-//        nodeProps->append(*nodeProp);
-//    }
-//    return nodeProps;
-//}
+/**
+ * Returns the nodes of the workflow
+ */
+QList<NodePropObject*> WorkflowModel::getNodes()
+{
+    std::pair<VertexIterator, VertexIterator> nodeIterators = _workflow->getNodeIterators();
+    QList<NodePropObject*> *nodeProps = new QList<NodePropObject*>();
+    for (auto &iter = nodeIterators.first; iter < nodeIterators.second; ++iter) {
+        NodePropObject *nodeProp = new NodePropObject();
+        nodeProp->setProps(_workflow->nodeProperties(*iter), *iter);
+        nodeProps->append(nodeProp);
+    }
+    return *nodeProps;
+}
 
 ///**
 // * Returns the edges of the node
@@ -157,5 +157,4 @@ int WorkflowModel::vertex2ItemID(int vertex)
 void WorkflowModel::createMetadata()
 {
     _workflow->createMetadata();
-}
 }

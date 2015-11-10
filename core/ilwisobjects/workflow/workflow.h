@@ -43,11 +43,7 @@ struct NodeProperties {
         _y = y;
         _operationid = mastercatalog()->url2id(url, itSINGLEOPERATION);
     }
-    quint64 _operationid = i64UNDEF;/*
-    QUrl _resourceUrl = *(new QUrl(""));
-    QString _resourceProvider = "";
-    quint16 _x = 0;
-    quint16 _y = 0;*/
+    quint64 _operationid = i64UNDEF;
     QUrl _resourceUrl;
     QString _resourceProvider;
     quint16 _x;

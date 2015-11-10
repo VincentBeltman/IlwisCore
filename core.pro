@@ -134,7 +134,8 @@ SOURCES += core/kernel.cpp \
     core/ilwisobjects/representation/shapelookup.cpp \
     core/ilwisobjects/workflow/workflowoperationimplementation.cpp \
     core/internaldatabaseconnection.cpp \
-    core/ilwisobjects/workflow/nodepropobject.cpp
+    core/ilwisobjects/workflow/nodepropobject.cpp \
+    core/ilwisobjects/workflow/edgepropobject.cpp
 
 
 HEADERS += core/kernel.h\
@@ -286,7 +287,8 @@ HEADERS += core/kernel.h\
     core/ilwisobjects/workflow/workflowoperationimplementation.h \
     core/identityinterface.h \
     core/internaldatabaseconnection.h \
-    core/ilwisobjects/workflow/nodepropobject.h
+    core/ilwisobjects/workflow/nodepropobject.h \
+    core/ilwisobjects/workflow/edgepropobject.h
 
 
 OTHER_FILES += \

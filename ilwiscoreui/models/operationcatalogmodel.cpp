@@ -285,20 +285,18 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
     QStringList parms = parameters.split("|");
     bool hasMissingParameters = false;
 
-    for(int i = 0; i < parms.size(); ++ i){ // -1 because the last is the output parameter
+    for(int i = 0; i < parms.size(); ++ i){
         if (operationresource.ilwisType() & itWORKFLOW && parms[i].size() == 0){
             if (operationresource[QString("pout_%1_optional").arg(i)] == "false" && i < operationresource["outparameters"].toInt()) {
-                em->addError(1, "Error message 1");
-                //qDebug() << "Param " << i << " is undefined with name " << operationresource[QString("pout_%1_name").arg(i)].toString();
+                em->addError(1, "Param " + QString::number(i) + " is undefined with name " +  operationresource[QString("pout_%1_name").arg(i)].toString());
                 hasMissingParameters = true;
             }
             if (operationresource[QString("pin_%1_optional").arg(i)] == "false" && i < operationresource["inparameters"].toInt()) {
-                em->addError(2, "Error message 2");
-                //qDebug() << "Param " << i << " is undefined with name " << operationresource[QString("pin_%1_name").arg(i)].toString();
+                em->addError(1, "Param " + QString::number(i) + " is undefined with name " +  operationresource[QString("pin_%1_name").arg(i)].toString());
                 hasMissingParameters = true;
             }
         }
-        if(i<operationresource["inparameters"].toInt()){
+        if(i < operationresource["inparameters"].toInt()){
             if ( expression.size() != 0)
                 expression += ",";
             expression += parms[i];
@@ -479,8 +477,8 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
         } catch (const ErrorObject& err){
             emit error(err.message());
         }
-        return sUNDEF;
     }
+    return sUNDEF;
 }
 
 OperationModel *OperationCatalogModel::operation(const QString &id)
@@ -495,12 +493,4 @@ OperationModel *OperationCatalogModel::operation(const QString &id)
 WorkflowModel *OperationCatalogModel::createWorkFlow(const QString &filter)
 {
     return 0;
-}
-
-void OperationCatalogModel::refresh()
-{
-    _currentOperations = QList<OperationModel *>();
-    _refresh = true;
-    emit operationsChanged();
-
 }
