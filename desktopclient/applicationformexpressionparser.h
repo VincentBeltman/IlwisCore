@@ -16,7 +16,7 @@ public:
     enum FieldType{ ftTEXTEDIT=1, ftTEXTAREA=2, ftCOMBOBOX=4, ftCHECKBOX=8, ftRADIOBUTTON=16};
     ApplicationFormExpressionParser();
 
-    Q_INVOKABLE QString index2Form(quint64 metaid, bool showoutputformat, bool hiddenFieldIndexes = false, std::vector<int> invisibleFieldIndexes = std::vector<int>()) const;
+    Q_INVOKABLE QString index2Form(quint64 metaid, bool showoutputformat, bool showEmptyOptionInList  = false, QString invisibleFieldIndexes = "") const;
     Q_INVOKABLE QString createWorkflowForm(quint64) const;
 private:
     struct FormParameter {
