@@ -15,6 +15,8 @@ Rectangle {
 
     WorkflowErrorModel {
         id: errorWrapper
+
+
     }
 
     ListView {

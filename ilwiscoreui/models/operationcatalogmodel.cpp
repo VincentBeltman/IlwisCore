@@ -281,6 +281,8 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
     if ( !operationresource.isValid())
         return sUNDEF;
 
+    em->clearList();
+
     QString expression;
     QStringList parms = parameters.split("|");
     bool hasMissingParameters = false;
