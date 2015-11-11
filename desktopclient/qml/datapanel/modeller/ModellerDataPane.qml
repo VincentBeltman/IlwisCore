@@ -22,7 +22,7 @@ Item {
                 var wf = scenario.addWorkflow(filter)
                 //TODO: mastercatalog id2resource
                 canvas.workflow = wf;
-                canvas.drawFromWorkflow()
+                //canvas.drawFromWorkflow()
             }
         }
     }
