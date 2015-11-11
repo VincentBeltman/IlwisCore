@@ -222,7 +222,7 @@ QString ApplicationFormExpressionParser::setInputIcons(const QString& iconField1
 }
 
 QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vector<FormParameter>& parameters, bool input, QString& results, bool showEmptyOptionInList) const{
-    QString rowBodyText = "Rectangle{height : 20;width : parent.width;color : \"white\";%1Text { x:%5 + %6;text: qsTr(\"%2\"); id:label_pin_%4; width : %3 - %5 - %6;wrapMode:Text.Wrap }";
+    QString rowBodyText = "Rectangle{height : 30;width : parent.width;color : \"white\";%1Text { x:%5 + %6;maximumLineCount: 2;text: qsTr(\"%2\"); id:label_pin_%4; width : %3 - %5 - %6;wrapMode:Text.Wrap; }";
     QString textField = "DropArea{ x : %2; height : 20; width : parent.width - label_pin_%1.width - 5 - %3 - %4 - %5; keys: [%6];\
                onDropped : { pin_%1.text = drag.source.message }\
             TextField{ id : pin_%1; anchors.fill : parent optionalOutputMarker %7}}";
@@ -291,7 +291,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
             QString buttons;
             QString state = "true";
             if ( showEmptyOptionInList ) {
-                buttons += QString(rowChoiceOption).arg("empty_value").arg("- (empty)").arg("true").arg(i).arg("");
+                buttons += QString(rowChoiceOption).arg(QString::number(i) + "empty_value").arg("- (empty)").arg("true").arg(i).arg("");
             }
             for(auto choiceString : parameters[i]._choiceList){
                 QString choice = choiceString, state="false";
@@ -299,7 +299,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
                     choice = choice.mid(1);
                     if (buttons.isEmpty()) state = "true";
                 }
-                buttons += QString(rowChoiceOption).arg(choice).arg(choice).arg(state).arg(i).arg(choice);
+                buttons += QString(rowChoiceOption).arg(QString::number(i) + choice).arg(choice).arg(state).arg(i).arg(choice);
             }
             formRows += QString(rowBodyChoiceHeader).arg(parameters[i]._label).arg(width).arg(i).arg(buttons);
             if ( results != "")
