@@ -287,12 +287,13 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
 
     for(int i = 0; i < parms.size(); ++ i){
         if (operationresource.ilwisType() & itWORKFLOW && parms[i].size() == 0){
-            if (operationresource[QString("pout_%1_optional").arg(i)] == "false" && i < operationresource["outparameters"].toInt()) {
-                em->addError(1, "Param " + QString::number(i) + " is undefined with name " +  operationresource[QString("pout_%1_name").arg(i)].toString());
+            int parm = i + 1;
+            if (operationresource[QString("pout_%1_optional").arg(parm)] == "false" && i < operationresource["outparameters"].toInt()) {
+                em->addError(1, "Output parameter " + QString::number(i) + " is undefined with name " +  operationresource[QString("pout_%1_name").arg(parm)].toString());
                 hasMissingParameters = true;
             }
-            if (operationresource[QString("pin_%1_optional").arg(i)] == "false" && i < operationresource["inparameters"].toInt()) {
-                em->addError(1, "Param " + QString::number(i) + " is undefined with name " +  operationresource[QString("pin_%1_name").arg(i)].toString());
+            if (operationresource[QString("pin_%1_optional").arg(parm)] == "false" && i < operationresource["inparameters"].toInt()) {
+                em->addError(1, "Input parameter " + QString::number(i) + " is undefined with name " +  operationresource[QString("pin_%1_name").arg(parm)].toString());
                 hasMissingParameters = true;
             }
         }
@@ -458,8 +459,6 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             expression = QString("script %1(%2)").arg(operationresource.name()).arg(expression);
         else
             expression = QString("script %1=%2(%3)").arg(allOutputsString).arg(operationresource.name()).arg(expression);
-
-        qDebug() << "Expression: " << expression;
 
         OperationExpression opExpr(expression);
 
