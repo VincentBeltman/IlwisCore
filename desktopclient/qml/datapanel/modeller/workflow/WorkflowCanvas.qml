@@ -168,7 +168,7 @@ Modeller.ModellerWorkArea {
       */
     function generateForm() {
         if (workflow){
-            workflow.createMetadata()
+            workflow.updateMetadata()
             manager.showRunForm(workflow.id)
         }
     }
