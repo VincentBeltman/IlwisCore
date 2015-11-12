@@ -17,9 +17,13 @@ Rectangle {
         id: errorWrapper
 
         errorModel.onErrorlistChanged: {
-            if(errorview.state == "smaller")
+
+            if(errormodel.getCount() != 0)
             {
-                errorview.state = "bigger"
+                if(errorview.state == "smaller")
+                {
+                    errorview.state = "bigger"
+                }
             }
         }
     }
