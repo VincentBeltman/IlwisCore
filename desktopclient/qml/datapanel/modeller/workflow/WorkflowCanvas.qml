@@ -422,7 +422,7 @@ Modeller.ModellerWorkArea {
                     item.isSelected = true
 
 //                    if(hiddenFields){
-                        manager.showOperationFormWithHiddenFields(item.operation.id,pressed, "1|2")
+                        manager.showOperationFormWithHiddenFields(item.operation.id,pressed, workflow.definedValueIndexes(pressed))
 //                    }else{
 //                        manager.showOperationForm(item.operation.id, pressed)
 //                    }

@@ -76,6 +76,20 @@ bool WorkflowModel::hasValueDefined(int operationIndex, int parameterIndex){
     }
 }
 
+/**
+ * Returns the values of an operation which have already been defined (a flow has been drawn to it)
+ * @param operationIndex the operation to check
+ * @return a string of fields which have been defined, seperated by |
+ */
+QString WorkflowModel::definedValueIndexes(int operationIndex){
+    try {
+        const OVertex& operationVertex = _operationNodes[operationIndex];
+        return _workflow->definedValueIndexes(operationVertex);
+    } catch (std::out_of_range e) {
+       return "";
+    }
+}
+
 void WorkflowModel::deleteOperation(int index)
 {
     try {
