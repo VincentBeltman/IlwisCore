@@ -15,6 +15,13 @@ Rectangle {
 
     WorkflowErrorModel {
         id: errorWrapper
+
+        errorModel.onErrorlistChanged: {
+            if(errorview.state == "smaller")
+            {
+                errorview.state = "bigger"
+            }
+        }
     }
 
     ListView {

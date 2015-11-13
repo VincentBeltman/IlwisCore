@@ -159,7 +159,8 @@ Modeller.ModellerWorkArea {
       Calls the WorkflowModel's run method
       */
     function run(){
-        operationCatalog.executeoperation(workflow.createMetadata(), manager.retrieveRunFormValues())
+        workflow.createMetadata()
+        manager.retrieveRunFormValues()
     }
 
     /**

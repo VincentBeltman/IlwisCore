@@ -40,6 +40,8 @@ void OperationWorker::process(){
                     }
                 }
             }
+
+            kernel()->issues()->log(QString(TR("Operation has executed succesfully")), IssueObject::itError);
         }else {
             qDebug() << "operation failed";
         }

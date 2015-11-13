@@ -3,21 +3,39 @@
 #include <QAbstractListModel>
 #include <QDebug>
 
+Message::Message(int id, QString msg)
+{
+    _id = id;
+    _msg = msg;
+}
+
+Message::~Message()
+{
+}
+
+int Message::id()
+{
+    return _id;
+}
+
+QString Message::msg()
+{
+    return _msg;
+}
+
+
 bool ErrorModel::instanceFlag = false;
 ErrorModel* ErrorModel::_instance = NULL;
 ErrorModel* ErrorModel::getInstance()
 {
-    qDebug() << "getInstance aangeroepen";
     if(! instanceFlag)
     {
-        qDebug() << "Errormodel aanmaken en teruggeven";
         _instance = new ErrorModel();
         instanceFlag = true;
         return _instance;
     }
     else
     {
-        qDebug() << "Bestaande errormodel terruggeven";
         return _instance;
     }
 }
@@ -35,5 +53,11 @@ QStringList ErrorModel::errorlist()
 void ErrorModel::addError(int id, QString msg)
 {
     _errorlist.append(msg);
+    emit errorlistChanged();
+}
+
+void ErrorModel::clearList()
+{
+    _errorlist.clear();
     emit errorlistChanged();
 }
