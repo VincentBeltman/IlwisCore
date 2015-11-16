@@ -221,8 +221,14 @@ QString ApplicationFormExpressionParser::setInputIcons(const QString& iconField1
     return imagePart;
 }
 
-QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vector<FormParameter>& parameters, bool input, QString& results, bool showEmptyOptionInList) const{
-    QString rowBodyText = "Rectangle{height : 30;width : parent.width;color : \"white\";%1Text { x:%5 + %6;maximumLineCount: 2;text: qsTr(\"%2\"); id:label_pin_%4; width : %3 - %5 - %6;wrapMode:Text.Wrap; }";
+QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vector<FormParameter>& parameters, bool input, QString& results, bool showEmptyOptionInList, QString invisibleFieldIndexes) const{
+    QStringList invisibleFieldList;
+    if(!invisibleFieldIndexes.isEmpty()){
+        invisibleFieldList = invisibleFieldIndexes.split("|");
+    }
+
+    QString rowBodyText = "Rectangle{visible:%7;height : 30;width : parent.width;color : \"white\";%1Text { x:%5 + %6;maximumLineCount: 2;text: qsTr(\"%2\"); id:label_pin_%4; width : %3 - %5 - %6;wrapMode:Text.Wrap; }";
+
     QString textField = "DropArea{ x : %2; height : 20; width : parent.width - label_pin_%1.width - 5 - %3 - %4 - %5; keys: [%6];\
                onDropped : { pin_%1.text = drag.source.message }\
             TextField{ id : pin_%1; anchors.fill : parent optionalOutputMarker %7}}";
@@ -242,6 +248,13 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     int oldOptionGroup = -1;
     int xshift = 0;
     for(int i = 0; i < parameters.size(); ++i){
+        QString visibile = "true";
+        for(int j=0;j<invisibleFieldList.size();++j){
+            if(i==invisibleFieldList[j].toInt()){
+                visibile = "false";
+            }
+        }
+
         QString check;
         if ( parameters[i]._isOptional){
             if ( oldOptionGroup != parameters[i]._optionGroup){
@@ -270,7 +283,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
                     arg(input ? keys(parameters[i]._dataType) : "\"?\"").
                     arg(checkEffects);
 
-            QString parameterRow = QString(rowBodyText + textFieldPart + imagePart + "}").arg(check).arg(parameters[i]._label).arg(width).arg(i).arg(checkWidth).arg(xshift);
+            QString parameterRow = QString(rowBodyText + textFieldPart + imagePart + "}").arg(check).arg(parameters[i]._label).arg(width).arg(i).arg(checkWidth).arg(xshift).arg(visibile);
             formRows += parameterRow;
             if ( results != "")
                 results += "+ \"|\" +";
@@ -321,7 +334,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
             }
             choices += "]";
             QString comboPart = QString(comboField).arg(i).arg(width).arg(checkWidth).arg(choices) + "}";
-            QString parameterRow = QString(rowBodyText + comboPart + "}").arg(check).arg(parameters[i]._label).arg(width).arg(i).arg(checkWidth).arg(xshift);
+            QString parameterRow = QString(rowBodyText + comboPart + "}").arg(check).arg(parameters[i]._label).arg(width).arg(i).arg(checkWidth).arg(xshift).arg(visibile);
             formRows += parameterRow;
             if ( results != "")
                 results += "+ \"|\" +";
@@ -338,9 +351,10 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     return formRows;
 }
 
-QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showoutputformat, bool showEmptyOptionInList) const {
+QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showoutputformat, bool showEmptyOptionInList, QString invisibleFieldIndexes) const {
     Resource resource = mastercatalog()->id2Resource(metaid);
     std::vector<FormParameter> parameters = getParameters(resource);
+
     std::vector<FormParameter> outparameters = getOutputParameters(resource);
     QString results;
     QString columnStart = "import QtQuick 2.2; import QtQuick.Controls 1.1;import QtQuick.Layouts 1.1;import MasterCatalogModel 1.0;Column { %1 x:5; width : parent.width - 5; height : parent.height;spacing :10;";
@@ -353,7 +367,7 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
     width *= 10;
     width = std::min(100, width);
 
-    QString inputpart = makeFormPart(width, parameters, true, results, showEmptyOptionInList);
+    QString inputpart = makeFormPart(width, parameters, true, results, showEmptyOptionInList, invisibleFieldIndexes);
     QString outputPart;
     QString seperator;
     if ( showoutputformat){

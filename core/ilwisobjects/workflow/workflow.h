@@ -129,6 +129,8 @@ public:
     //------- Queries
     bool hasValueDefined(const OVertex& operationVertex, int parameterIndex);
 
+    QString definedValueIndexes(const OVertex &operationVertex);
+
     // ------ operation metadata functions
     IOperationMetaData getOperationMetadata(const OVertex &v);
     IlwisTypes ilwisType() const;
