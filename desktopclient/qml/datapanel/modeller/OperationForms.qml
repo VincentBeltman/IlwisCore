@@ -22,6 +22,22 @@ Rectangle {
     }
 
     /**
+      Shows the operation's form. Passes the hidden fields to the index2Form method.
+      */
+    function newOperationFormWithHiddenFields(metaid, title, newItemId, hiddenFields){
+        console.log("Hidden fields: ")
+        console.log(hiddenFields)
+
+        itemId = newItemId
+
+        operationid = metaid
+        var form= formbuilder.index2Form(metaid, false,false,hiddenFields)
+        appFrame.formQML = form
+        appFrame.formTitle = title
+        appFrame.opacity = 1
+    }
+
+    /**
       Shows the operation's form. A boolean (showOutput) has to be passed to this method which decides whether an ouput form is shown.
       */
     function newFormWithOutput(metaid, title){
