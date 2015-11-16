@@ -42,6 +42,8 @@ public:
 
     Q_INVOKABLE bool hasValueDefined(int operationIndex, int parameterIndex);
 
+    Q_INVOKABLE QString definedValueIndexes(int operationIndex);
+
     Q_INVOKABLE QList<NodePropObject*> getNodes();
 //    Q_INVOKABLE QList<EdgeProperties> getEdgesByNode();
     Q_INVOKABLE int vertex2ItemID(int vertex);
