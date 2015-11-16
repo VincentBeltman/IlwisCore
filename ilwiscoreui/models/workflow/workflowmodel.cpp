@@ -27,9 +27,13 @@ void WorkflowModel::asignConstantInputData(QString inputData, int operationIndex
     for (int i = 0; i < inputParameters.length(); ++i) {
         QString value = inputParameters[i];
         OVertex vertex = _operationNodes[operationIndex];
-        SPAssignedInputData constantInput = _workflow->getAssignedInputData({vertex, i});
-        if (!value.trimmed().isEmpty()) {
-            constantInput->value = value;
+        if(_workflow->hasInputAssignment(vertex,i)){
+            SPAssignedInputData constantInput = _workflow->getAssignedInputData({vertex, i});
+            if (value.trimmed().isEmpty()) {
+                constantInput->value = QVariant::Invalid;
+            } else {
+                constantInput->value = value;
+            }
         }
     }
 }
