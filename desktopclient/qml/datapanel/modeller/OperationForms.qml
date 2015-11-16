@@ -25,9 +25,6 @@ Rectangle {
       Shows the operation's form. Passes the hidden fields to the index2Form method.
       */
     function newOperationFormWithHiddenFields(metaid, title, newItemId, hiddenFields){
-        console.log("Hidden fields: ")
-        console.log(hiddenFields)
-
         itemId = newItemId
 
         operationid = metaid

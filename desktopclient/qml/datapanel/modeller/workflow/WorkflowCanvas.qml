@@ -422,8 +422,10 @@ Modeller.ModellerWorkArea {
                     item = wfCanvas.operationsList[pressed]
                     item.isSelected = true
 
-                    if(workflow.definedValueIndexes(pressed)){
-                        manager.showOperationFormWithHiddenFields(item.operation.id,pressed, workflow.definedValueIndexes(pressed))
+                    var definedValueIndexes = workflow.definedValueIndexes(pressed)
+
+                    if(definedValueIndexes){
+                        manager.showOperationFormWithHiddenFields(item.operation.id,pressed, definedValueIndexes)
                     }else{
                         manager.showOperationForm(item.operation.id, pressed)
                     }
