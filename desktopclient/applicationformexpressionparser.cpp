@@ -249,7 +249,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     int xshift = 0;
     for(int i = 0; i < parameters.size(); ++i){
         QString visibile = "true";
-        for(int j=0;j<invisibleFieldIndexes.size();++j){
+        for(int j=0;j<invisibleFieldList.size();++j){
             if(i==invisibleFieldList[j].toInt()){
                 visibile = "false";
             }
