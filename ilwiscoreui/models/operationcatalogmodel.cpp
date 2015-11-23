@@ -57,7 +57,6 @@ void OperationCatalogModel::refresh()
     CatalogModel::refresh();
     _currentOperations.clear();
     _operationsByKey.clear();
-    _refresh = true;
     emit operationsChanged();
 }
 
@@ -494,4 +493,9 @@ OperationModel *OperationCatalogModel::operation(const QString &id)
 WorkflowModel *OperationCatalogModel::createWorkFlow(const QString &filter)
 {
     return 0;
+}
+
+void OperationCatalogModel::keyFilter(const QString &keyf)
+{
+   CatalogModel::keyFilter(keyf);
 }
