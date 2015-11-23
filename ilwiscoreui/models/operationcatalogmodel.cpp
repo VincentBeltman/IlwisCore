@@ -288,13 +288,13 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
     bool hasMissingParameters = false;
 
     for(int i = 0; i < parms.size(); ++ i){
-        if (operationresource.ilwisType() & itWORKFLOW && parms[i].size() == 0){
+        if (operationresource.ilwisType() & itWORKFLOW){
             int parm = i + 1;
-            if (operationresource[QString("pout_%1_optional").arg(parm)] == "false" && i < operationresource["outparameters"].toInt()) {
+            if (operationresource[QString("pout_%1_optional").arg(parm)] == "false" && i < operationresource["outparameters"].toInt() && parms[i + operationresource["inparameters"].toInt()].size() == 0) {
                 em->addError(1, "Output parameter " + QString::number(i) + " is undefined with name " +  operationresource[QString("pout_%1_name").arg(parm)].toString());
                 hasMissingParameters = true;
             }
-            if (operationresource[QString("pin_%1_optional").arg(parm)] == "false" && i < operationresource["inparameters"].toInt()) {
+            if (operationresource[QString("pin_%1_optional").arg(parm)] == "false" && i < operationresource["inparameters"].toInt() && parms[i].size() == 0) {
                 em->addError(1, "Input parameter " + QString::number(i) + " is undefined with name " +  operationresource[QString("pin_%1_name").arg(parm)].toString());
                 hasMissingParameters = true;
             }

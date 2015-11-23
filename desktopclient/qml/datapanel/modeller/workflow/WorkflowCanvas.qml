@@ -421,7 +421,15 @@ Modeller.ModellerWorkArea {
                     wfCanvas.currentIndex = pressed;
                     item = wfCanvas.operationsList[pressed]
                     item.isSelected = true
-                    manager.showOperationForm(item.operation.id, pressed)
+
+                    var definedValueIndexes = workflow.definedValueIndexes(pressed)
+
+                    if(definedValueIndexes){
+                        manager.showOperationFormWithHiddenFields(item.operation.id,pressed, definedValueIndexes)
+                    }else{
+                        manager.showOperationForm(item.operation.id, pressed)
+                    }
+
                     manager.showMetaData(item.operation)
                 } else {
                     manager.resetMetaData(workflow);

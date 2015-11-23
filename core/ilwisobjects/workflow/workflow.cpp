@@ -301,6 +301,26 @@ bool Workflow::hasValueDefined(const OVertex &operationVertex, int parameterInde
     return false;
 }
 
+/**
+ * Returns the inputs of an operation which have already been defined (if they for example have a flow drawn to them)
+ * @param operationVertex the operations
+ * @return A string seperated by |
+ */
+QString Workflow::definedValueIndexes(const OVertex &operationVertex){
+    QString definedValues;
+
+    for (const InputAssignment& assignment : getImplicitInputAssignments(operationVertex)) {
+        if (assignment.first == operationVertex && hasValueDefined(operationVertex, assignment.second)) {
+            if(!definedValues.isEmpty()){
+                definedValues += "|";
+            }
+            definedValues += QString::number(assignment.second);
+        }
+    }
+
+    return definedValues;
+}
+
 OEdge Workflow::addOperationFlow(const OVertex &from, const OVertex &to, const EdgeProperties &properties)
 {
     // TODO allow multiple edges between v1 and v2?
