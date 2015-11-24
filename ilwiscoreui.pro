@@ -85,7 +85,8 @@ HEADERS += ilwiscoreui/ilwiscoreui_global.h \
     ilwiscoreui/models/workflow/scenariodesignermodel.h \
     ilwiscoreui/models/workflow/scenariobuildermodel.h \
     ilwiscoreui/models/workflowerrormodel.h \
-    ilwiscoreui/models/workflow/errormodel.h
+    ilwiscoreui/models/workflow/errormodel.h \
+    ilwiscoreui/propertyeditors/applyundefinedvaluedefinition.h
 
 unix {
     target.path = /usr/lib
@@ -140,7 +141,7 @@ SOURCES += \
     ilwiscoreui/models/chartmodel.cpp \
     ilwiscoreui/models/consolescriptmodel.cpp \
     ilwiscoreui/models/datapanemodel.cpp \
-   ilwiscoreui/models/tabmodel.cpp \
+    ilwiscoreui/models/tabmodel.cpp \
     ilwiscoreui/models/operationworker.cpp \
     ilwiscoreui/models/objectcreator.cpp \
     ilwiscoreui/models/ilwisobjectcreatormodel.cpp \
@@ -155,7 +156,8 @@ SOURCES += \
     ilwiscoreui/models/workflow/scenariodesignermodel.cpp \
     ilwiscoreui/models/workflow/scenariobuildermodel.cpp \
     ilwiscoreui/models/workflowerrormodel.cpp \
-    ilwiscoreui/models/workflow/errormodel.cpp
+    ilwiscoreui/models/workflow/errormodel.cpp \
+    ilwiscoreui/propertyeditors/applyundefinedvaluedefinition.cpp
 
 DESTDIR = $$PWD/../libraries/$$PLATFORM$$CONF
 
