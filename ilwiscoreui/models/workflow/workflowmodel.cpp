@@ -137,7 +137,7 @@ void WorkflowModel::deleteFlow(int operationIndex1, int operationIndex2, int ind
  */
 QList<NodePropObject*> WorkflowModel::getNodes()
 {
-    std::pair<VertexIterator, VertexIterator> nodeIterators = _workflow->getNodeIterators();
+    std::pair<WorkflowVertexIterator, WorkflowVertexIterator> nodeIterators = _workflow->getNodeIterators();
     QList<NodePropObject*> *nodeProps = new QList<NodePropObject*>();
     for (auto &iter = nodeIterators.first; iter < nodeIterators.second; ++iter) {
         NodePropObject *nodeProp = new NodePropObject();

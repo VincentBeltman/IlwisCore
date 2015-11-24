@@ -84,12 +84,9 @@ HEADERS += ilwiscoreui/ilwiscoreui_global.h \
     ilwiscoreui/propertyeditors/layeropacitysetter.h \
     ilwiscoreui/models/workflow/scenariodesignermodel.h \
     ilwiscoreui/models/workflow/scenariobuildermodel.h \
-<<<<<<< HEAD
     ilwiscoreui/models/workflowerrormodel.h \
-    ilwiscoreui/models/workflow/errormodel.h
-=======
+    ilwiscoreui/models/workflow/errormodel.h \
     ilwiscoreui/propertyeditors/applyundefinedvaluedefinition.h
->>>>>>> master
 
 unix {
     target.path = /usr/lib

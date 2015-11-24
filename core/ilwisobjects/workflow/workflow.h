@@ -78,7 +78,7 @@ typedef boost::graph_traits<WorkflowGraph>::edge_descriptor OEdge;
 typedef boost::graph_traits<WorkflowGraph>::in_edge_iterator InEdgeIterator;
 typedef boost::graph_traits<WorkflowGraph>::out_edge_iterator OutEdgeIterator;
 
-typedef boost::graph_traits<WorkflowGraph>::vertex_iterator VertexIterator;
+typedef boost::graph_traits<WorkflowGraph>::vertex_iterator WorkflowVertexIterator;
 
 typedef std::pair<OVertex, int> InputAssignment;
 
@@ -138,7 +138,7 @@ public:
 
     // ------ Methods for saving
     QMap<InputAssignment, SPAssignedInputData> getAllInputAssignments() { return _inputAssignments; }
-    std::pair<VertexIterator, VertexIterator> getNodeIterators() { return boost::vertices(_wfGraph); }
+    std::pair<WorkflowVertexIterator, WorkflowVertexIterator> getNodeIterators() { return boost::vertices(_wfGraph); }
 
     // ------ for debugging
     void debugPrintGraph();

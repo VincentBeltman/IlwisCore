@@ -88,10 +88,10 @@ Ilwis::OperationImplementation::State AddDrawer::prepare(ExecutionContext *ctx, 
             if ( filter[0] == '\"')
                 filter = filter.mid(1, filter.size() - 2);
             std::vector<Resource> res = mastercatalog()->select(filter);
-            if ( res.size() != 1){
-                kernel()->issues()->log(QString("Could not open as %1, %2").arg(tpname).arg(url));
-                return sPREPAREFAILED;
-            }
+//            if ( res.size() != 1){
+//                kernel()->issues()->log(QString("Could not open as %1, %2").arg(tpname).arg(url));
+//                return sPREPAREFAILED;
+//            }
             _coverage.prepare(res[0]);
         }else{
            _coverage.prepare(filter, tp);
