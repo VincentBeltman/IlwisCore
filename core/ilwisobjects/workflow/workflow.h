@@ -18,7 +18,7 @@ namespace Ilwis {
 struct AssignedInputData {
     AssignedInputData() {}
     QString inputName;
-    QVariant value;
+    QString value;
 };
 
 struct AssignedOutputData {
@@ -41,7 +41,8 @@ struct NodeProperties {
         _resourceProvider = provider;
         _x = x;
         _y = y;
-        _operationid = mastercatalog()->url2id(url, itSINGLEOPERATION);
+        _operationid = mastercatalog()->url2id(url, itOPERATIONMETADATA);
+        qDebug() << _operationid;
     }
     quint64 _operationid = i64UNDEF;
     QUrl _resourceUrl;
@@ -54,8 +55,8 @@ struct EdgeProperties {
     EdgeProperties(int outParm, int inParm, int inRect, int outRect) :
         _outputParameterIndex(outParm),
         _inputParameterIndex(inParm),
-        _outputRectangleIndex(inRect),
-        _inputRectangleIndex(outRect){}
+        _outputRectangleIndex(outRect),
+        _inputRectangleIndex(inRect){}
     QString outputName;
     bool temporary = true;
     int _outputParameterIndex;

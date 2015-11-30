@@ -78,8 +78,8 @@ void IlwisObject::connectTo(const QUrl& outurl, const QString& format, const QSt
 
 
 
-    Resource resource;
-    resource = mastercatalog()->id2Resource(id());
+    Resource resource = source();
+    //resource = mastercatalog()->id2Resource(id());
     if ( !resource.isValid()) {
         resource = Resource(url,ilwisType(), false);
         resource.setId(id());

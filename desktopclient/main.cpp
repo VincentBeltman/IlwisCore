@@ -120,6 +120,8 @@ int main(int argc, char *argv[])
         qmlRegisterType<ScenarioDesignerModel>("ScenarioDesignerModel", 1,0,"ScenarioDesignerModel");
         qmlRegisterType<WorkflowErrorModel>("WorkflowErrorModel", 1,0,"WorkflowErrorModel");
         qmlRegisterType<ErrorModel>("ErrorModel", 1,0,"ErrorModel");
+        qmlRegisterType<NodePropObject>("NodePropObject", 1,0,"NodePropObject");
+        qmlRegisterType<EdgePropObject>("EdgePropObject", 1,0,"EdgePropObject");
 
         MasterCatalogModel mastercatalogmodel(ctx);
 

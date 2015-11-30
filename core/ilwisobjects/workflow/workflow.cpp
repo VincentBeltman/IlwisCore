@@ -135,7 +135,6 @@ OVertex Workflow::addOperation(const NodeProperties &properties)
 
 void Workflow::removeOperation(OVertex vertex)
 {
-    boost::clear_vertex(vertex, _wfGraph);
     boost::remove_vertex(vertex, _wfGraph);
     removeAllInputAssignments(vertex);
 }
@@ -180,7 +179,7 @@ QList<InputAssignment> Workflow::getConstantInputAssignments(const OVertex &v) c
     QList<InputAssignment> assignedPins;
     for (InputAssignment assignment : _inputAssignments.keys()) {
         if (assignment.first == v) {
-            if (_inputAssignments.value(assignment)->value.isValid()) {
+            if (_inputAssignments.value(assignment)->value.size() > 0) {
                 assignedPins.push_back(assignment);
             }
         }
@@ -295,7 +294,7 @@ bool Workflow::hasValueDefined(const OVertex &operationVertex, int parameterInde
                    return true;
                 }
             }
-            return _inputAssignments.value({operationVertex, parameterIndex})->value.isValid();
+            return _inputAssignments.value({operationVertex, parameterIndex})->value.size() > 0;
         }
     }
     return false;
