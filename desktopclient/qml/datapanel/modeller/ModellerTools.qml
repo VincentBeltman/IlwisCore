@@ -7,8 +7,12 @@ ToolBar{
     id : modellertools
     width : parent.width
     height : 55
+
+    property alias zoomLevel: zoomLabel
+
     Column {
-        anchors.fill: parent
+        height:parent.height
+        width: parent.height/2
         Row {
             width : parent.width
             height : 25
@@ -67,32 +71,6 @@ ToolBar{
                 }
             }
 
-            Button {
-                height : 25
-                width : 25
-                Image {
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    source : iconsource("zoomin20.png")
-                }
-                onClicked: {
-                    modellerDataPane.canvasZoomIn()
-                }
-            }
-            Button {
-                height : 25
-                width : 25
-                Image {
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    source : iconsource("zoomout20.png")
-                }
-                onClicked: {
-                    modellerDataPane.canvasZoomOut()
-                }
-            }
         }
         Row {
             width : parent.width
@@ -163,6 +141,75 @@ ToolBar{
                 }
             }
         }
+    }
+
+    Column{
+        anchors{
+            right: parent.right
+        }
+
+        height: parent.height
+        width: parent.width/2
+        Row{
+            height : 25
+            spacing : 2
+            anchors{
+                right: parent.right
+            }
+
+            Button {
+                height : 25
+                width : 25
+                Image {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    source : iconsource("zoomout20.png")
+                }
+                onClicked: {
+                    modellerDataPane.canvasZoomOut()
+                }
+            }
+
+            Button {
+                height : 25
+                width : 75
+                text: "Default zoom"
+
+                onClicked: {
+                    modellerDataPane.defaultZoom()
+                }
+            }
+
+            Button {
+                height : 25
+                width : 25
+                Image {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    source : iconsource("zoomin20.png")
+                }
+                onClicked: {
+                    modellerDataPane.canvasZoomIn()
+                }
+            }
+        }
+
+        Row{
+            height : 25
+            spacing : 2
+            anchors{
+                right: parent.right
+            }
+            Text{
+                id:zoomLabel
+                text:"100%"
+                font.pixelSize: 18
+            }
+        }
+
+
     }
 }
 
