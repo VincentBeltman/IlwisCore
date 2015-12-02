@@ -13,6 +13,8 @@
 #include "ilwistypes.h"
 #include "operationmetadata.h"
 
+#include "iooptions.h"
+
 namespace Ilwis {
 
 struct AssignedInputData {

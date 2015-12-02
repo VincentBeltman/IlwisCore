@@ -14,6 +14,7 @@ Item {
     property TabModel tabmodel
     property ScenarioDesignerModel scenario
     property double factor : 1.5
+    property int ontTopZValue: 1000000
 
     function addDataSource(filter, sourceName, sourceType){
         if ( filter !== "" ){
@@ -105,6 +106,10 @@ Item {
         canvas.run()
     }
 
+    function addError(id, error) {
+        errorview.addError(id, error)
+    }
+
     signal exit;
 
     property bool canSeparate : true
@@ -121,14 +126,14 @@ Item {
         orientation: Qt.Vertical
         height : parent.height - modellertools.height
 
-
         ModellerErrorView {
             height: 0
             id : errorview
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.right: parent.right
+            width : parent.width
             state: "smaller"
+            y: 45
+            z: ontTopZValue
+            visible: false
 
             states: [
                 State {
@@ -136,6 +141,7 @@ Item {
                     PropertyChanges {
                         target: errorview
                         height : 80
+                        visible: true
                     }
                     PropertyChanges {
                         target: datapane
@@ -147,6 +153,7 @@ Item {
                     PropertyChanges {
                         target: errorview
                         height : 0
+                        visible: false
                     }
                 }
             ]
@@ -160,7 +167,7 @@ Item {
         Item {
             id : datapane
             width : parent.width
-            height : parent.height - modellertools.height - 170
+            height : parent.height - 170
 
             function asignConstantInputData(vertexIndex, parameterIndex, value){
                 canvas.asignConstantInputData(vertexIndex, parameterIndex, value)
@@ -201,14 +208,14 @@ Item {
 
                     PropertyChanges {
                         target: datapane
-                        height : parent.height - modellertools.height - 170
+                        height : parent.height - 170
                     }
                 },
                 State {
                     name : "bigger"
                     PropertyChanges {
                         target: datapane
-                        height : parent.height - modellertools.height + 10
+                        height : parent.height - 10
                     }
                 }
 
@@ -219,15 +226,12 @@ Item {
                 }
             ]
         }
+
         ModelManager{
             id : manager
             height : 170
             anchors.left: parent.left
-            anchors.leftMargin: 5
             anchors.right: parent.right
         }
-
-
     }
-
 }

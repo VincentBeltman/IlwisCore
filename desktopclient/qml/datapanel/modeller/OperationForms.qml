@@ -16,16 +16,16 @@ Rectangle {
     property var operationid
     property int itemId: -1
 
-    function newForm(metaid, title, newItemId){
-        fillAppFrame(metaid, title, false, true, [])
+    function newForm(item, title, newItemId){
+        fillAppFrame(item.operation.id, title + "(" + item.getTitle() + ")", false, true, [])
         itemId = newItemId
     }
 
     /**
       Shows the operation's form. Passes the hidden fields to the index2Form method.
       */
-    function newOperationFormWithHiddenFields(metaid, title, newItemId, hiddenFields){
-        fillAppFrame(metaid, title, false, true, hiddenFields)
+    function newOperationFormWithHiddenFields(item, title, newItemId, hiddenFields){
+        fillAppFrame(item.operation.id, title + "(" + item.getTitle() + ")", false, true, hiddenFields)
         itemId = newItemId
     }
 
@@ -39,6 +39,7 @@ Rectangle {
     function fillAppFrame(metaid, title, output, showEmpty, hiddenFields) {
         var form= formbuilder.index2Form(metaid, output, showEmpty ,hiddenFields)
         operationid = metaid
+        appFrame.formQML = ""
         appFrame.formQML = form
         appFrame.formTitle = title
         appFrame.opacity = 1

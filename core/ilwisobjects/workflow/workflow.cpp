@@ -123,6 +123,12 @@ OVertex Workflow::addOperation(const NodeProperties &properties)
     OVertex v = boost::add_vertex(properties, _wfGraph);
 
     IOperationMetaData meta = getOperationMetadata(v);
+//    Resource res = mastercatalog()->id2Resource(meta->id());
+
+//    if (mastercatalog()->id2Resource(meta->id()).ilwisType() & itWORKFLOW) {
+//        static_cast<IWorkflow>(meta)->createMetadata();
+//    }
+//    quint64 id = nodeProperties(v)._operationid;
     std::vector<SPOperationParameter> inputs = meta->getInputParameters();
     for (int i = 0 ; i < inputs.size() ; i++) {
         if ( !inputs.at(i)->isOptional()) {

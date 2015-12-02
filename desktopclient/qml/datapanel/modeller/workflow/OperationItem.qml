@@ -4,6 +4,8 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.0
 import QtQuick.Dialogs 1.0
 import OperationModel 1.0
+import WorkflowErrorModel 1.0
+import ErrorModel 1.0
 
 Rectangle {
     id : operationItem
@@ -28,6 +30,8 @@ Rectangle {
 
 
     function resetInputModel(){
+        operations.refresh()
+        operation = operations.operation(operation.id)
         operationInParameters.model = null
         operationInParameters.model = operation.inParamNames
     }
@@ -40,6 +44,10 @@ Rectangle {
             }
         }
         return iconsource("operationitem.png")
+    }
+
+    function getTitle() {
+        return operationName.text
     }
 
 
@@ -222,14 +230,11 @@ Rectangle {
     function setFlow(target, attachRect, flowPoints){
         if(workflow.hasValueDefined(target.itemid, flowPoints.toParameterIndex))
         {
-            //TODO: Error gooien.
+            modellerDataPane.addError(1, "This parameter already has a value");
+            wfCanvas.stopWorkingLine()
             return;
         }
 
-        for(var i =0; i < flowConnections.length; ++i){
-            if ( flowConnections[i].target == target)
-                return // dont add duplicates
-        }
         flowConnections.push({
             "target" : target,
             "source" :operationItem,
@@ -252,19 +257,14 @@ Rectangle {
     function attachFlow(target, attachRect){
         //If not connected to itself
         if ( wfCanvas.operationsList[wfCanvas.currentIndex] !== target){
-            var flowPoints
 
-            if( operation.isLegalFlow(wfCanvas.operationsList[wfCanvas.currentIndex].operation, target.operation))
-            {
-                if ( operation.needChoice(target.operation)){
-                    wfCanvas.showAttachmentForm(true, target,attachRect)
+            if (operation.isLegalFlow(wfCanvas.operationsList[wfCanvas.currentIndex].operation, target.operation)) {
+                if (operation.needChoice(target.operation)) {
+                    wfCanvas.showAttachmentForm(target, attachRect)
+                } else {
+                    wfCanvas.operationsList[wfCanvas.currentIndex].setFlow(target, attachRect, null)
                 }
-                else{
-                    wfCanvas.operationsList[wfCanvas.currentIndex].setFlow(target,attachRect, null)
-                }
-            }
-            else
-            {
+            } else {
                 wfCanvas.stopWorkingLine()
             }
 
