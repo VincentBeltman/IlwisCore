@@ -13,8 +13,8 @@ Item {
     height : parent.height
     property TabModel tabmodel
     property ScenarioDesignerModel scenario
-    property double factor : 1.5
     property int ontTopZValue: 1000000
+    property double factor : 1.1
 
     function addDataSource(filter, sourceName, sourceType){
         if ( filter !== "" ){
@@ -88,11 +88,33 @@ Item {
         scaleCanvas(factor);
     }
 
+    /**
+    Sets the canvas' zoom back to 100%
+    */
+    function defaultZoom(){
+        tform.xScale = 1
+        tform.yScale = 1
+
+        canvas.height = canvas.parent.height
+        canvas.width = canvas.parent.width
+
+        setPercentage()
+    }
+
     function scaleCanvas(scaleFactor){
         canvas.height /= scaleFactor;
         canvas.width /= scaleFactor;
         tform.xScale *=scaleFactor;
         tform.yScale *=scaleFactor;
+
+        setPercentage()
+    }
+
+    /**
+    Sets the zoom percentage based on the tform's xScale
+    */
+    function setPercentage(){
+        modellertools.zoomLevel.text = Math.round((tform.xScale *100)) + "%"
     }
 
     function asignConstantInputData(inputData, operationid) {
