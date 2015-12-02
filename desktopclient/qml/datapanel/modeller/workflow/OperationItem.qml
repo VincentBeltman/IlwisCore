@@ -57,7 +57,7 @@ Rectangle {
         elide: Text.ElideMiddle
 
         x : 15
-        text : operation ? operation.name : "?"
+        text : itemid + ". " + (operation ? operation.name : "?")
         font.bold : true
     }
     Text {
