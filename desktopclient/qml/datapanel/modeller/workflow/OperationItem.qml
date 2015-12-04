@@ -32,8 +32,6 @@ Rectangle {
 
 
     function resetInputModel(){
-        operations.refresh()
-        operation = operations.operation(operation.id)
         operationInParameters.model = null
         operationInParameters.model = operation.inParamNames
     }

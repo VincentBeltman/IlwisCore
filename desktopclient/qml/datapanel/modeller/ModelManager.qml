@@ -20,7 +20,7 @@ Rectangle {
         forms.item.showOperationFormWithHiddenFields(operation, itemId, constantValues, hiddenFields)
     }
 
-    function showOperationForm(operation, constantValues, itemId){
+    function showOperationForm(operation, itemId, constantValues){
         modellerProperties.getTab(1)
         forms.item.showOperationForm(operation, itemId, constantValues)
     }

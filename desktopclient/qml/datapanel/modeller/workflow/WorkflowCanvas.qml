@@ -461,7 +461,7 @@ Modeller.ModellerWorkArea {
                         item.isSelected = true
 
                         implicitIndexes = workflow.implicitIndexes(operationSelected)
-                        constantValues = workflow.getAsignedValuesByItemID(item.itemdId)
+                        //constantValues = workflow.getAsignedValuesByItemID(item.itemdId)
                         if(implicitIndexes){
                             manager.showOperationFormWithHiddenFields(item, operationSelected, constantValues, implicitIndexes)
                         }else{

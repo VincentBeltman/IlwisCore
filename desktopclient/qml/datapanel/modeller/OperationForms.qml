@@ -21,7 +21,7 @@ Rectangle {
     Create a form for the workflow
     */
     function showRunForm(metaid, operationNames) {
-        var form= formbuilder.index2Form(metaid,true, false, "", operationNames)
+        var form= formbuilder.index2Form(metaid, true, false, "", [], operationNames)
         operationid = metaid
         appFrame.formQML = form
         appFrame.formTitle = qsTr("Set run values for workflow")
@@ -29,7 +29,7 @@ Rectangle {
     }
 
     function showForm(item, title, newItemId, constantValues){
-        fillAppFrame(item.operation.id, title + "(" + item.getTitle() + ")", false, true, constantValues, [])
+        fillAppFrame(item.operation.id, title + "(" + item.getTitle() + ")", false, true, "", constantValues)
         itemId = newItemId
     }
 
@@ -37,12 +37,12 @@ Rectangle {
       Shows the operation's form. Passes the hidden fields to the index2Form method.
       */
     function showOperationFormWithHiddenFields(item, title, newItemId, constantValues, hiddenFields){
-        fillAppFrame(item.operation.id, title + "(" + item.getTitle() + ")", false, true, constantValues, hiddenFields)
+        fillAppFrame(item.operation.id, title + "(" + item.getTitle() + ")", false, true, hiddenFields, constantValues)
         itemId = newItemId
     }
 
-    function fillAppFrame(metaid, title, output, showEmpty, constantValues, hiddenFields) {
-        var form= formbuilder.index2Form(metaid, output, showEmpty ,hiddenFields)
+    function fillAppFrame(metaid, title, output, showEmpty, hiddenFields, constantValues) {
+        var form= formbuilder.index2Form(metaid, output, showEmpty, hiddenFields, {}, constantValues)
         operationid = metaid
         appFrame.formQML = ""
         appFrame.formQML = form
