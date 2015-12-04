@@ -21,7 +21,7 @@ Rectangle {
     Create a form for the workflow
     */
     function showRunForm(metaid, operationNames) {
-        var form= formbuilder.index2WorkflowForm(metaid, operationNames)
+        var form= formbuilder.index2Form(metaid,true, false, "", operationNames)
         operationid = metaid
         appFrame.formQML = form
         appFrame.formTitle = qsTr("Set run values for workflow")
