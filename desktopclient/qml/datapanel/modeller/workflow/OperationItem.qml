@@ -4,12 +4,16 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.0
 import QtQuick.Dialogs 1.0
 import OperationModel 1.0
+import WorkflowErrorModel 1.0
+import ErrorModel 1.0
 
 Rectangle {
     id : operationItem
     width: 200
     height: 120
     scale: 1
+    z: 0
+
     property OperationModel operation
     property int itemid
     property var selectedAttach
@@ -28,18 +32,24 @@ Rectangle {
 
 
     function resetInputModel(){
+        operations.refresh()
+        operation = operations.operation(operation.id)
         operationInParameters.model = null
         operationInParameters.model = operation.inParamNames
     }
 
     function getBackground() {
-        var keywords = operation.keywords.split(', ')
-        if (keywords.indexOf('workflow') > -1) {
-            return iconsource("workflowitem.png")
-        } else {
-            return iconsource("operationitem.png")
+        if (operation) {
+            var keywords = operation.keywords.split(', ')
+            if (keywords.indexOf('workflow') > -1) {
+                return iconsource("workflowitem.png")
+            }
         }
+        return iconsource("operationitem.png")
+    }
 
+    function getTitle() {
+        return operationName.text
     }
 
 
@@ -58,7 +68,7 @@ Rectangle {
         elide: Text.ElideMiddle
 
         x : 15
-        text : operation ? operation.name : "?"
+        text : itemid + ". " + (operation ? operation.name : "?")
         font.bold : true
     }
     Text {
@@ -162,6 +172,12 @@ Rectangle {
         wfCanvas.canvasValid = false
     }
 
+    onIsSelectedChanged: {
+        if (isSelected) {
+            z = highestZIndex++
+        }
+    }
+
     function deselectAll(){
         att1.isSelected = att2.isSelected = att3.isSelected = att4.isSelected = att5.isSelected = att6.isSelected = att7.isSelected = att8.isSelected = false
     }
@@ -216,14 +232,11 @@ Rectangle {
     function setFlow(target, attachRect, flowPoints){
         if(workflow.hasValueDefined(target.itemid, flowPoints.toParameterIndex))
         {
-            //TODO: Error gooien.
+            modellerDataPane.addError(1, "This parameter already has a value");
+            wfCanvas.stopWorkingLine()
             return;
         }
 
-        for(var i =0; i < flowConnections.length; ++i){
-            if ( flowConnections[i].target == target)
-                return // dont add duplicates
-        }
         flowConnections.push({
             "target" : target,
             "source" :operationItem,
@@ -246,19 +259,14 @@ Rectangle {
     function attachFlow(target, attachRect){
         //If not connected to itself
         if ( wfCanvas.operationsList[wfCanvas.currentIndex] !== target){
-            var flowPoints
 
-            if( operation.isLegalFlow(wfCanvas.operationsList[wfCanvas.currentIndex].operation, target.operation))
-            {
-                if ( operation.needChoice(target.operation)){
-                    wfCanvas.showAttachmentForm(true, target,attachRect)
+            if (operation.isLegalFlow(wfCanvas.operationsList[wfCanvas.currentIndex].operation, target.operation)) {
+                if (operation.needChoice(target.operation)) {
+                    wfCanvas.showAttachmentForm(target, attachRect)
+                } else {
+                    wfCanvas.operationsList[wfCanvas.currentIndex].setFlow(target, attachRect, null)
                 }
-                else{
-                    wfCanvas.operationsList[wfCanvas.currentIndex].setFlow(target,attachRect, null)
-                }
-            }
-            else
-            {
+            } else {
                 wfCanvas.stopWorkingLine()
             }
 

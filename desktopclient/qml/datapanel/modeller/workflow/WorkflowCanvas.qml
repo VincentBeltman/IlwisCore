@@ -11,8 +11,10 @@ import "../../../matrix.js" as Matrix
 Modeller.ModellerWorkArea {
     property WorkflowModel workflow;
     property OperationCatalogModel operationCatalog;
+    property bool canvasActive : true;
     property var deleteItemIndex;
     property var deleteEdgeIndex;
+    property int highestZIndex : 1;
 
     function asignConstantInputData(inputData, itemId) {
         workflow.asignConstantInputData(inputData, itemId)
@@ -51,14 +53,15 @@ Modeller.ModellerWorkArea {
             var to = flow.target.itemid
             var inputIndex = flow.flowPoints.toParameterIndex
             var outputIndex = flow.flowPoints.fromParameterIndex
+            var operationObject = wfCanvas.operationsList[deleteItemIndex]
 
             workflow.deleteFlow(from, to, outputIndex, inputIndex)
-            wfCanvas.operationsList[deleteItemIndex].flowConnections.splice(deleteEdgeIndex, 1)
+            operationObject.flowConnections.splice(deleteEdgeIndex, 1)
             flow.target.resetInputModel()
             wfCanvas.canvasValid = false
 
             //Create a new edge
-            wfCanvas.showAttachmentForm(true, flow.target, flow.attachtarget);
+            wfCanvas.showAttachmentFormFromFlow(flow);
         }
     }
 
@@ -93,7 +96,7 @@ Modeller.ModellerWorkArea {
             // First delete the operation at C++. THIS NEEDS TO BE DONE FIRST
             workflow.deleteOperation(deleteItemIndex)
 
-            // This removes 1 (second param) from the operation list beginning from deleteItemIndex
+            // This removes 1 from the operation list beginning from deleteItemIndex
             wfCanvas.operationsList.splice(deleteItemIndex, 1)
 
             // Delete incomming connections of the operation which will be deleted
@@ -110,13 +113,12 @@ Modeller.ModellerWorkArea {
                 }
                 // Delete the connections
                 for (var j = 0; j < deleteFlows.length; j++) {
-                    var deleteIndex = deleteFlows[j];
-                    wfCanvas.operationsList[i].flowConnections.splice(deleteIndex, 1)
+                    wfCanvas.operationsList[i].flowConnections.splice(deleteFlows[j] - j, 1)
                 }
             }
             // Loop through all operations after the deleted item. We need to reset their itemid
             for (var i = deleteItemIndex; i < wfCanvas.operationsList.length; i++) {
-                operation.itemid = i
+                wfCanvas.operationsList[i].itemid = i
             }
 
             // Destroy the QML object.
@@ -178,47 +180,60 @@ Modeller.ModellerWorkArea {
       Draws canvas from the workflow
       */
     function drawFromWorkflow() {
-        var nodes = workflow.getNodes(), node, resource, edges, edge, fromItemid,
+        var nodes = workflow.nodes, node, resource, unOrderdEdges = workflow.edges, edges = [], nodeEdges, edge, fromItemid,
                 toItemId, fromOperation=false, toOperation=false, flowPoints;
-        for (var i = 0; i < nodes.length; i++) {
-            node = nodes[i];
-            resource = mastercatalog.id2Resource(node.operationId)
-
-            wfCanvas.createItem(node.x, node.y, resource);
-            edges = workflow.getEdges(node)
-            for (var j = 0; j < edges.length; j++) {
-                edge = edges[j]
-                fromItemid = workflow.vertex2ItemID(node.vertex) //TODO: Temporary
-                toItemId = workflow.vertex2ItemID(edge.toVertex) //TODO: Temporary
-
-                for (var k = 0; k < wfCanvas.operationsList.length; k++) {
-                    if (wfCanvas.operationsList[k].itemid == fromItemid && !fromOperation) {
-                        fromOperation = wfCanvas.operationsList[k]
-                    } else if (wfCanvas.operationsList[k].itemid == toItemId && !toOperation) {
-                        toOperation = wfCanvas.operationsList[k]
-                    }
-                }
-
-                if (fromOperation && toOperation){
-                    flowPoints = {
-                        "fromParameterIndex" : edge.fromParameter,
-                        "toParameterIndex" : edge.toParameter
-                    }
-                    fromOperation.flowConnections.push({
-                       "target" : toOperation,
-                       "source" : fromOperation,
-                       "attachtarget" : toOperation.index2Rectangle(edge.toRect),
-                       "attachsource" : fromOperation.index2Rectangle(edge.fromRect),
-                       "flowPoints" : flowPoints,
-                       "isSelected" : false
-                    })
-                }
-
-                fromOperation = false
-                toOperation = false
+        for(var i = 0; i < unOrderdEdges.length; i++) {
+            edge = unOrderdEdges[i]
+            if (edge.fromVertex in edges) {
+                edges[edge.fromVertex].push(edge)
+            } else {
+                edges[edge.fromVertex] = [edge]
             }
         }
-        wfCanvas.draw(true)
+
+        for (var i = 0; i < nodes.length; i++) {
+            node = nodes[i];
+            resource = wfCanvas.getOperation(node.operationId)
+
+            wfCanvas.createItem(node.x, node.y, resource)
+        }
+        for (var i = 0; i < nodes.length; i++) {
+            node = nodes[i];
+            nodeEdges = edges[node.vertex]
+            if (nodeEdges) {
+                for (var j = 0; j < nodeEdges.length; j++) {
+                    edge = nodeEdges[j]
+                    fromItemid = workflow.vertex2ItemID(node.vertex) //TODO: Temporary
+                    toItemId = workflow.vertex2ItemID(edge.toVertex) //TODO: Temporary
+
+                    for (var k = 0; k < wfCanvas.operationsList.length; k++) {
+                        if (!fromOperation && wfCanvas.operationsList[k].itemid == fromItemid) {
+                            fromOperation = wfCanvas.operationsList[k]
+                        } else if (!toOperation && wfCanvas.operationsList[k].itemid == toItemId) {
+                            toOperation = wfCanvas.operationsList[k]
+                        }
+                    }
+
+                    if (fromOperation && toOperation){
+                        flowPoints = {
+                            "fromParameterIndex" : edge.fromParameter,
+                            "toParameterIndex" : edge.toParameter
+                        }
+                        fromOperation.flowConnections.push({
+                           "target" : toOperation,
+                           "source" : fromOperation,
+                           "attachtarget" : toOperation.index2Rectangle(edge.toRect),
+                           "attachsource" : fromOperation.index2Rectangle(edge.fromRect),
+                           "flowPoints" : flowPoints,
+                           "isSelected" : false
+                        })
+                    }
+
+                    fromOperation = false
+                    toOperation = false
+                }
+            }
+        }
     }
 
     Canvas {
@@ -355,13 +370,23 @@ Modeller.ModellerWorkArea {
             wfCanvas.canvasValid = true
         }
 
-        function showAttachmentForm(yesno, target, attachRect){
+        function showAttachmentForm(target, attachRect){
+            canvasActive = false;
             var fromOperation = operationsList[wfCanvas.currentIndex].operation
             attachementForm.operationFrom = fromOperation
             attachementForm.operationTo = target.operation
             attachementForm.attachRect = attachRect
             attachementForm.target = target
-            attachementForm.state = yesno ? "visible" : "visible"
+            attachementForm.state = "visible"
+        }
+        function showAttachmentFormFromFlow(flow) {
+            canvasActive = false;
+            attachementForm.operationFrom = flow.source.operation
+            attachementForm.operationTo = flow.target.operation
+            attachementForm.attachRect = flow.attachtarget
+            attachementForm.target = flow.target
+            attachementForm.source = flow.source
+            attachementForm.state = "visible"
         }
 
         onWidthChanged: {
@@ -379,6 +404,9 @@ Modeller.ModellerWorkArea {
             anchors.fill: wfCanvas
             onDropped: {
                 if (drag.source.type === "singleoperation" || drag.source.type === "workflow") {
+                    if (drag.source.type === "workflow") {
+                        operations.refresh()
+                    }
                     var oper = wfCanvas.getOperation(drag.source.ilwisobjectid)
                     wfCanvas.createItem(drag.x - 50, drag.y - 30,oper)
                     workflow.addOperation(drag.source.ilwisobjectid)
@@ -405,72 +433,89 @@ Modeller.ModellerWorkArea {
 
             onPressed: {
 
-                wfCanvas.lastX = mouseX;
-                wfCanvas.lastY = mouseY;
-                wfCanvas.dragStart = transformedPoint(wfCanvas.lastX,wfCanvas.lastY);
-                wfCanvas.dragged = false;
+                if (canvasActive) {
+                    wfCanvas.canvasValid = false;
 
-                wfCanvas.canvasValid = false;
+                    wfCanvas.lastX = mouseX;
+                    wfCanvas.lastY = mouseY;
+                    wfCanvas.dragStart = transformedPoint(wfCanvas.lastX,wfCanvas.lastY);
+                    wfCanvas.dragged = false;
 
-                var selected = false, pressed = -1;
+                    var selected = false, pressed = -1;
 
-                for(var i=0; i < wfCanvas.operationsList.length; ++i){
+                    for(var i=0; i < wfCanvas.operationsList.length; ++i){
 
-                    var item = wfCanvas.operationsList[i]
-                    var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
-
-                    for(var j=0; j < item.flowConnections.length; j++)
-                    {
-                        var flow = item.flowConnections[j];
-
-                        // Retrieve basic X and Y positions of the line
-                        var startPoint = flow.attachsource.center();
-                        var endPoint = flow.attachtarget.center();
-                        var ax = startPoint.x;
-                        var ay = startPoint.y;
-                        var bx = endPoint.x;
-                        var by = endPoint.y;
-
-                        // Calculate distance to check mouse hits a line
-                        var distanceAC = Math.sqrt(Math.pow((ax-mouseX), 2) + Math.pow((ay-mouseY), 2));
-                        var distanceBC = Math.sqrt(Math.pow((bx-mouseX), 2) + Math.pow((by-mouseY), 2));
-                        var distanceAB = Math.sqrt(Math.pow((ax-bx), 2) + Math.pow((ay-by), 2));
+                        var item = wfCanvas.operationsList[i]
+                        var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
 
 
-                        // Check if mouse intersects the line with offset of 10
-                        if(!selected && (distanceAC + distanceBC) >= distanceAB &&
-                           (distanceAC + distanceBC) < (distanceAB + 10))
-                        {
-                            selected = true;
-                            flow.isSelected = true;
+
+                        var operationSelected = -1, highestZ = -1, smallestDistance = 100000,
+                                selectedFlow = false, implicitIndexes, constantValues;
+
+                        for(var i=0; i < wfCanvas.operationsList.length; ++i){
+
+                            var item = wfCanvas.operationsList[i]
+                            var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
+
+                            for(var j=0; j < item.flowConnections.length; j++)
+                            {
+                                var flow = item.flowConnections[j];
+
+                                // Retrieve basic X and Y positions of the line
+                                var startPoint = flow.attachsource.center();
+                                var endPoint = flow.attachtarget.center();
+                                var ax = startPoint.x;
+                                var ay = startPoint.y;
+                                var bx = endPoint.x;
+                                var by = endPoint.y;
+
+                                // Calculate distance to check mouse hits a line
+                                var distanceAC = Math.sqrt(Math.pow((ax-mouseX), 2) + Math.pow((ay-mouseY), 2));
+                                var distanceBC = Math.sqrt(Math.pow((bx-mouseX), 2) + Math.pow((by-mouseY), 2));
+                                var distanceAB = Math.sqrt(Math.pow((ax-bx), 2) + Math.pow((ay-by), 2));
+                                var distanceLine = distanceAC + distanceBC;
+
+
+                                // Check if mouse intersects the line with offset of 10
+                                if(distanceLine >= distanceAB &&
+                                   distanceLine < (distanceAB + wfCanvas.scale) &&
+                                   distanceLine - distanceAB < smallestDistance)
+                                {
+                                    smallestDistance = distanceLine - distanceAB;
+                                    selectedFlow = flow;
+                                }
+                                flow.isSelected = false;
+                            }
+
+                            if ( isContained && item.z > highestZ ) {
+                                operationSelected = i
+                                highestZ = item.z
+                            }
+                            item.isSelected = false
+                        }
+                        wfCanvas.oldx = mouseX
+                        wfCanvas.oldy = mouseY
+                        wfCanvas.currentIndex = operationSelected
+                        if (selectedFlow && operationSelected == -1) {
+                            selectedFlow.isSelected = true
+                        } else if (operationSelected > -1) {
+                            item = wfCanvas.operationsList[operationSelected]
+                            item.isSelected = true
+
+                            implicitIndexes = workflow.implicitIndexes(operationSelected)
+                            constantValues = workflow.getAsignedValuesByItemID(item.itemdId)
+                            if(implicitIndexes){
+                                manager.showOperationFormWithHiddenFields(item, operationSelected, constantValues, implicitIndexes)
+                            }else{
+                                manager.showOperationForm(item, operationSelected, constantValues)
+                            }
+
+                            manager.showMetaData(item.operation)
                         } else {
-                            flow.isSelected = false;
+                            manager.resetMetaData();
                         }
                     }
-
-                    if ( isContained) {
-                        pressed = i
-                    }
-                    item.isSelected = false
-                }
-                wfCanvas.oldx = mouseX
-                wfCanvas.oldy = mouseY
-                if (pressed > -1) {
-                    wfCanvas.currentIndex = pressed;
-                    item = wfCanvas.operationsList[pressed]
-                    item.isSelected = true
-
-                    var definedValueIndexes = workflow.definedValueIndexes(pressed)
-
-                    if(definedValueIndexes){
-                        manager.showOperationFormWithHiddenFields(item.operation.id,pressed, definedValueIndexes)
-                    }else{
-                        manager.showOperationForm(item.operation.id, pressed)
-                    }
-
-                    manager.showMetaData(item.operation)
-                } else {
-                    manager.resetMetaData(workflow);
                 }
             }
 
@@ -531,7 +576,16 @@ Modeller.ModellerWorkArea {
             }
         }
 
+    }
 
+    Component.onDestruction: {
+        var coordinates = [], node;
+        for (var i = 0; i < wfCanvas.operationsList.length; i++) {
+            node = wfCanvas.operationsList[i]
+            coordinates[node.itemid] = node.x + '|' + node.y
+        }
+
+        workflow.store(coordinates)
     }
 
     function zoom(clicks){
