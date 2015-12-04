@@ -256,7 +256,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
         formColumnEnd = QString("}");
     }
 
-    formRows += formColumnStart;
+//    formRows += formColumnStart;
 
     for(int i = 0; i < parameters.size(); ++i){
         QString visibile = "true";
@@ -360,7 +360,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
         formRows.replace("optionalOutputMarker","");
     }
 
-    formRows += formColumnEnd;
+//    formRows += formColumnEnd;
     return formRows;
 }
 
