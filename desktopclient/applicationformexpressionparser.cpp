@@ -415,7 +415,7 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
  * @param metaid the id of the workflow
  * @return a string containing the qml form
  */
-QString ApplicationFormExpressionParser::index2WorkflowForm(quint64 metaid, std::map<QString, int> operationNames) const {
+QString ApplicationFormExpressionParser::index2WorkflowForm(quint64 metaid, QMap<QString, QPair<int,int>> operationNames) const {
     Resource resource = mastercatalog()->id2Resource(metaid);
     std::vector<FormParameter> parameters = getParameters(resource);
 

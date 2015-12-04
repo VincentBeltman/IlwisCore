@@ -17,7 +17,7 @@ public:
     ApplicationFormExpressionParser();
 
     Q_INVOKABLE QString index2Form(quint64 metaid, bool showoutputformat, bool showEmptyOptionInList  = false, QString invisibleFieldIndexes = "") const;
-    Q_INVOKABLE QString index2WorkflowForm(quint64 metaid, std::map<QString, int> operationNames = std::map<QString, int>()) const;
+    Q_INVOKABLE QString index2WorkflowForm(quint64 metaid, QMap<QString, QPair<int,int>> operationNames = QMap<QString, QPair<int,int>>()) const;
 //    Q_INVOKABLE QString createWorkflowForm(quint64) const;
 private:
     struct FormParameter {
