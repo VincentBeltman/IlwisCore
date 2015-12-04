@@ -32,7 +32,7 @@ Rectangle {
       */
     function showRunForm(workflowid){
         if ( workflowid){
-            workflowForm.item.showFormWithOutput(workflowid, qsTr("Set run values for workflow"))
+            workflowForm.item.showRunForm(workflowid, qsTr("Set run values for workflow"))
         }
     }
 
