@@ -69,12 +69,12 @@ Rectangle {
     /**
       * Shows the run form for the whole workflow
       */
-    function showRunForm(workflowid){
+    function showRunForm(workflowid, operationNames){
         if ( workflowid){
             datapane.state = "smaller"
             var tab= modellerProperties.getTab(3)
             tab.active=true
-            tab.item.newWorkflowForm(workflowid, qsTr("Set run values"))
+            tab.item.newWorkflowForm(workflowid, qsTr("Set run values"), operationNames)
         }
     }
 

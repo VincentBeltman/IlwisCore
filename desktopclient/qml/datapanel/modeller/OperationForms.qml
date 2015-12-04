@@ -19,8 +19,8 @@ Rectangle {
     /**
     Create a form for the workflow
     */
-    function newWorkflowForm(metaid, title){
-        var form= formbuilder.index2WorkflowForm(metaid)
+    function newWorkflowForm(metaid, title, operationNames){
+        var form= formbuilder.index2WorkflowForm(metaid, operationNames)
         operationid = metaid
         appFrame.formQML = form
         appFrame.formTitle = title
