@@ -168,10 +168,10 @@ Modeller.ModellerWorkArea {
     /**
       Calls the create meta data method of the WorkflowModel and regenerates the form
       */
-    function generateForm() {
+    function generateForm(operationNames) {
         if (workflow){
             workflow.createMetadata()
-            manager.showRunForm(workflow.id)
+            manager.showRunForm(workflow.id, operationNames)
         }
     }
 
@@ -292,11 +292,16 @@ Modeller.ModellerWorkArea {
                     ctx.lineTo(workingLineEnd.x, workingLineEnd.y);
                     ctx.stroke();
                 }
+
+                var operationNames = {}
                 for( var i=0; i < operationsList.length; i++){
                     operationsList[i].drawFlows(ctx)
+
+                    operationNames[wfCanvas.operationsList[i].operation.name] = {inParameterCount: wfCanvas.operationsList[i].operation.inParameterCount, outParameterCount: wfCanvas.operationsList[i].operation.outParameterCount};
                 }
                 //wfCanvas.requestPaint();
-                generateForm()
+                generateForm(operationNames)
+                console.log("" + operationNames)
             }
         }
 
@@ -385,8 +390,7 @@ Modeller.ModellerWorkArea {
                     wfCanvas.createItem(drag.x - 50, drag.y - 30,oper)
                     workflow.addOperation(drag.source.ilwisobjectid)
 
-                    generateForm()
-                    console.log("parameter count: " + wfCanvas.operationsList[0].operation.inParameterCount)
+                    wfCanvas.canvasValid = false
                 }
             }
         }

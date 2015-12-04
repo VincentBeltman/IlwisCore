@@ -25,9 +25,9 @@ Rectangle {
         forms.item.showOperationForm(operation, itemId, constantValues)
     }
 
-    function showRunForm(workflowid){
+    function showRunForm(workflowid, operationNames){
         modellerProperties.getTab(1)
-        forms.item.showRunForm(workflowid)
+        forms.item.showRunForm(workflowid, operationNames)
     }
 
     function retrieveRunFormValues(){
