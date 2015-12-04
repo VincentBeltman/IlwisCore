@@ -131,8 +131,8 @@ public:
 
     //------- Queries
     bool hasValueDefined(const OVertex& operationVertex, int parameterIndex);
-
-    QString definedValueIndexes(const OVertex &operationVertex);
+    QList<InputAssignment> getConstantInputAssignments(const OVertex &v) const;
+    QString implicitIndexes(const OVertex &operationVertex);
 
     // ------ operation metadata functions
     IOperationMetaData getOperationMetadata(const OVertex &v);
@@ -168,7 +168,6 @@ private:
 
     QStringList getInputTerms(const OVertex &v);
     QStringList getOutputTerms(const OVertex &v);
-    QList<InputAssignment> getConstantInputAssignments(const OVertex &v) const;
     QList<InputAssignment> getOpenInputAssignments(const OVertex &v) const;
     QList<InputAssignment> getImplicitInputAssignments(const OVertex &v);
     std::vector<quint16> getAssignedPouts(const OVertex &v);

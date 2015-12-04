@@ -311,16 +311,14 @@ bool Workflow::hasValueDefined(const OVertex &operationVertex, int parameterInde
  * @param operationVertex the operations
  * @return A string seperated by |
  */
-QString Workflow::definedValueIndexes(const OVertex &operationVertex){
+QString Workflow::implicitIndexes(const OVertex &operationVertex){
     QString definedValues;
 
     for (const InputAssignment& assignment : getImplicitInputAssignments(operationVertex)) {
-        if (assignment.first == operationVertex && hasValueDefined(operationVertex, assignment.second)) {
-            if(!definedValues.isEmpty()){
-                definedValues += "|";
-            }
-            definedValues += QString::number(assignment.second);
+        if(definedValues.size() != 0){
+            definedValues += "|";
         }
+        definedValues += QString::number(assignment.second);
     }
 
     return definedValues;

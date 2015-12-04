@@ -6,6 +6,7 @@ import WorkflowModel 1.0
 import ScenarioBuilderModel 1.0
 import ScenarioDesignerModel 1.0
 import "./workflow" as WorkFlow
+import "../../Global.js" as Global
 
 Item {
     id: modellerDataPane
@@ -27,6 +28,7 @@ Item {
                     canvas.workflow.load()
                     canvas.drawFromWorkflow()
                 }
+                manager.showWorkflowMetadata(canvas.workflow)
             }
         }
     }
@@ -142,49 +144,44 @@ Item {
         id : modellertools
     }
 
+    ModellerErrorView {
+        height: 0
+        id : errorview
+        width : parent.width
+        y: modellertools.height
+        z: ontTopZValue
+        color: Global.alternatecolor4
+        border.width: 1
+        border.color: Global.alternatecolor1
+
+        states: [
+            State {
+                name : "bigger"
+                PropertyChanges {
+                    target: errorview
+                    height : 80
+                }
+            },
+            State {
+                name: "smaller"
+                PropertyChanges {
+                    target: errorview
+                    height : 0
+                }
+            }
+        ]
+        transitions: [
+            Transition {
+                NumberAnimation { properties: "height"; duration : 750 ; easing.type: Easing.InOutCubic }
+            }
+        ]
+    }
+
     SplitView {
         anchors.top : modellertools.bottom
         width : parent.width
         orientation: Qt.Vertical
         height : parent.height - modellertools.height
-
-        ModellerErrorView {
-            height: 0
-            id : errorview
-            width : parent.width
-            state: "smaller"
-            y: 45
-            z: ontTopZValue
-            visible: false
-
-            states: [
-                State {
-                    name : "bigger"
-                    PropertyChanges {
-                        target: errorview
-                        height : 80
-                        visible: true
-                    }
-                    PropertyChanges {
-                        target: datapane
-                        height : parent.height - modellertools.height - 170 - 80
-                    }
-                },
-                State { name: "smaller"
-
-                    PropertyChanges {
-                        target: errorview
-                        height : 0
-                        visible: false
-                    }
-                }
-            ]
-            transitions: [
-                Transition {
-                    NumberAnimation { properties: "height"; duration : 750 ; easing.type: Easing.InOutCubic }
-                }
-            ]
-        }
 
         Item {
             id : datapane
@@ -237,7 +234,7 @@ Item {
                     name : "bigger"
                     PropertyChanges {
                         target: datapane
-                        height : parent.height - 10
+                        height : parent.height - 23
                     }
                 }
 

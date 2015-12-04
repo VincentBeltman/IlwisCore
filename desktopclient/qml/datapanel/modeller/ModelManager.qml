@@ -15,14 +15,14 @@ Rectangle {
     /**
       Calls the newForm method and passes through the fields that should be hidden
       */
-    function showOperationFormWithHiddenFields(operation, itemId, hiddenFields){
+    function showOperationFormWithHiddenFields(operation, itemId, constantValues, hiddenFields){
         modellerProperties.getTab(1)
-        forms.item.showOperationFormWithHiddenFields(operation, itemId, hiddenFields)
+        forms.item.showOperationFormWithHiddenFields(operation, itemId, constantValues, hiddenFields)
     }
 
-    function showOperationForm(operation, itemId){
+    function showOperationForm(operation, constantValues, itemId){
         modellerProperties.getTab(1)
-        forms.item.showOperationForm(operation, itemId)
+        forms.item.showOperationForm(operation, itemId, constantValues)
     }
 
     function showRunForm(workflowid){
@@ -34,18 +34,16 @@ Rectangle {
         return forms.item.retrieveRunFormValues()
     }
 
-    function showMetaData(item){
-        var tab = modellerProperties.getTab(2)
-        tab.item.setDesc(item.description)
-        tab.item.setName(item.syntax)
-        tab.item.setKeywords(item.keywords)
+    function showMetaData(item) {
+        metadata.item.showMetaData(item)
     }
 
-    function resetMetaData(workflow){
-        var tab = modellerProperties.getTab(2)
-        tab.item.setDesc(workflow.description)
-        tab.item.setName(workflow.name)
-        tab.item.setKeywords(workflow.keywords)
+    function resetMetaData() {
+        metadata.item.resetMetaData()
+    }
+
+    function showWorkflowMetadata(workflow) {
+        metadata.item.showWorkflowMetaData(workflow)
     }
 
     TabView{
@@ -57,6 +55,7 @@ Rectangle {
             if ( currentIndex === index){
                 if ( modelmanager.height <= 60){
                     datapane.state = "smaller"
+
                 }
                 else{
                     datapane.state = "bigger"
@@ -83,10 +82,10 @@ Rectangle {
         }
 
         Tab{
-            id : metadataComp
+            id : metadata
             active: true
             title: "Metadata"
-            MetaData{}
+            MetaDataTab{}
         }
 
         style: DataPanel.ButtonBarTabViewStyle{}

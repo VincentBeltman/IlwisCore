@@ -47,11 +47,13 @@ public:
 
     Q_INVOKABLE bool hasValueDefined(int operationIndex, int parameterIndex);
 
-    Q_INVOKABLE QString definedValueIndexes(int operationIndex);
+    Q_INVOKABLE QString implicitIndexes(int operationIndex);
 
     QQmlListProperty<NodePropObject> getNodes() ;
     QQmlListProperty<EdgePropObject> getEdges();
+
     Q_INVOKABLE int vertex2ItemID(int vertex);
+    Q_INVOKABLE QStringList getAsignedValuesByItemID(int operationIndex);
 
     Q_INVOKABLE void store(const QStringList &coordinates);
     Q_INVOKABLE void load();

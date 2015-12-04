@@ -15,19 +15,15 @@ Rectangle {
     /**
       Calls the newForm method and passes through the fields that should be hidden
       */
-    function showOperationFormWithHiddenFields(operation, itemId, hiddenFields){
+    function showOperationFormWithHiddenFields(operation, itemId, constantValues, hiddenFields){
         if (operation) {
-            datapane.state = "smaller"
-            var tab = formTabs.getTab(0)
-            tab.item.newOperationFormWithHiddenFields(operation, qsTr("Set constant values"), itemId,hiddenFields)
+            operationForm.item.showOperationFormWithHiddenFields(operation, qsTr("Set constant values"), itemId, constantValues, hiddenFields)
         }
     }
 
-    function showOperationForm(operation, itemId){
+    function showOperationForm(operation, itemId, constantValues){
         if (operation) {
-            datapane.state = "smaller"
-            var tab = formTabs.getTab(0)
-            tab.item.newForm(operation, qsTr("Set constant values "), itemId)
+            operationForm.item.showForm(operation, qsTr("Set constant values "), itemId, constantValues)
         }
     }
 
@@ -36,10 +32,7 @@ Rectangle {
       */
     function showRunForm(workflowid){
         if ( workflowid){
-            datapane.state = "smaller"
-            var tab = formTabs.getTab(1)
-            tab.active = true
-            tab.item.newFormWithOutput(workflowid, qsTr("Set run values for workflow"))
+            workflowForm.item.showFormWithOutput(workflowid, qsTr("Set run values for workflow"))
         }
     }
 
@@ -47,8 +40,7 @@ Rectangle {
       * Calls the execute form methods of the OperationForms class, which returns the data the user put into the form.
       */
     function retrieveRunFormValues(){
-        var tab = modellerProperties.getTab(3)
-        return tab.item.executeForm()
+        return workflowForm.item.executeForm()
     }
 
     TabView{

@@ -90,10 +90,10 @@ bool WorkflowModel::hasValueDefined(int operationIndex, int parameterIndex){
  * @param operationIndex the operation to check
  * @return a string of fields which have been defined, seperated by |
  */
-QString WorkflowModel::definedValueIndexes(int operationIndex){
+QString WorkflowModel::implicitIndexes(int operationIndex){
     try {
         const OVertex& operationVertex = _operationNodes[operationIndex];
-        return _workflow->definedValueIndexes(operationVertex);
+        return _workflow->implicitIndexes(operationVertex);
     } catch (std::out_of_range e) {
        return "";
     }
@@ -207,6 +207,16 @@ int WorkflowModel::vertex2ItemID(int vertex)
         }
     }
     return iUNDEF;
+}
+
+QStringList WorkflowModel::getAsignedValuesByItemID(int itemId)
+{
+    QStringList* results = new QStringList();
+    QList<InputAssignment> assignedInputs = _workflow->getConstantInputAssignments(_operationNodes[itemId]);
+    for (const InputAssignment &assignedInput : assignedInputs) {
+        results->push_back(_workflow->getAssignedInputData(assignedInput)->value);
+    }
+    return *results;
 }
 
 void WorkflowModel::store(const QStringList &coordinates)

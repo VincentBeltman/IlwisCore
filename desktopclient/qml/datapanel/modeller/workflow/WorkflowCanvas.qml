@@ -403,7 +403,8 @@ Modeller.ModellerWorkArea {
                 if (canvasActive) {
                     wfCanvas.canvasValid = false;
 
-                    var operationSelected = -1, highestZ = -1, smallestDistance = 100000, selectedFlow = false;
+                    var operationSelected = -1, highestZ = -1, smallestDistance = 100000,
+                            selectedFlow = false, implicitIndexes, constantValues;
 
                     for(var i=0; i < wfCanvas.operationsList.length; ++i){
 
@@ -455,17 +456,17 @@ Modeller.ModellerWorkArea {
                         item = wfCanvas.operationsList[operationSelected]
                         item.isSelected = true
 
-                        var definedValueIndexes = workflow.definedValueIndexes(operationSelected)
-
-                        if(definedValueIndexes){
-                            manager.showOperationFormWithHiddenFields(item, operationSelected, definedValueIndexes)
+                        implicitIndexes = workflow.implicitIndexes(operationSelected)
+                        constantValues = workflow.getAsignedValuesByItemID(item.itemdId)
+                        if(implicitIndexes){
+                            manager.showOperationFormWithHiddenFields(item, operationSelected, constantValues, implicitIndexes)
                         }else{
-                            manager.showOperationForm(item, operationSelected)
+                            manager.showOperationForm(item, operationSelected, constantValues)
                         }
 
                         manager.showMetaData(item.operation)
                     } else {
-                        manager.resetMetaData(workflow);
+                        manager.resetMetaData();
                     }
                 }
 
