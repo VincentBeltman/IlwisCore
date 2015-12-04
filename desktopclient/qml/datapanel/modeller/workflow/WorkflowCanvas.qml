@@ -301,7 +301,6 @@ Modeller.ModellerWorkArea {
                 }
                 //wfCanvas.requestPaint();
                 generateForm(operationNames)
-                console.log("" + operationNames)
             }
         }
 

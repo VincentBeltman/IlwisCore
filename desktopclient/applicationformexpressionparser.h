@@ -16,8 +16,8 @@ public:
     enum FieldType{ ftTEXTEDIT=1, ftTEXTAREA=2, ftCOMBOBOX=4, ftCHECKBOX=8, ftRADIOBUTTON=16};
     ApplicationFormExpressionParser();
 
-    Q_INVOKABLE QString index2Form(quint64 metaid, bool showoutputformat, bool showEmptyOptionInList  = false, QString invisibleFieldIndexes = "") const;
-    Q_INVOKABLE QString index2WorkflowForm(quint64 metaid, QMap<QString, QPair<int,int>> operationNames = QMap<QString, QPair<int,int>>()) const;
+    Q_INVOKABLE QString index2Form(quint64 metaid, bool showoutputformat = true, bool showEmptyOptionInList  = false, QString invisibleFieldIndexes = "", QVariantMap operationNames = QVariantMap()) const;
+//    Q_INVOKABLE QString index2WorkflowForm(quint64 metaid, QVariantMap operationNames = QVariantMap()) const;
 //    Q_INVOKABLE QString createWorkflowForm(quint64) const;
 private:
     struct FormParameter {
@@ -38,7 +38,7 @@ private:
     void setParameter(const Ilwis::Resource &resource, bool &inChoiceList, std::vector<FormParameter> &parameters, QString &part, QStringList &choices, int &parmCount, bool isOptional, int optionGroup, const QString &defvalue) const;
     QString setInputIcons(const QString& iconField, const QString& iconField2, const std::vector<FormParameter>& parameters, int i, int& imagewidth) const;
     std::vector<ApplicationFormExpressionParser::FormParameter> getOutputParameters(const Ilwis::Resource &resource) const;
-    QString makeFormPart(int width, const std::vector<FormParameter> &parameters, bool input, QString &results, bool showEmptyOptionInList = false, QString invisibleFieldIndexes = "", QMap<QString, int> operationNames = QMap<QString, int>()) const;
+    QString makeFormPart(int width, const std::vector<FormParameter> &parameters, bool input, QString &results, bool showEmptyOptionInList = false, QString invisibleFieldIndexes = "", QVariantMap operationNames = QVariantMap() ) const;
     QString iconName(IlwisTypes dataType) const;
     QString keys(IlwisTypes type) const;
 
