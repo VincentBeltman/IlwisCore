@@ -16,9 +16,19 @@ Rectangle {
     property var operationid
     property int itemId: -1
 
-    function newForm(metaid, title, newItemId){
-        fillAppFrame(metaid, title, false, true, [])
-        itemId = newItemId
+    /**
+    Create a form for the workflow
+    */
+    function newWorkflowForm(metaid, title){
+        var form= formbuilder.index2WorkflowForm(metaid)
+        operationid = metaid
+        appFrame.formQML = form
+        appFrame.formTitle = title
+        appFrame.opacity = 1
+    }
+
+    function newForm(metaid, title){
+        fillAppFrame(metaid, title, true, false, [])
     }
 
     /**

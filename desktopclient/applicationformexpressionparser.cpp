@@ -221,7 +221,7 @@ QString ApplicationFormExpressionParser::setInputIcons(const QString& iconField1
     return imagePart;
 }
 
-QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vector<FormParameter>& parameters, bool input, QString& results, bool showEmptyOptionInList, QString invisibleFieldIndexes) const{
+QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vector<FormParameter>& parameters, bool input, QString& results, bool showEmptyOptionInList, QString invisibleFieldIndexes, QMap<QString, int> operationNames) const{
     QStringList invisibleFieldList;
     if(!invisibleFieldIndexes.isEmpty()){
         invisibleFieldList = invisibleFieldIndexes.split("|");
@@ -247,7 +247,24 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     QString formRows;
     int oldOptionGroup = -1;
     int xshift = 0;
+
+    QString columnStart;
+    QString columnEnd;
+
+//  if(!operationNames.empty()){
+    columnStart = QString("Column{");
+    columnEnd = QString("");
+//  }
+
     for(int i = 0; i < parameters.size(); ++i){
+        QString operationName;
+//        if(!operationNames.empty()){
+            //Optional
+//            operationName = QString("Rectangle{height:20;width:parent.width;color:\"lightgrey\";Text {text : ");
+//            operationName += QString("\"bladfdsfdsfdsfdsfdsklfjdsfkldsjfdlkfjdsflkdsjfdsklfjdslkfjbla\";");
+//            operationName += QString(" font.pointSize: 10;x:5}}");
+//        }
+
         QString visibile = "true";
         for(int j=0;j<invisibleFieldList.size();++j){
             if(i==invisibleFieldList[j].toInt()){
@@ -393,13 +410,20 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
 
 }
 
-QString ApplicationFormExpressionParser::createWorkflowForm(quint64 metaid) const {
-    QString columnStart = "import QtQuick 2.2; import QtQuick.Controls 1.1;import QtQuick.Layouts 1.1;import Column { %1 x:5; width : parent.width - 5; height : parent.height;spacing :10;";
+/**
+ * Creates a form for a workflow
+ * @param metaid the id of the workflow
+ * @return a string containing the qml form
+ */
+QString ApplicationFormExpressionParser::index2WorkflowForm(quint64 metaid, std::map<QString, int> operationNames) const {
+    Resource resource = mastercatalog()->id2Resource(metaid);
+    std::vector<FormParameter> parameters = getParameters(resource);
+
+    std::vector<FormParameter> outparameters = getOutputParameters(resource);
+    QString results;
+    QString columnStart = "import QtQuick 2.2; import QtQuick.Controls 1.1;import QtQuick.Layouts 1.1;import MasterCatalogModel 1.0;Column { %1 x:5; width : parent.width - 5; height : parent.height;spacing :10;";
     QString exclusiveGroup = "ExclusiveGroup { id : sourceFilterGroup; onCurrentChanged: {}}";
     columnStart += exclusiveGroup;
-
-    std::vector<FormParameter> parameters = createWorkflowMetadata(metaid);
-
     int width = 0;
     for(int i = 0; i < parameters.size(); ++i){
         width = std::max(parameters[i]._label.size(), width);
@@ -407,19 +431,28 @@ QString ApplicationFormExpressionParser::createWorkflowForm(quint64 metaid) cons
     width *= 10;
     width = std::min(100, width);
 
-    QString results;
-    QString inputpart = makeFormPart(width, parameters, true, results, false);
-    results = "property string formresult : " + results + ";property string outputfield_0;";
+    QString inputpart = makeFormPart(width, parameters, true, results);
+    QString outputPart = makeFormPart(width, outparameters, false, results);
+    QString seperator;
+
+    results = "property var outputFormats;property string formresult : " + results;
+    for(int i = 0; i < outparameters.size(); ++i){
+        results += QString(";property string outputfield_%1").arg(i);
+        if ( hasType(outparameters[i]._dataType, itCOVERAGE | itTABLE)){
+            results += QString(";property alias format_%1 :  pout_format_%1").arg(i);
+        }
+    }
+    results += ";";
+    seperator = "Rectangle{width : parent.width - 12; x: 6; height:2;color : \"#B3B3B3\"}";
+
     columnStart = QString(columnStart).arg(results);
+    QString component = columnStart + inputpart + seperator + outputPart + "}";
 
-    //QString seperator = "Rectangle{width : parent.width - 12; x: 6; height:2;color : \"#B3B3B3\"}";
+    // for debugging, check if the qml is ok; can be retrieved from teh log file
+  // kernel()->issues()->log(component);
 
-    QString component = columnStart + inputpart + "}";
-
-    MESSAGE1("new dynamic qml component: %1", component);
     return component;
 }
-
 
 std::vector<ApplicationFormExpressionParser::FormParameter> ApplicationFormExpressionParser::createWorkflowMetadata(quint64 metaid) const
 {

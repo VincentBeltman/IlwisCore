@@ -358,6 +358,7 @@ Modeller.ModellerWorkArea {
                     workflow.addOperation(drag.source.ilwisobjectid)
 
                     generateForm()
+                    console.log("parameter count: " + wfCanvas.operationsList[0].operation.inParameterCount)
                 }
             }
         }

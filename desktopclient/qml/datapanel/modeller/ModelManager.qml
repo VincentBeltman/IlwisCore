@@ -74,7 +74,7 @@ Rectangle {
             datapane.state = "smaller"
             var tab= modellerProperties.getTab(3)
             tab.active=true
-            tab.item.newFormWithOutput(workflowid, qsTr("Set run values"))
+            tab.item.newWorkflowForm(workflowid, qsTr("Set run values"))
         }
     }
 

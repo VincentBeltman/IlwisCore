@@ -15,6 +15,8 @@ Rectangle {
     property bool isSelected : false
     property var flowConnections: []
 
+    property alias name:operationName
+
     function iconsource(name) {
         if ( name.indexOf("/") !== -1)
             return name
