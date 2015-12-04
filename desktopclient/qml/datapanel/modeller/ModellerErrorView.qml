@@ -25,6 +25,13 @@ Rectangle {
                     errorview.state = "bigger"
                 }
             }
+            else
+            {
+                if(errorview.state == "bigger")
+                {
+                    errorview.state = "smaller"
+                }
+            }
         }
     }
 

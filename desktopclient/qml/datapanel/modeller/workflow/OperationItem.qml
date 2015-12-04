@@ -9,6 +9,7 @@ Rectangle {
     id : operationItem
     width: 200
     height: 120
+    scale: 1
     property OperationModel operation
     property int itemid
     property var selectedAttach

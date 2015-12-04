@@ -5,6 +5,7 @@ import OperationModel 1.0
 import WorkflowModel 1.0
 import QtQuick.Dialogs 1.1
 import ".." as Modeller
+import "../../../matrix.js" as Matrix
 
 
 Modeller.ModellerWorkArea {
@@ -221,6 +222,7 @@ Modeller.ModellerWorkArea {
     }
 
     Canvas {
+
         Keys.onDeletePressed: {
             deleteSelectedOperation()
         }
@@ -230,6 +232,7 @@ Modeller.ModellerWorkArea {
 
         id : wfCanvas
         anchors.fill: parent
+
 
         property var ctx: getContext('2d')
         property bool canvasValid: true
@@ -243,12 +246,24 @@ Modeller.ModellerWorkArea {
         property var currentItem;
         property var operationsList: []
 
+
+
+        property double scaleFactor: 1.1;
+        property int lastX: canvas.width/2;
+        property int lastY: canvas.height/2;
+        property var dragStart;
+        property bool dragged;
+        //property var ctx;
+        property var matrix: new Matrix.Matrix();
+        property double sxx: 0;
+        property double syy: 0;
+
         Timer {
             interval: 30;
             running: true;
             repeat: true
             onTriggered: {
-                wfCanvas.draw()
+                wfCanvas.draw(true)
             }
         }
 
@@ -266,8 +281,11 @@ Modeller.ModellerWorkArea {
         }
 
         function draw(force){
+            var p1 = transformedPoint(0,0);
+            var p2 = transformedPoint(width, height);
+            ctx.clearRect(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);
+
             if (canvasValid == false || (force !== null && force)) {
-                clear();
                 canvasValid = true
                 if ( workingLineBegin.x !== -1 && workingLineEnd.x !== -1){
                     ctx.beginPath();
@@ -280,9 +298,17 @@ Modeller.ModellerWorkArea {
                 for( var i=0; i < operationsList.length; i++){
                     operationsList[i].drawFlows(ctx)
                 }
-                //wfCanvas.requestPaint();
                 generateForm()
             }
+
+            ctx.beginPath();
+            ctx.moveTo(0,0);
+            ctx.lineTo(200,100);
+            ctx.stroke();
+
+            ctx.rect(0,0,200,200);
+            ctx.stroke();
+            wfCanvas.requestPaint();
         }
 
         function createItem(x,y, resource) {
@@ -369,9 +395,21 @@ Modeller.ModellerWorkArea {
             id: area
             anchors.fill: parent
             acceptedButtons: Qt.LeftButton | Qt.RightButton
-            hoverEnabled: wfCanvas.workingLineBegin.x !== -1
+            hoverEnabled: true
+
+            onWheel: {
+                handleScroll(wheel);
+                console.log("handle scroll");
+                //wheel scroll here
+            }
 
             onPressed: {
+
+                wfCanvas.lastX = mouseX;
+                wfCanvas.lastY = mouseY;
+                wfCanvas.dragStart = transformedPoint(wfCanvas.lastX,wfCanvas.lastY);
+                wfCanvas.dragged = false;
+
                 wfCanvas.canvasValid = false;
 
                 var selected = false, pressed = -1;
@@ -434,8 +472,6 @@ Modeller.ModellerWorkArea {
                 } else {
                     manager.resetMetaData(workflow);
                 }
-
-
             }
 
             onDoubleClicked: {
@@ -462,6 +498,15 @@ Modeller.ModellerWorkArea {
             }
 
             onPositionChanged: {
+                wfCanvas.lastX = mouseX;
+                wfCanvas.lastY = mouseY;
+                wfCanvas.dragged = true;
+                if (wfCanvas.dragStart){
+                    var pt = transformedPoint(wfCanvas.lastX,wfCanvas.lastY);
+                    translate(pt.x-wfCanvas.dragStart.x,pt.y-wfCanvas.dragStart.y);
+                }
+
+
                 if ( attachementForm.state == "invisible"){
                     if ( wfCanvas.workingLineBegin.x !== -1){
                         wfCanvas.workingLineEnd = Qt.point( mouseX, mouseY)
@@ -481,10 +526,55 @@ Modeller.ModellerWorkArea {
             }
 
             onReleased: {
+                wfCanvas.dragStart = null;
                 wfCanvas.stopWorkingLine()
             }
         }
 
 
+    }
+
+    function zoom(clicks){
+        var pt = transformedPoint(wfCanvas.lastX,wfCanvas.lastY);
+        translate(pt.x,pt.y);
+        var factor = Math.pow(wfCanvas.scaleFactor,clicks);
+        scale(factor,factor);
+        translate(-pt.x,-pt.y);
+        console.log("zooming");
+        //wfCanvas.draw(true);
+    }
+
+    function handleScroll(wheel){
+
+        var delta = wheel.angleDelta.y/40;
+        console.log(delta);
+        if (delta) zoom(delta);
+    }
+
+    function scale(sx, sy)
+    {
+        wfCanvas.matrix = wfCanvas.matrix.scaleX(sx);
+        wfCanvas.matrix = wfCanvas.matrix.scaleY(sy);
+
+        wfCanvas.sxx = sx;
+        wfCanvas.syy = sy;
+
+        wfCanvas.ctx.scale(sx, sy);
+        console.log("Scaling");
+    }
+
+    function translate(dx, dy)
+    {
+        var translate = wfCanvas.ctx.translate;
+        wfCanvas.matrix = wfCanvas.matrix.translate(dx, dy);
+        wfCanvas.ctx.translate(dx,dy);
+    }
+
+    function transformedPoint(x, y)
+    {
+        return {
+            x: wfCanvas.matrix.inverse().a * x + wfCanvas.matrix.inverse().c * y + wfCanvas.matrix.inverse().e,
+            y: wfCanvas.matrix.inverse().b * x + wfCanvas.matrix.inverse().d * y + wfCanvas.matrix.inverse().f
+        }
     }
 }
