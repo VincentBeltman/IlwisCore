@@ -212,9 +212,9 @@ int WorkflowModel::vertex2ItemID(int vertex)
 QStringList WorkflowModel::getAsignedValuesByItemID(int itemId)
 {
     QStringList* results = new QStringList();
-    QList<InputAssignment> assignedInputs = _workflow->getConstantInputAssignments(_operationNodes[itemId]);
-    for (const InputAssignment &assignedInput : assignedInputs) {
-        results->push_back(_workflow->getAssignedInputData(assignedInput)->value);
+    QList<InputAssignment> inputs = _workflow->getInputAssignments(_operationNodes[itemId]);
+    for (const InputAssignment &input : inputs) {
+        results->push_back(QString::number(input.second) + "|" + _workflow->getAssignedInputData(input)->value);
     }
     return *results;
 }

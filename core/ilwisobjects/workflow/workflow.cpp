@@ -277,6 +277,17 @@ std::pair<OutEdgeIterator,OutEdgeIterator> Workflow::getOutEdges(const OVertex &
     return boost::out_edges(v, _wfGraph);
 }
 
+QList<InputAssignment> Workflow::getInputAssignments(const OVertex &v) const
+{
+    QList<InputAssignment> assignedPins;
+    for (InputAssignment assignment : _inputAssignments.keys()) {
+        if (assignment.first == v) {
+            assignedPins.push_back(assignment);
+        }
+    }
+    return assignedPins;
+}
+
 void Workflow::updateNodeProperties(OVertex v, const NodeProperties &properties)
 {
     boost::put(nodeIndex(), v, properties);
@@ -289,6 +300,7 @@ void Workflow::updateEdgeProperties(OEdge e, const EdgeProperties &properties)
 
 bool Workflow::hasValueDefined(const OVertex &operationVertex, int parameterIndex)
 {
+
     boost::graph_traits<WorkflowGraph>::vertex_iterator vi, vi_end;
     // Loop through all vertices
     for (boost::tie(vi, vi_end) = boost::vertices(_wfGraph); vi != vi_end; ++vi) {

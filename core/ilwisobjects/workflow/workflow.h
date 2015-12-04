@@ -128,10 +128,10 @@ public:
 
     std::pair<InEdgeIterator, InEdgeIterator> getInEdges(const OVertex &v);
     std::pair<OutEdgeIterator, OutEdgeIterator> getOutEdges(const OVertex &v);
+    QList<InputAssignment> getInputAssignments(const OVertex &v) const;
 
     //------- Queries
     bool hasValueDefined(const OVertex& operationVertex, int parameterIndex);
-    QList<InputAssignment> getConstantInputAssignments(const OVertex &v) const;
     QString implicitIndexes(const OVertex &operationVertex);
 
     // ------ operation metadata functions
@@ -169,6 +169,7 @@ private:
     QStringList getInputTerms(const OVertex &v);
     QStringList getOutputTerms(const OVertex &v);
     QList<InputAssignment> getOpenInputAssignments(const OVertex &v) const;
+    QList<InputAssignment> getConstantInputAssignments(const OVertex &v) const;
     QList<InputAssignment> getImplicitInputAssignments(const OVertex &v);
     std::vector<quint16> getAssignedPouts(const OVertex &v);
 };

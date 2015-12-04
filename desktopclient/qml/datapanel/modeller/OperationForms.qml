@@ -41,13 +41,6 @@ Rectangle {
         itemId = newItemId
     }
 
-    /**
-      Shows the operation's form. A boolean (showOutput) has to be passed to this method which decides whether an ouput form is shown.
-      */
-    function showFormWithOutput(metaid, title){
-        fillAppFrame(metaid, title, true, false, [], [])//TODO
-    }
-
     function fillAppFrame(metaid, title, output, showEmpty, constantValues, hiddenFields) {
         var form= formbuilder.index2Form(metaid, output, showEmpty ,hiddenFields)
         operationid = metaid
