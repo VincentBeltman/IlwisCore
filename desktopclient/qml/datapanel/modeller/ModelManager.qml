@@ -11,79 +11,39 @@ Rectangle {
     id : modelmanager
     width: parent.width
     height: 62
-    Component {
-        id : modelLayerOptions
-        LayerManagement{}
-    }
-
-    Component {
-        id : operationForms
-        OperationForms{}
-    }
-
-    Component {
-        id : runForms
-        OperationForms{}
-    }
-
-    Component{
-        id : metadataComp
-        MetaData{
-        }
-    }
 
     /**
       Calls the newForm method and passes through the fields that should be hidden
       */
-    function showOperationFormWithHiddenFields(operationid, itemId, hiddenFields){
-        if ( operationid){
-            datapane.state = "smaller"
-            var tab= modellerProperties.getTab(1)
-            tab.active=true
-            tab.item.newOperationFormWithHiddenFields(operationid, qsTr("Set default values"), itemId,hiddenFields)
-        }
+    function showOperationFormWithHiddenFields(operation, itemId, constantValues, hiddenFields){
+        modellerProperties.getTab(1)
+        forms.item.showOperationFormWithHiddenFields(operation, itemId, constantValues, hiddenFields)
     }
 
-    function showOperationForm(operationid, itemId){
-        if ( operationid){
-            datapane.state = "smaller"
-            var tab= modellerProperties.getTab(1)
-            tab.active=true
-            tab.item.newForm(operationid, qsTr("Set default values"), itemId)
-        }
+    function showOperationForm(operation, constantValues, itemId){
+        modellerProperties.getTab(1)
+        forms.item.showOperationForm(operation, itemId, constantValues)
     }
 
-    function showMetaData(item){
-        var tab = modellerProperties.getTab(2)
-        tab.item.setDesc(item.description)
-        tab.item.setName(item.syntax)
-        tab.item.setKeywords(item.keywords)
-    }
-    function resetMetaData(workflow){
-        var tab = modellerProperties.getTab(2)
-        tab.item.setDesc(workflow.description)
-        tab.item.setName(workflow.name)
-        tab.item.setKeywords(workflow.keywords)
-    }
-
-    /**
-      * Shows the run form for the whole workflow
-      */
     function showRunForm(workflowid){
-        if ( workflowid){
-            datapane.state = "smaller"
-            var tab= modellerProperties.getTab(3)
-            tab.active=true
-            tab.item.newWorkflowForm(workflowid, qsTr("Set run values"))
-        }
+        modellerProperties.getTab(1)
+        forms.item.showRunForm(workflowid)
     }
 
-    /**
-      Calls the execute form methods of the OperationForms class, which returns the data the user put into the form.
-      */
     function retrieveRunFormValues(){
-        var tab= modellerProperties.getTab(3)
-        return tab.item.executeForm()
+        return forms.item.retrieveRunFormValues()
+    }
+
+    function showMetaData(item) {
+        metadata.item.showMetaData(item)
+    }
+
+    function resetMetaData() {
+        metadata.item.resetMetaData()
+    }
+
+    function showWorkflowMetadata(workflow) {
+        metadata.item.showWorkflowMetaData(workflow)
     }
 
     TabView{
@@ -95,9 +55,9 @@ Rectangle {
             if ( currentIndex === index){
                 if ( modelmanager.height <= 60){
                     datapane.state = "smaller"
+
                 }
                 else{
-                    datapane.state = ""
                     datapane.state = "bigger"
                 }
             }
@@ -106,14 +66,26 @@ Rectangle {
         }
 
 
-        Component.onCompleted: {
-            var tab =addTab(qsTr("Model layers"), modelLayerOptions)
-            tab.active = true
+        Tab {
+            id : modelLayerOptions
+            title: "Model layers"
+            active: true
+            LayerManagement{}
+        }
 
-            addTab(qsTr("Operation Form"), operationForms)
-            tab = addTab(qsTr("Metadata"), metadataComp)
-            addTab(qsTr("Workflow Form"), runForms)
-            tab.active = true // we need to be active as layers maybe added to it
+        Tab {
+            id : forms
+            active: true
+            title: "Input form"
+
+            FormsTab{}
+        }
+
+        Tab{
+            id : metadata
+            active: true
+            title: "Metadata"
+            MetaDataTab{}
         }
 
         style: DataPanel.ButtonBarTabViewStyle{}

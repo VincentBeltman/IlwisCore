@@ -123,6 +123,12 @@ OVertex Workflow::addOperation(const NodeProperties &properties)
     OVertex v = boost::add_vertex(properties, _wfGraph);
 
     IOperationMetaData meta = getOperationMetadata(v);
+//    Resource res = mastercatalog()->id2Resource(meta->id());
+
+//    if (mastercatalog()->id2Resource(meta->id()).ilwisType() & itWORKFLOW) {
+//        static_cast<IWorkflow>(meta)->createMetadata();
+//    }
+//    quint64 id = nodeProperties(v)._operationid;
     std::vector<SPOperationParameter> inputs = meta->getInputParameters();
     for (int i = 0 ; i < inputs.size() ; i++) {
         if ( !inputs.at(i)->isOptional()) {
@@ -135,7 +141,6 @@ OVertex Workflow::addOperation(const NodeProperties &properties)
 
 void Workflow::removeOperation(OVertex vertex)
 {
-    boost::clear_vertex(vertex, _wfGraph);
     boost::remove_vertex(vertex, _wfGraph);
     removeAllInputAssignments(vertex);
 }
@@ -180,7 +185,7 @@ QList<InputAssignment> Workflow::getConstantInputAssignments(const OVertex &v) c
     QList<InputAssignment> assignedPins;
     for (InputAssignment assignment : _inputAssignments.keys()) {
         if (assignment.first == v) {
-            if (_inputAssignments.value(assignment)->value.isValid()) {
+            if (_inputAssignments.value(assignment)->value.size() > 0) {
                 assignedPins.push_back(assignment);
             }
         }
@@ -295,7 +300,7 @@ bool Workflow::hasValueDefined(const OVertex &operationVertex, int parameterInde
                    return true;
                 }
             }
-            return _inputAssignments.value({operationVertex, parameterIndex})->value.isValid();
+            return _inputAssignments.value({operationVertex, parameterIndex})->value.size() > 0;
         }
     }
     return false;
@@ -306,16 +311,14 @@ bool Workflow::hasValueDefined(const OVertex &operationVertex, int parameterInde
  * @param operationVertex the operations
  * @return A string seperated by |
  */
-QString Workflow::definedValueIndexes(const OVertex &operationVertex){
+QString Workflow::implicitIndexes(const OVertex &operationVertex){
     QString definedValues;
 
     for (const InputAssignment& assignment : getImplicitInputAssignments(operationVertex)) {
-        if (assignment.first == operationVertex && hasValueDefined(operationVertex, assignment.second)) {
-            if(!definedValues.isEmpty()){
-                definedValues += "|";
-            }
-            definedValues += QString::number(assignment.second);
+        if(definedValues.size() != 0){
+            definedValues += "|";
         }
+        definedValues += QString::number(assignment.second);
     }
 
     return definedValues;

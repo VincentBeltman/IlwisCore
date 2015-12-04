@@ -110,7 +110,9 @@ OTHER_FILES += \
     desktopclient/qml/workbench/modeller/ModellerList.qml \
     desktopclient/qml/workbench/modeller/ModellerSelection.qml \
     desktopclient/qml/datapanel/workflow/AbstractBasicWorkflowDrawObjectqml \
-    desktopclient/qml/datapanel/workflow/OperationWorkflowDrawObject.qml
+    desktopclient/qml/datapanel/workflow/OperationWorkflowDrawObject.qml \
+    desktopclient/qml/datapanel/modeller/FormsTab.qml \
+    desktopclient/qml/datapanel/modeller/MetaDataTab.qml
 
 
 # Installation path

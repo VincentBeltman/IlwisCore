@@ -321,7 +321,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
             QString buttons;
             QString state = "true";
             if ( showEmptyOptionInList ) {
-                buttons += QString(rowChoiceOption).arg(QString::number(i) + "empty_value").arg("- (empty)").arg("true").arg(i).arg("");
+                buttons += QString(rowChoiceOption).arg(QString::number(i) + "empty_value").arg("- (empty)").arg("true").arg(i).arg("\"\"");
             }
             for(auto choiceString : parameters[i]._choiceList){
                 QString choice = choiceString, state="false";
@@ -389,7 +389,8 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
     QString seperator;
     if ( showoutputformat){
         outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList);
-        results = "property var outputFormats;property string formresult : " + results;
+        if (results.size() > 0) results = ": " + results;
+        results = "property var outputFormats;property string formresult" + results;
         for(int i = 0; i < outparameters.size(); ++i){
             results += QString(";property string outputfield_%1").arg(i);
             if ( hasType(outparameters[i]._dataType, itCOVERAGE | itTABLE)){
@@ -404,7 +405,7 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
     QString component = columnStart + inputpart + seperator + outputPart + "}";
 
     // for debugging, check if the qml is ok; can be retrieved from teh log file
-  // kernel()->issues()->log(component);
+    //kernel()->issues()->log(component);
 
     return component;
 

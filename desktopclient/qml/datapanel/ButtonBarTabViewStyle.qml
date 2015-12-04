@@ -5,8 +5,8 @@ import QtQuick.Controls.Styles 1.0
 import "../Global.js" as Global
 
 TabViewStyle {
-    property string selectColor : "#B0C4DE"
-    property string nonselectColor : "white"
+    property string selectColor : Global.selectedTabColor
+    property string nonselectColor : Global.notSelectedTabColor
     property int tabHeight : 23
 
 

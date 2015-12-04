@@ -15,7 +15,7 @@ class ILWISCOREUISHARED_EXPORT WorkflowErrorModel : public QObject
     Q_OBJECT
 
 public:
-    Q_PROPERTY(ErrorModel* errorModel READ errorModel)
+    Q_PROPERTY(ErrorModel* errorModel READ errorModel CONSTANT)
 
 
     WorkflowErrorModel();

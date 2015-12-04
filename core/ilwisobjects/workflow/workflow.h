@@ -13,12 +13,14 @@
 #include "ilwistypes.h"
 #include "operationmetadata.h"
 
+#include "iooptions.h"
+
 namespace Ilwis {
 
 struct AssignedInputData {
     AssignedInputData() {}
     QString inputName;
-    QVariant value;
+    QString value;
 };
 
 struct AssignedOutputData {
@@ -41,7 +43,8 @@ struct NodeProperties {
         _resourceProvider = provider;
         _x = x;
         _y = y;
-        _operationid = mastercatalog()->url2id(url, itSINGLEOPERATION);
+        _operationid = mastercatalog()->url2id(url, itOPERATIONMETADATA);
+        qDebug() << _operationid;
     }
     quint64 _operationid = i64UNDEF;
     QUrl _resourceUrl;
@@ -54,8 +57,8 @@ struct EdgeProperties {
     EdgeProperties(int outParm, int inParm, int inRect, int outRect) :
         _outputParameterIndex(outParm),
         _inputParameterIndex(inParm),
-        _outputRectangleIndex(inRect),
-        _inputRectangleIndex(outRect){}
+        _outputRectangleIndex(outRect),
+        _inputRectangleIndex(inRect){}
     QString outputName;
     bool temporary = true;
     int _outputParameterIndex;
@@ -128,8 +131,8 @@ public:
 
     //------- Queries
     bool hasValueDefined(const OVertex& operationVertex, int parameterIndex);
-
-    QString definedValueIndexes(const OVertex &operationVertex);
+    QList<InputAssignment> getConstantInputAssignments(const OVertex &v) const;
+    QString implicitIndexes(const OVertex &operationVertex);
 
     // ------ operation metadata functions
     IOperationMetaData getOperationMetadata(const OVertex &v);
@@ -165,7 +168,6 @@ private:
 
     QStringList getInputTerms(const OVertex &v);
     QStringList getOutputTerms(const OVertex &v);
-    QList<InputAssignment> getConstantInputAssignments(const OVertex &v) const;
     QList<InputAssignment> getOpenInputAssignments(const OVertex &v) const;
     QList<InputAssignment> getImplicitInputAssignments(const OVertex &v);
     std::vector<quint16> getAssignedPouts(const OVertex &v);

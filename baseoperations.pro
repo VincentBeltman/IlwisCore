@@ -102,7 +102,10 @@ SOURCES += \
     baseoperations/util/testoperation.cpp
 
 OTHER_FILES += \
-    baseoperations/baseoperations.json
+    baseoperations/baseoperations.json \
+    desktopclient/asd.qml \
+    desktopclient/asdadfdafs.qml \
+    desktopclient/sad.qml
 
 LIBS += -L$$PWD/../libraries/$$PLATFORM$$CONF/ -lilwiscore
 
