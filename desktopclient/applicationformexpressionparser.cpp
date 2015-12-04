@@ -248,23 +248,17 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     int oldOptionGroup = -1;
     int xshift = 0;
 
-    QString columnStart;
-    QString columnEnd;
+    QString formColumnStart;
+    QString formColumnEnd;
 
-//  if(!operationNames.empty()){
-    columnStart = QString("Column{");
-    columnEnd = QString("");
-//  }
+    if(!operationNames.empty()){
+        formColumnStart = QString("Column{anchors.fill:parent Rectangle{anchors.fill:parent color:\"red\" } ");
+        formColumnEnd = QString("}");
+    }
+
+    formRows += formColumnStart;
 
     for(int i = 0; i < parameters.size(); ++i){
-        QString operationName;
-//        if(!operationNames.empty()){
-            //Optional
-//            operationName = QString("Rectangle{height:20;width:parent.width;color:\"lightgrey\";Text {text : ");
-//            operationName += QString("\"bladfdsfdsfdsfdsfdsklfjdsfkldsjfdlkfjdsflkdsjfdsklfjdslkfjbla\";");
-//            operationName += QString(" font.pointSize: 10;x:5}}");
-//        }
-
         QString visibile = "true";
         for(int j=0;j<invisibleFieldList.size();++j){
             if(i==invisibleFieldList[j].toInt()){
@@ -365,6 +359,8 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     }else {
         formRows.replace("optionalOutputMarker","");
     }
+
+    formRows += formColumnEnd;
     return formRows;
 }
 
@@ -384,11 +380,22 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
     width *= 10;
     width = std::min(100, width);
 
-    QString inputpart = makeFormPart(width, parameters, true, results, showEmptyOptionInList, invisibleFieldIndexes);
+    QString inputpart;
+    if(operationNames.isEmpty()){
+        inputpart = makeFormPart(width, parameters, true, results, showEmptyOptionInList, invisibleFieldIndexes);
+    }else{
+        inputpart = makeFormPart(width, parameters, true, results, showEmptyOptionInList, invisibleFieldIndexes, operationNames);
+    }
+
     QString outputPart;
     QString seperator;
     if ( showoutputformat){
-        outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList);
+        if(operationNames.isEmpty()){
+            outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList);
+        }else{
+            outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList,"", operationNames);
+        }
+
         if (results.size() > 0) results = ": " + results;
         results = "property var outputFormats;property string formresult" + results;
         for(int i = 0; i < outparameters.size(); ++i){
