@@ -248,16 +248,6 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     int oldOptionGroup = -1;
     int xshift = 0;
 
-    QString formColumnStart;
-    QString formColumnEnd;
-
-    if(!operationNames.empty()){
-        formColumnStart = QString("Column{anchors.fill:parent Rectangle{anchors.fill:parent color:\"red\" } ");
-        formColumnEnd = QString("}");
-    }
-
-//    formRows += formColumnStart;
-
     for(int i = 0; i < parameters.size(); ++i){
         QString visibile = "true";
         for(int j=0;j<invisibleFieldList.size();++j){
@@ -360,7 +350,6 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
         formRows.replace("optionalOutputMarker","");
     }
 
-//    formRows += formColumnEnd;
     return formRows;
 }
 
@@ -387,6 +376,24 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
         inputpart = makeFormPart(width, parameters, true, results, showEmptyOptionInList, invisibleFieldIndexes, operationNames);
     }
 
+    //For the operation form numbering
+    QString formColumnStart;
+    QString formColumnEnd;
+    QString numberColumn;
+
+    if(!operationNames.empty()){
+        formColumnStart = QString("Column{ anchors{right: parent.right} width:parent.width-15; spacing:3;  ");
+        formColumnEnd = QString("}");
+
+        numberColumn = QString("Column{Rectangle{color:\"white\";} height:parent.height; width:15; spacing:0; ");
+
+        for(int i=0;i<operationNames.size();++i){
+            numberColumn += QString("Rectangle{width:parent.width; Text{text:\"%1.\";} height:100;}").arg(i);
+        }
+
+        numberColumn += QString("}");
+    }
+
     QString outputPart;
     QString seperator;
     if ( showoutputformat){
@@ -409,7 +416,7 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
     }else
         results = "property string formresult : " + results + ";";
     columnStart = QString(columnStart).arg(results);
-    QString component = columnStart + inputpart + seperator + outputPart + "}";
+    QString component = columnStart + numberColumn + formColumnStart + inputpart + seperator + outputPart + formColumnEnd + "}";
 
     // for debugging, check if the qml is ok; can be retrieved from teh log file
     //kernel()->issues()->log(component);
