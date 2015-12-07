@@ -214,7 +214,7 @@ QStringList WorkflowModel::getAsignedValuesByItemID(int itemId)
     QStringList* results = new QStringList();
     QList<InputAssignment> inputs = _workflow->getInputAssignments(_operationNodes[itemId]);
     for (const InputAssignment &input : inputs) {
-        results->push_back(QString::number(input.second) + "|" + _workflow->getAssignedInputData(input)->value);
+        results->push_back(_workflow->getAssignedInputData(input)->value);
     }
     return *results;
 }
