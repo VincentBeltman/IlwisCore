@@ -8,7 +8,8 @@
 #include "commandhandler.h"
 #include "featurecoverage.h"
 #include "workflowerrormodel.h"
-#include "../../IlwisCore/core/ilwiscontext.h"
+#include "ilwiscontext.h"
+//#include "../../IlwisCore/core/ilwiscontext.h"
 
 using namespace Ilwis;
 using namespace boost;
@@ -48,13 +49,13 @@ void WorkflowModel::addOperation(const QString &id)
 {
     bool ok;
     quint64 opid = id.toULongLong(&ok);
-    if (!ok){
-        kernel()->issues()->log(QString(TR("Invalid operation id used in workflow %1")).arg(name()));
-        return ;
+    Resource res=mastercatalog()->id2Resource(opid);
+    if ( ok && res.isValid()){
+        auto vertex = _workflow->addOperation({res});
+        _operationNodes.push_back(vertex);
+    }else {
+       kernel()->issues()->log(QString(TR("Invalid operation id used in workflow %1")).arg(name()));
     }
-    auto vertex = _workflow->addOperation({opid, _workflow->source()});
-    _operationNodes.push_back(vertex);
-
 }
 
 void WorkflowModel::addFlow(int operationIndex1, int operationIndex2, const QVariantMap& flowpoints, int outRectIndex, int inRectIndex)
@@ -65,6 +66,7 @@ void WorkflowModel::addFlow(int operationIndex1, int operationIndex2, const QVar
             const OVertex& toOperationVertex = _operationNodes[operationIndex2];
             int outParamIndex = flowpoints["fromParameterIndex"].toInt();
             int inParamIndex = flowpoints["toParameterIndex"].toInt();
+
             EdgeProperties flowPoperties(
                 outParamIndex, inParamIndex,
                 outRectIndex, inRectIndex
@@ -90,6 +92,7 @@ bool WorkflowModel::hasValueDefined(int operationIndex, int parameterIndex){
  * @param operationIndex the operation to check
  * @return a string of fields which have been defined, seperated by |
  */
+
 QString WorkflowModel::implicitIndexes(int operationIndex){
     try {
         const OVertex& operationVertex = _operationNodes[operationIndex];
@@ -198,7 +201,6 @@ QQmlListProperty<EdgePropObject> WorkflowModel::getEdges()
  * Runs the createMetadata function on the workflow.
  * The workflow will be put in the master catalog and will be usable.
  */
-
 int WorkflowModel::vertex2ItemID(int vertex)
 {
     for (int i = 0; i < _operationNodes.size(); ++i) {
@@ -209,6 +211,42 @@ int WorkflowModel::vertex2ItemID(int vertex)
     return iUNDEF;
 }
 
+void WorkflowModel::store(const QStringList &coordinates)
+{
+    try {
+        for (int i = 0; i< coordinates.size(); i++) {
+            QStringList split = coordinates[i].split('|');
+            OVertex v = _operationNodes[i];
+            NodeProperties props = _workflow->nodeProperties(v);
+            props._x = split[0].toInt();
+            props._y = split[1].toInt();
+            _workflow->updateNodeProperties(v, props);
+        }
+
+        _workflow->name(_workflow->name());
+        QString workingcatalog = context()->workingCatalog()->source().url().toString();
+        _workflow->connectTo(QUrl(workingcatalog +"/"+ _workflow->name() + ".ilwis"), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmOUTPUT);
+        _workflow->createTime(Ilwis::Time::now());
+        _workflow->store();
+    } catch(const ErrorObject&){
+
+    }
+}
+
+void WorkflowModel::load()
+{
+    //_workflow->connectTo(QUrl("ilwis://internalcatalog/" + _workflow->name() + "_workflow"), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmINPUT);
+
+    try{
+        std::pair<WorkflowVertexIterator, WorkflowVertexIterator> nodeIterators = _workflow->getNodeIterators();
+        for (auto &iter = nodeIterators.first; iter < nodeIterators.second; ++iter) {
+            _operationNodes.push_back(*iter);
+        }
+    } catch (const ErrorObject& err){
+
+    }
+}
+
 QStringList WorkflowModel::getAsignedValuesByItemID(int itemId)
 {
     QStringList* results = new QStringList();
@@ -217,33 +255,6 @@ QStringList WorkflowModel::getAsignedValuesByItemID(int itemId)
         results->push_back(_workflow->getAssignedInputData(assignedInput)->value);
     }
     return *results;
-}
-
-void WorkflowModel::store(const QStringList &coordinates)
-{
-    for (int i = 0; i< coordinates.size(); i++) {
-        QStringList split = coordinates[i].split('|');
-        OVertex v = _operationNodes[i];
-        NodeProperties props = _workflow->nodeProperties(v);
-        props._x = split[0].toInt();
-        props._y = split[1].toInt();
-        _workflow->updateNodeProperties(v, props);
-    }
-
-    _workflow->name(_workflow->name());
-    _workflow->connectTo(QUrl("file:///C:/Users/vincent/Desktop/testdata/workflows/" + _workflow->name()), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmOUTPUT);
-    _workflow->createTime(Ilwis::Time::now());
-    _workflow->store();
-}
-
-void WorkflowModel::load()
-{
-    //_workflow->connectTo(QUrl("ilwis://internalcatalog/" + _workflow->name() + "_workflow"), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmINPUT);
-
-    std::pair<WorkflowVertexIterator, WorkflowVertexIterator> nodeIterators = _workflow->getNodeIterators();
-    for (auto &iter = nodeIterators.first; iter < nodeIterators.second; ++iter) {
-        _operationNodes.push_back(*iter);
-    }
 }
 
 void WorkflowModel::createMetadata()

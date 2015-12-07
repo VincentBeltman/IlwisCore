@@ -193,6 +193,11 @@ Item {
             }
 
 
+//            function asignConstantInputData(vertexIndex, parameterIndex, value){
+//                canvas.asignConstantInputData(vertexIndex, parameterIndex, value)
+//            }
+
+
 
             WorkFlow.WorkflowCanvas {
                 id: canvas

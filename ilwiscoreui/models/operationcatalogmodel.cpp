@@ -291,6 +291,7 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             int parm = i + 1;
             if (operationresource[QString("pout_%1_optional").arg(parm)] == "false" && i < operationresource["outparameters"].toInt()) {
                 QString value = parms[i + operationresource["inparameters"].toInt()];
+
                 QString output = value.split("@@")[0];
                 if (output.size() == 0) {
                     em->addError(1, "Output parameter " + QString::number(i) + " is undefined with name " +  operationresource[QString("pout_%1_name").arg(parm)].toString());
@@ -514,5 +515,21 @@ WorkflowModel *OperationCatalogModel::createWorkFlow(const QString &filter)
 
 void OperationCatalogModel::keyFilter(const QString &keyf)
 {
-   CatalogModel::keyFilter(keyf);
+    QStringList parts= keyf.split(" ",QString::SkipEmptyParts);
+   QString result;
+   for(QString part : parts){
+       if ( part.toLower() == "or")
+           result += " or ";
+       else if ( part.toLower() == "and")
+           result += " and ";
+       else {
+           result += "keyword='" + part + "'";
+       }
+
+   }
+   _currentOperations.clear();
+   _operationsByKey.clear();
+   _refresh = true;
+   CatalogModel::filter(result);
+   emit operationsChanged();
 }
