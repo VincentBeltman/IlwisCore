@@ -120,6 +120,7 @@ Rectangle {
             var fromIndex = getIndex(textid.currentText)
             var toIndex = getIndex(textid2.currentText)
             var flowPoints = { "fromParameterIndex" : fromIndex, "toParameterIndex" : toIndex};
+
             if (!source) {
                 source = wfCanvas.operationsList[wfCanvas.currentIndex]
             }

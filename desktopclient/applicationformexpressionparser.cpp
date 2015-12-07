@@ -372,8 +372,10 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
     QString seperator;
     if ( showoutputformat){
         outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList);
+
         if (results.size() > 0) results = ": " + results;
         results = "property var outputFormats;property string formresult" + results;
+
         for(int i = 0; i < outparameters.size(); ++i){
             results += QString(";property string outputfield_%1").arg(i);
             if ( hasType(outparameters[i]._dataType, itCOVERAGE | itTABLE)){
