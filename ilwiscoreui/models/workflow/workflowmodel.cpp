@@ -56,7 +56,7 @@ void WorkflowModel::addOperation(const QString &id)
     }else {
        kernel()->issues()->log(QString(TR("Invalid operation id used in workflow %1")).arg(name()));
     }
-    auto vertex = _workflow->addOperation({opid, _workflow->source()});
+    auto vertex = _workflow->addOperation({_workflow->source()});
     _operationNodes.push_back(vertex);
 }
 
@@ -203,7 +203,6 @@ QQmlListProperty<EdgePropObject> WorkflowModel::getEdges()
  * Runs the createMetadata function on the workflow.
  * The workflow will be put in the master catalog and will be usable.
  */
-
 int WorkflowModel::vertex2ItemID(int vertex)
 {
     for (int i = 0; i < _operationNodes.size(); ++i) {
@@ -250,64 +249,6 @@ void WorkflowModel::load()
     }
 }
 
-/**
- * Returns the nodes of the workflow
- */
-QQmlListProperty<NodePropObject> WorkflowModel::getNodes()
-{
-    if ( _nodeProps.size() != 0) {
-        for(auto *node : _nodeProps)
-            delete node;
-        _nodeProps.clear();
-    }
-
-    std::pair<WorkflowVertexIterator, WorkflowVertexIterator> nodeIterators = _workflow->getNodeIterators();
-    for (auto &iter = nodeIterators.first; iter < nodeIterators.second; ++iter) {
-        NodePropObject *nodeProp = new NodePropObject();
-        nodeProp->setProps(_workflow->nodeProperties(*iter), *iter);
-        _nodeProps.append(std::move(nodeProp));
-    }
-    return  QQmlListProperty<NodePropObject>(this, _nodeProps);
-}
-
-///**
-// * Returns the edges of the node
-// */
-QQmlListProperty<EdgePropObject> WorkflowModel::getEdges()
-{
-    if ( _edgeProps.size() != 0) {
-        for(auto *edge : _edgeProps)
-            delete edge;
-        _edgeProps.clear();
-    }
-
-    std::pair<WorkflowVertexIterator, WorkflowVertexIterator> nodeIterators = _workflow->getNodeIterators();
-    for (auto &iter = nodeIterators.first; iter < nodeIterators.second; ++iter) {
-        std::pair<OutEdgeIterator,OutEdgeIterator> edgeIterators = _workflow->getOutEdges(*iter);
-        for (auto &iter2 = edgeIterators.first; iter2 < edgeIterators.second; ++iter2) {
-            EdgePropObject *edgeProp = new EdgePropObject();
-            edgeProp->setProps(_workflow->edgeProperties(*iter2), *iter, _workflow->getTargetOperationNode(*iter2));
-            _edgeProps.append(std::move(edgeProp));
-        }
-    }
-    return  QQmlListProperty<EdgePropObject>(this, _edgeProps);
-}
-
-/**
- * Runs the createMetadata function on the workflow.
- * The workflow will be put in the master catalog and will be usable.
- */
-
-int WorkflowModel::vertex2ItemID(int vertex)
-{
-    for (int i = 0; i < _operationNodes.size(); ++i) {
-        if (_operationNodes[i] == vertex) {
-            return i;
-        }
-    }
-    return iUNDEF;
-}
-
 QStringList WorkflowModel::getAsignedValuesByItemID(int itemId)
 {
     QStringList* results = new QStringList();
@@ -316,33 +257,6 @@ QStringList WorkflowModel::getAsignedValuesByItemID(int itemId)
         results->push_back(_workflow->getAssignedInputData(assignedInput)->value);
     }
     return *results;
-}
-
-void WorkflowModel::store(const QStringList &coordinates)
-{
-    for (int i = 0; i< coordinates.size(); i++) {
-        QStringList split = coordinates[i].split('|');
-        OVertex v = _operationNodes[i];
-        NodeProperties props = _workflow->nodeProperties(v);
-        props._x = split[0].toInt();
-        props._y = split[1].toInt();
-        _workflow->updateNodeProperties(v, props);
-    }
-
-    _workflow->name(_workflow->name());
-    _workflow->connectTo(QUrl("file:///C:/Users/vincent/Desktop/testdata/workflows/" + _workflow->name()), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmOUTPUT);
-    _workflow->createTime(Ilwis::Time::now());
-    _workflow->store();
-}
-
-void WorkflowModel::load()
-{
-    //_workflow->connectTo(QUrl("ilwis://internalcatalog/" + _workflow->name() + "_workflow"), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmINPUT);
-
-    std::pair<WorkflowVertexIterator, WorkflowVertexIterator> nodeIterators = _workflow->getNodeIterators();
-    for (auto &iter = nodeIterators.first; iter < nodeIterators.second; ++iter) {
-        _operationNodes.push_back(*iter);
-    }
 }
 
 void WorkflowModel::createMetadata()
