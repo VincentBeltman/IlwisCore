@@ -17,10 +17,15 @@ Item {
 
     function addDataSource(filter, sourceName, sourceType){
         if ( filter !== "" ){
-            if ( sourceType === "workflow")            {
+            if (sourceType === "workflow") {
                 scenario = scenarios.create()
-                var wf = scenario.addWorkflow(filter)
-                canvas.workflow = wf;
+
+                var resource = mastercatalog.id2Resource(filter.split('=')[1]);
+                canvas.workflow = scenario.addWorkflow(filter);
+                if (resource) {
+                    canvas.workflow.load()
+                    canvas.drawFromWorkflow()
+                }
             }
         }
     }
@@ -70,6 +75,10 @@ Item {
         canvas.deleteSelectedEdge()
     }
 
+    function alterSelectedEdge(){
+        canvas.alterSelectedEdge()
+    }
+
     function canvasZoomOut(){
         scaleCanvas(1/factor);
     }
@@ -83,6 +92,10 @@ Item {
         canvas.width /= scaleFactor;
         tform.xScale *=scaleFactor;
         tform.yScale *=scaleFactor;
+    }
+
+    function asignConstantInputData(inputData, operationid) {
+        canvas.asignConstantInputData(inputData, operationid);
     }
 
     /**
@@ -108,10 +121,51 @@ Item {
         orientation: Qt.Vertical
         height : parent.height - modellertools.height
 
+
+        ModellerErrorView {
+            height: 0
+            id : errorview
+            anchors.left: parent.left
+            anchors.leftMargin: 5
+            anchors.right: parent.right
+            state: "smaller"
+
+            states: [
+                State {
+                    name : "bigger"
+                    PropertyChanges {
+                        target: errorview
+                        height : 80
+                    }
+                    PropertyChanges {
+                        target: datapane
+                        height : parent.height - modellertools.height - 170 - 80
+                    }
+                },
+                State { name: "smaller"
+
+                    PropertyChanges {
+                        target: errorview
+                        height : 0
+                    }
+                }
+            ]
+            transitions: [
+                Transition {
+                    NumberAnimation { properties: "height"; duration : 750 ; easing.type: Easing.InOutCubic }
+                }
+            ]
+        }
+
         Item {
             id : datapane
             width : parent.width
             height : parent.height - modellertools.height - 170
+
+            function asignConstantInputData(vertexIndex, parameterIndex, value){
+                canvas.asignConstantInputData(vertexIndex, parameterIndex, value)
+            }
+
 
 
             WorkFlow.WorkflowCanvas {
@@ -124,16 +178,20 @@ Item {
                     anchors.fill: parent
                     propagateComposedEvents: true
                     onWheel: {
-                        if(wheel.angleDelta.y > 0)  // zoom in
+                        if(wheel.angleDelta.y > 0){  // zoom in
                             modellerDataPane.canvasZoomIn();
-                        else                        // zoom out
+                        }
+                        else{                        // zoom out
                             modellerDataPane.canvasZoomOut();
+                        }
                     }
                     onPressed:{mouse.accepted = false}
                     onPositionChanged:{mouse.accepted = false}
                     onReleased:{mouse.accepted = false}
                 }
             }
+
+
             ModellerDefinitionView{ id : defview}
             ModellerTemplateBuilder{ id : templateBuilder}
             ModellerOperationalView{ id : operview}

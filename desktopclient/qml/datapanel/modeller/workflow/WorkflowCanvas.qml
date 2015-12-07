@@ -9,9 +9,15 @@ import ".." as Modeller
 
 Modeller.ModellerWorkArea {
     property WorkflowModel workflow;
+    property OperationCatalogModel operationCatalog;
     property var deleteItemIndex;
     property var deleteEdgeIndex;
+    property var highestZIndex : 1;
 
+    function asignConstantInputData(inputData, itemId) {
+        workflow.asignConstantInputData(inputData, itemId)
+        wfCanvas.operationsList[itemId].resetInputModel()
+    }
 
     function deleteSelectedOperation(){
         for(var i=0; i < wfCanvas.operationsList.length; ++i){
@@ -25,6 +31,38 @@ Modeller.ModellerWorkArea {
     }
 
     function deleteSelectedEdge(){
+        var flow = getSelectedEdge()
+        if(flow != 0)
+        {
+            messageDialogEdge.open()
+        }
+    }
+
+    function alterSelectedEdge(){
+        var flow = getSelectedEdge()
+        if(flow != 0)
+        {
+            //Retrieve target and rectangle before deleting the edge
+            var target = flow.target;
+            var attachedRect = flow.attachtarget;
+
+            //Delete the edge
+            var from = flow.source.itemid
+            var to = flow.target.itemid
+            var inputIndex = flow.flowPoints.toParameterIndex
+            var outputIndex = flow.flowPoints.fromParameterIndex
+
+            workflow.deleteFlow(from, to, outputIndex, inputIndex)
+            wfCanvas.operationsList[deleteItemIndex].flowConnections.splice(deleteEdgeIndex, 1)
+            flow.target.resetInputModel()
+            wfCanvas.canvasValid = false
+
+            //Create a new edge
+            wfCanvas.showAttachmentForm(true, flow.target, flow.attachtarget);
+        }
+    }
+
+    function getSelectedEdge(){
         for(var i=0; i < wfCanvas.operationsList.length; ++i){
             var item = wfCanvas.operationsList[i]
 
@@ -36,11 +74,11 @@ Modeller.ModellerWorkArea {
                 {
                     deleteItemIndex = i;
                     deleteEdgeIndex = j;
-                    messageDialogEdge.open()
-                    break
+                    return flow;
                 }
             }
         }
+        return 0;
     }
 
     MessageDialog {
@@ -103,16 +141,17 @@ Modeller.ModellerWorkArea {
         standardButtons: StandardButton.Yes | StandardButton.No
         onYes: {
             var flow = wfCanvas.operationsList[deleteItemIndex].flowConnections[deleteEdgeIndex]
-            var from = flow
-            var to = flow.attachtarget
+            var from = flow.source.itemid
+            var to = flow.target.itemid
+            var inputIndex = flow.flowPoints.toParameterIndex
+            var outputIndex = flow.flowPoints.fromParameterIndex
+
+            workflow.deleteFlow(from, to, outputIndex, inputIndex)
             wfCanvas.operationsList[deleteItemIndex].flowConnections.splice(deleteEdgeIndex, 1)
-            flow.destroy()
-            workflow.deleteFlow()
+            flow.target.resetInputModel()
             wfCanvas.canvasValid = false
-            wfCanvas.draw(true)
         }
         Component.onCompleted: {
-            wfCanvas.canvasValid = false
             visible = false
         }
     }
@@ -121,16 +160,79 @@ Modeller.ModellerWorkArea {
       Calls the WorkflowModel's run method
       */
     function run(){
-        // workflow.createMetadata()
-        workflow.run(manager.retrieveRunFormValues())
+        drawFromWorkflow();return;
+        workflow.createMetadata()
+        manager.retrieveRunFormValues()
     }
 
     /**
       Calls the create meta data method of the WorkflowModel and regenerates the form
       */
     function generateForm() {
-        workflow.createMetadata()
-        manager.showRunForm(workflow.id)
+        if (workflow){
+            workflow.createMetadata()
+            manager.showRunForm(workflow.id)
+        }
+    }
+
+    /**
+      Draws canvas from the workflow
+      */
+    function drawFromWorkflow() {
+        var nodes = workflow.nodes, node, resource, unOrderdEdges = workflow.edges, edges = [], nodeEdges, edge, fromItemid,
+                toItemId, fromOperation=false, toOperation=false, flowPoints;
+        for(var i = 0; i < unOrderdEdges.length; i++) {
+            edge = unOrderdEdges[i]
+            if (edge.fromVertex in edges) {
+                edges[edge.fromVertex].push(edge)
+            } else {
+                edges[edge.fromVertex] = [edge]
+            }
+        }
+
+        for (var i = 0; i < nodes.length; i++) {
+            node = nodes[i];
+            resource = wfCanvas.getOperation(node.operationId)
+
+            wfCanvas.createItem(node.x, node.y, resource)
+        }
+        for (var i = 0; i < nodes.length; i++) {
+            node = nodes[i];
+            nodeEdges = edges[node.vertex]
+            if (nodeEdges) {
+                for (var j = 0; j < nodeEdges.length; j++) {
+                    edge = nodeEdges[j]
+                    fromItemid = workflow.vertex2ItemID(node.vertex) //TODO: Temporary
+                    toItemId = workflow.vertex2ItemID(edge.toVertex) //TODO: Temporary
+
+                    for (var k = 0; k < wfCanvas.operationsList.length; k++) {
+                        if (!fromOperation && wfCanvas.operationsList[k].itemid == fromItemid) {
+                            fromOperation = wfCanvas.operationsList[k]
+                        } else if (!toOperation && wfCanvas.operationsList[k].itemid == toItemId) {
+                            toOperation = wfCanvas.operationsList[k]
+                        }
+                    }
+
+                    if (fromOperation && toOperation){
+                        flowPoints = {
+                            "fromParameterIndex" : edge.fromParameter,
+                            "toParameterIndex" : edge.toParameter
+                        }
+                        fromOperation.flowConnections.push({
+                           "target" : toOperation,
+                           "source" : fromOperation,
+                           "attachtarget" : toOperation.index2Rectangle(edge.toRect),
+                           "attachsource" : fromOperation.index2Rectangle(edge.fromRect),
+                           "flowPoints" : flowPoints,
+                           "isSelected" : false
+                        })
+                    }
+
+                    fromOperation = false
+                    toOperation = false
+                }
+            }
+        }
     }
 
     Canvas {
@@ -160,7 +262,9 @@ Modeller.ModellerWorkArea {
             interval: 30;
             running: true;
             repeat: true
-            onTriggered: wfCanvas.draw()
+            onTriggered: {
+                wfCanvas.draw()
+            }
         }
 
 
@@ -192,13 +296,13 @@ Modeller.ModellerWorkArea {
                     operationsList[i].drawFlows(ctx)
                 }
                 //wfCanvas.requestPaint();
+                generateForm()
             }
         }
 
-
-
         function createItem(x,y, resource) {
             component = Qt.createComponent("OperationItem.qml");
+
             if (component.status == Component.Ready)
                 finishCreation(x,y,resource);
             else
@@ -240,7 +344,7 @@ Modeller.ModellerWorkArea {
             wfCanvas.canvasValid = true
         }
 
-        function showAttachementForm(yesno, target, attachRect){
+        function showAttachmentForm(yesno, target, attachRect){
             var fromOperation = operationsList[wfCanvas.currentIndex].operation
             attachementForm.operationFrom = fromOperation
             attachementForm.operationTo = target.operation
@@ -263,14 +367,13 @@ Modeller.ModellerWorkArea {
             id: canvasDropArea
             anchors.fill: wfCanvas
             onDropped: {
-                if (drag.source.type === "singleoperation") {
+                if (drag.source.type === "singleoperation" || drag.source.type === "workflow") {
                     var oper = wfCanvas.getOperation(drag.source.ilwisobjectid)
                     wfCanvas.createItem(drag.x - 50, drag.y - 30,oper)
                     workflow.addOperation(drag.source.ilwisobjectid)
 
                     generateForm()
                 }
-
             }
         }
         FlowParametersChoiceForm{
@@ -286,7 +389,7 @@ Modeller.ModellerWorkArea {
             onPressed: {
                 wfCanvas.canvasValid = false;
 
-                var selected = false, pressed = -1;
+                var selected = false, pressed = -1, highestZ = -1;
 
                 for(var i=0; i < wfCanvas.operationsList.length; ++i){
 
@@ -322,24 +425,58 @@ Modeller.ModellerWorkArea {
                         }
                     }
 
-                    if ( isContained) {
+                    if ( isContained && item.z > highestZ ) {
                         pressed = i
+                        highestZ = item.z
                     }
                     item.isSelected = false
                 }
                 wfCanvas.oldx = mouseX
                 wfCanvas.oldy = mouseY
+                wfCanvas.currentIndex = pressed
                 if (pressed > -1) {
-                    wfCanvas.currentIndex = pressed;
                     item = wfCanvas.operationsList[pressed]
                     item.isSelected = true
-                    manager.showOperationForm(item.operation.id)
+
+                    var definedValueIndexes = workflow.definedValueIndexes(pressed)
+
+                    if(definedValueIndexes){
+                        manager.showOperationFormWithHiddenFields(item.operation.id,pressed, definedValueIndexes)
+                    }else{
+                        manager.showOperationForm(item.operation.id, pressed)
+                    }
+
                     manager.showMetaData(item.operation)
                 } else {
                     manager.resetMetaData(workflow);
                 }
 
 
+            }
+
+            onDoubleClicked: {
+                var pressed = -1, item = 0;
+                for(var i=0; i < wfCanvas.operationsList.length; ++i){
+
+                    item = wfCanvas.operationsList[i]
+                    var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
+
+                    if ( isContained) {
+                        pressed = i
+                    }
+                }
+                if (pressed > -1) {
+                    var resource = mastercatalog.id2Resource(item.operation.id)
+                    var filter = "itemid=" + resource.id
+                    bigthing.newCatalog(filter, "workflow",resource.url,"other")
+                }
+
+
+            }
+
+            Keys.onEscapePressed: {
+                console.log("escape key");
+                wfCanvas.stopWorkingLine()
             }
 
             Keys.onEscapePressed: {
@@ -371,6 +508,15 @@ Modeller.ModellerWorkArea {
             }
         }
 
+    }
 
+    Component.onDestruction: {
+        var coordinates = [], node;
+        for (var i = 0; i < wfCanvas.operationsList.length; i++) {
+            node = wfCanvas.operationsList[i]
+            coordinates[node.itemid] = node.x + '|' + node.y
+        }
+
+        workflow.store(coordinates)
     }
 }

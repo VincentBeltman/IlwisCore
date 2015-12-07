@@ -9,6 +9,7 @@ Rectangle {
     id : operationItem
     width: 200
     height: 120
+    z: 0
     property OperationModel operation
     property int itemid
     property var selectedAttach
@@ -31,10 +32,23 @@ Rectangle {
         operationInParameters.model = operation.inParamNames
     }
 
+    function getBackground() {
+        if (operation) {
+            var keywords = operation.keywords.split(', ')
+            if (keywords.indexOf('workflow') > -1) {
+                return iconsource("workflowitem.png")
+            }
+        }
+        return iconsource("operationitem.png")
+    }
+
+
+
+
     Image {
         id : box
         anchors.fill: parent
-        source : iconsource("operationitem.png")
+        source : getBackground()
     }
     Text{
         id : operationName
@@ -46,7 +60,6 @@ Rectangle {
         x : 15
         text : operation ? operation.name : "?"
         font.bold : true
-
     }
     Text {
         id : labelInput
@@ -149,6 +162,12 @@ Rectangle {
         wfCanvas.canvasValid = false
     }
 
+    onIsSelectedChanged: {
+        if (isSelected) {
+            z = highestZIndex++
+        }
+    }
+
     function deselectAll(){
         att1.isSelected = att2.isSelected = att3.isSelected = att4.isSelected = att5.isSelected = att6.isSelected = att7.isSelected = att8.isSelected = false
     }
@@ -201,39 +220,66 @@ Rectangle {
     }
 
     function setFlow(target, attachRect, flowPoints){
+        if(workflow.hasValueDefined(target.itemid, flowPoints.toParameterIndex))
+        {
+            //TODO: Error gooien.
+            return;
+        }
+
         for(var i =0; i < flowConnections.length; ++i){
-            if ( flowConnections[i].target == target && flowConnections[i].attachement == attachRect)
+            if ( flowConnections[i].target == target)
                 return // dont add duplicates
         }
-        flowConnections.push({"target" : target, "source" :operationItem ,"attachtarget": attachRect, "attachsource" : selectedAttach, "flowPoints" : flowPoints, "isSelected" : false})
-        workflow.addFlow(itemid, target.itemid, flowPoints)
+        flowConnections.push({
+            "target" : target,
+            "source" :operationItem,
+            "attachtarget" : attachRect,
+            "attachsource" : selectedAttach,
+            "flowPoints" : flowPoints,
+            "isSelected" : false
+        })
+        workflow.addFlow(
+            itemid,
+            target.itemid,
+            flowPoints,
+            attachRect.index,
+            selectedAttach.index
+        )
         target.resetInputModel()
         wfCanvas.stopWorkingLine()
     }
 
     function attachFlow(target, attachRect){
+        //If not connected to itself
         if ( wfCanvas.operationsList[wfCanvas.currentIndex] !== target){
             var flowPoints
-            if ( operation.needChoice(target.operation)){
-                 wfCanvas.showAttachementForm(true, target,attachRect)
+
+            if( operation.isLegalFlow(wfCanvas.operationsList[wfCanvas.currentIndex].operation, target.operation))
+            {
+                if ( operation.needChoice(target.operation)){
+                    wfCanvas.showAttachmentForm(true, target,attachRect)
+                }
+                else{
+                    wfCanvas.operationsList[wfCanvas.currentIndex].setFlow(target,attachRect, null)
+                }
             }
-            else if ( operation.isLegalFlow(operation, target.operation, flowPoints)){
-                wfCanvas.operationsList[wfCanvas.currentIndex].setFlow(target,attachRect, null)
-            } else
-               wfCanvas.stopWorkingLine()
+            else
+            {
+                wfCanvas.stopWorkingLine()
+            }
 
             wfCanvas.canvasValid = false
         }
     }
 
-    function deleteFlow(flow, edgeIndex)
-    {
-        var flow = flowConnections[edgeIndex]
-
-        for(var i=0; i < flowConnections.length; i++)
-        {
-
+    function index2Rectangle(index) {
+        for (var i = 0; i < operationItem.children.length; i++) {
+            var child = operationItem.children[i];
+            if(child.hasOwnProperty("index") && child.index == index){
+                return child
+            }
         }
+        return 0
     }
 
     AttachmentRectangle{

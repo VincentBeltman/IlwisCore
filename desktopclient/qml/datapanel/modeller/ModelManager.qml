@@ -32,12 +32,24 @@ Rectangle {
         }
     }
 
-    function showOperationForm(operationid){
+    /**
+      Calls the newForm method and passes through the fields that should be hidden
+      */
+    function showOperationFormWithHiddenFields(operationid, itemId, hiddenFields){
         if ( operationid){
             datapane.state = "smaller"
             var tab= modellerProperties.getTab(1)
             tab.active=true
-            tab.item.newForm(operationid, qsTr("Set default values"))
+            tab.item.newOperationFormWithHiddenFields(operationid, qsTr("Set default values"), itemId,hiddenFields)
+        }
+    }
+
+    function showOperationForm(operationid, itemId){
+        if ( operationid){
+            datapane.state = "smaller"
+            var tab= modellerProperties.getTab(1)
+            tab.active=true
+            tab.item.newForm(operationid, qsTr("Set default values"), itemId)
         }
     }
 
@@ -62,7 +74,7 @@ Rectangle {
             datapane.state = "smaller"
             var tab= modellerProperties.getTab(3)
             tab.active=true
-            tab.item.newForm(workflowid, qsTr("Set run values"))
+            tab.item.newFormWithOutput(workflowid, qsTr("Set run values"))
         }
     }
 
