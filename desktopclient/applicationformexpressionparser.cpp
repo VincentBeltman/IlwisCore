@@ -231,40 +231,34 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
 
     QString textField = "DropArea{ x : %2; height : 20; width : parent.width - label_pin_%1.width - 5 - %3 - %4 - %5; keys: [%6];\
                onDropped : { pin_%1.text = drag.source.message }\
-            TextField{ id : pin_%1; text: %7; anchors.fill : parent optionalOutputMarker %8}}";
+            TextField{ id : pin_%1; text: \"%7\"; anchors.fill : parent optionalOutputMarker %8}}";
     QString textArea = "DropArea{ x : %2; height : 55; width : parent.width - label_pin_%1.width - 5 - %3 - %4 - %5; keys: [%6];\
            onDropped : { pin_%1.text = drag.source.message }\
-        TextArea{ id : pin_%1; text: %7; anchors.fill : parent optionalOutputMarker %8}}";
+        TextArea{ id : pin_%1; text: \"%7\"; anchors.fill : parent optionalOutputMarker %8}}";
 
    // QString textArea = "TextArea{ id : pin_%1; x : %2 + %5; height : 55; width : parent.width - label_pin_%1.width - 5 - %3 - %4 - %5 optionalOutputMarker}";
     QString iconField1 = "Button{ width : 20; height:20; checkable : true;checked : false;"
             "onClicked : {mastercatalog.currentCatalog.filterChanged(\"%2|exclusive\" , checked)}"
             "Image{anchors.centerIn : parent;width : 14; height:14;source:\"../images/%1\";fillMode: Image.PreserveAspectFit}}";
     QString iconField2 = "Image{width : 14; height:14;source:\"../images/%1\";fillMode: Image.PreserveAspectFit}";
-    QString comboField = "ComboBox{id : pin_%1; x : %2;width : parent.width - label_pin_%1.width - 5 - %3;model : %4;currentIndex: %5";
+    QString comboField = "ComboBox{id : pin_%1; x : %2;width : parent.width - label_pin_%1.width - 5 - %3;model : %4;currentIndex: %5;";
     QString rowBodyChoiceHeader = "Row{ width : parent.width;Text { text: qsTr(\"%1\"); width : %2; } Column{ExclusiveGroup { id: exclusivegroup_pin_%3} %4}}";
     QString rowChoiceOption = "RadioButton{id:choice_pin_%1;text:qsTr(\"%2\");checked:%3;exclusiveGroup:exclusivegroup_pin_%4;property string value:qsTr(\"%5\")}";
     QString formRows;
     int oldOptionGroup = -1;
     int xshift = 0;
 
-    QString columnStart;
-    QString columnEnd;
+    QString formColumnStart;
+    QString formColumnEnd;
 
-//  if(!operationNames.empty()){
-    columnStart = QString("Column{");
-    columnEnd = QString("");
-//  }
+    if(!operationNames.empty()){
+        formColumnStart = QString("Column{anchors.fill:parent Rectangle{anchors.fill:parent color:\"red\" } ");
+        formColumnEnd = QString("}");
+    }
+
+//    formRows += formColumnStart;
 
     for(int i = 0; i < parameters.size(); ++i){
-        QString operationName;
-//        if(!operationNames.empty()){
-            //Optional
-//            operationName = QString("Rectangle{height:20;width:parent.width;color:\"lightgrey\";Text {text : ");
-//            operationName += QString("\"bladfdsfdsfdsfdsfdsklfjdsfkldsjfdlkfjdsflkdsjfdsklfjdslkfjbla\";");
-//            operationName += QString(" font.pointSize: 10;x:5}}");
-//        }
-
         QString visibile = "true";
         for(int j=0;j<invisibleFieldList.size();++j){
             if(i==invisibleFieldList[j].toInt()){
@@ -374,6 +368,8 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     }else {
         formRows.replace("optionalOutputMarker","");
     }
+
+//    formRows += formColumnEnd;
     return formRows;
 }
 
@@ -393,11 +389,13 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
     width *= 10;
     width = std::min(100, width);
 
-    QString inputpart = makeFormPart(width, parameters, true, results, showEmptyOptionInList, invisibleFieldIndexes, constantValues);
+    QString inputpart = makeFormPart(width, parameters, true, results, showEmptyOptionInList, invisibleFieldIndexes, operationNames, constantValues);
+
     QString outputPart;
     QString seperator;
     if ( showoutputformat){
-        outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList);
+        outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList,"", operationNames, constantValues);
+
         if (results.size() > 0) results = ": " + results;
         results = "property var outputFormats;property string formresult" + results;
         for(int i = 0; i < outparameters.size(); ++i){
