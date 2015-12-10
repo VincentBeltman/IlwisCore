@@ -297,11 +297,11 @@ Modeller.ModellerWorkArea {
                 var operationNames = {}
                 for( var i=0; i < operationsList.length; i++){
                     operationsList[i].drawFlows(ctx)
-
-                    operationNames[wfCanvas.operationsList[i].operation.name] = {
+                    operationNames[i + ". " + wfCanvas.operationsList[i].operation.name] = {
                         inParameterCount: wfCanvas.operationsList[i].operation.inParameterCount,
                         outParameterCount: wfCanvas.operationsList[i].operation.outParameterCount
                     };
+
                 }
                 //wfCanvas.requestPaint();
                 generateForm(operationNames)
@@ -500,10 +500,10 @@ Modeller.ModellerWorkArea {
                 }
             }
 
-            Keys.onEscapePressed: {
-                console.log("escape key");
-                wfCanvas.stopWorkingLine()
-            }
+//            Keys.onEscapePressed: {
+//                console.log("escape key");
+//                wfCanvas.stopWorkingLine()
+//            }
 
             onPositionChanged: {
                 if ( attachementForm.state == "invisible"){

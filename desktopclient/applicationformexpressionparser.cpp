@@ -248,19 +248,48 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     int oldOptionGroup = -1;
     int xshift = 0;
 
-    QString formColumnStart;
-    QString formColumnEnd;
-
-    if(!operationNames.empty()){
-        formColumnStart = QString("Column{anchors.fill:parent Rectangle{anchors.fill:parent color:\"red\" } ");
-        formColumnEnd = QString("}");
-    }
-
-//    formRows += formColumnStart;
+    //Variables for workflow form
+    QVariantMap::iterator operationIndex = operationNames.begin();
+    int operationInParameterCount = 0;
 
     for(int i = 0; i < parameters.size(); ++i){
         QString constantValue = constantValues.value(i, "");
         bool validConstant = constantValues.value(i, "").size() != 0;
+        QString operationRowStart;
+        QString operationRowEnd;
+
+        if(!operationNames.empty()){
+            QVariant values = operationIndex.value();
+            QVariantMap map = values.toMap();
+
+            int inParameterCount;
+            if(input){
+                inParameterCount = map.value("inParameterCount").toInt();
+            }else{
+                inParameterCount = map.value("outParameterCount").toInt();
+            }
+
+            int number = std::distance( operationNames.begin(), operationIndex );
+
+            if(operationInParameterCount==0){
+                operationRowStart = QString("Row{width:parent.width;");
+                operationRowStart += QString("Column{height:parent.height; width:25;Rectangle{Text{anchors.fill:parent; text:\"%1.\";font.pixelSize:15}").arg(number);
+                operationRowStart += QString("Rectangle{anchors.bottom:parent.bottom;width : parent.width; height:1;color : \"black\"} width:parent.width;height:parent.height;}}");
+                operationRowStart += QString("Column{width:parent.width-25; ");
+            }
+
+            if(operationInParameterCount+1==inParameterCount){
+                operationRowEnd = "Rectangle{width : parent.width; height:3;color : \"white\"} Rectangle{width : parent.width; height:1;color : \"black\"}}}";
+
+                ++operationIndex;
+                operationInParameterCount = -1;
+            }
+
+            ++operationInParameterCount;
+
+            formRows += operationRowStart;
+        }
+
         QString visibile = "true";
         for(int j=0;j<invisibleFieldList.size();++j){
             if(i==invisibleFieldList[j].toInt()){
@@ -362,6 +391,8 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
                 results += "+ \"|\" +";
             results += QString("pin_%1.currentText").arg(i);
         }
+
+        formRows += operationRowEnd;
     }
     if ( !input){
         formRows.replace("pin_","pout_");
@@ -371,7 +402,6 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
         formRows.replace("optionalOutputMarker","");
     }
 
-//    formRows += formColumnEnd;
     return formRows;
 }
 
@@ -408,7 +438,12 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
             }
         }
         results += ";";
-        seperator = "Rectangle{width : parent.width - 12; x: 6; height:2;color : \"#B3B3B3\"}";
+        if(operationNames.isEmpty()){
+            seperator = "Rectangle{width : parent.width - 12; x: 6; height:2;color : \"#B3B3B3\"}";
+        }else{
+            seperator = "Rectangle{width : parent.width - 12; x: 6; height:5;color : \"#B3B3B3\"}";
+        }
+
     }else
         results = "property string formresult : " + results + ";";
     columnStart = QString(columnStart).arg(results);
