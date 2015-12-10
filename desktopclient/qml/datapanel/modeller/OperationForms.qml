@@ -21,11 +21,23 @@ Rectangle {
     Create a form for the workflow
     */
     function showRunForm(metaid, operationNames) {
-        var form= formbuilder.index2Form(metaid, true, false, "", [], operationNames)
+        var validValues = [], parameterEntrySet = canvas.workflow.getParameterEntrySet();
+
+        if (appFrame.currentAppForm != null) {
+            var currentValues = appFrame.currentAppForm.formresult.split('|')
+            for (var i = 0; i < parameterEntrySet.length; i++) {
+                if (!parameterEntrySet[i]) {
+                    validValues.push(currentValues[i])
+                }
+            }
+        }
+
+        var form = formbuilder.index2Form(metaid, true, false, "", operationNames, validValues)
         operationid = metaid
         appFrame.formQML = form
         appFrame.formTitle = qsTr("Set run values for workflow")
         appFrame.opacity = 1
+        //canvas.workflow.resetParameterEntrySet()
     }
 
     function showForm(item, title, newItemId, constantValues){

@@ -121,14 +121,7 @@ void Workflow::removeOutputDataProperties(const OVertex &v, quint16 index)
 OVertex Workflow::addOperation(const NodeProperties &properties)
 {
     OVertex v = boost::add_vertex(properties, _wfGraph);
-
     IOperationMetaData meta = getOperationMetadata(v);
-//    Resource res = mastercatalog()->id2Resource(meta->id());
-
-//    if (mastercatalog()->id2Resource(meta->id()).ilwisType() & itWORKFLOW) {
-//        static_cast<IWorkflow>(meta)->createMetadata();
-//    }
-//    quint64 id = nodeProperties(v)._operationid;
     std::vector<SPOperationParameter> inputs = meta->getInputParameters();
     for (int i = 0 ; i < inputs.size() ; i++) {
         if ( !inputs.at(i)->isOptional()) {
@@ -153,6 +146,44 @@ NodeProperties Workflow::nodeProperties(const OVertex &v)
 EdgeProperties Workflow::edgeProperties(const OEdge &e)
 {
     return edgeIndex()[e];
+}
+
+
+QList<int>* Workflow::getWorkflowParameterIndex(const OVertex &v) const
+{
+    QList<int>* parameterIndexes = new QList<int>();
+    int parameterIndex;
+    boost::graph_traits<WorkflowGraph>::vertex_iterator vi, vi_end;
+    for (boost::tie(vi,vi_end) = boost::vertices(_wfGraph); vi != vi_end; ++vi) {
+        OVertex vertex = *vi;
+        for (const InputAssignment &inputAssignment : getInputAssignments(v)) {
+            if (getAssignedInputData(inputAssignment)->value.isEmpty()) {
+                if (vertex == v) {
+                    parameterIndexes->push_back(parameterIndex);
+                }
+                ++parameterIndex;
+            }
+        }
+    }
+    return parameterIndexes;
+}
+
+int Workflow::getWorkflowParameterIndex(const OVertex &v, int index) const
+{
+    int parameterIndex = 0;
+    boost::graph_traits<WorkflowGraph>::vertex_iterator vi, vi_end;
+    for (boost::tie(vi,vi_end) = boost::vertices(_wfGraph); vi != vi_end; ++vi) {
+        OVertex vertex = *vi;
+        for (const InputAssignment &inputAssignment : getInputAssignments(v)) {
+            if (getAssignedInputData(inputAssignment)->value.isEmpty()) {
+                if (vertex == v && index == inputAssignment.second) {
+                    return parameterIndex;
+                }
+                ++parameterIndex;
+            }
+        }
+    }
+    return -1;
 }
 
 // Gets all nodes which have input parameters which are open.

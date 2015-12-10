@@ -16,17 +16,14 @@ Rectangle {
       Calls the newForm method and passes through the fields that should be hidden
       */
     function showOperationFormWithHiddenFields(operation, itemId, constantValues, hiddenFields){
-        modellerProperties.getTab(1)
         forms.item.showOperationFormWithHiddenFields(operation, itemId, constantValues, hiddenFields)
     }
 
     function showOperationForm(operation, itemId, constantValues){
-        modellerProperties.getTab(1)
         forms.item.showOperationForm(operation, itemId, constantValues)
     }
 
     function showRunForm(workflowid, operationNames){
-        modellerProperties.getTab(1)
         forms.item.showRunForm(workflowid, operationNames)
     }
 

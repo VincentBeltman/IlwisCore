@@ -36,44 +36,16 @@ public:
     ~WorkflowModel();
     explicit WorkflowModel(const Ilwis::Resource &source, QObject *parent=0);
 
-//<<<<<<< HEAD
-//    Q_PROPERTY(QQmlListProperty<NodePropObject>  nodes READ getNodes CONSTANT)
-//    Q_PROPERTY(QQmlListProperty<EdgePropObject>  edges READ getEdges CONSTANT)
-
-//    Q_INVOKABLE void asignConstantInputData(QString inputData, int operationIndex);
-//=======
-//<<<<<<< HEAD
-//>>>>>>> master
-//    Q_INVOKABLE void addOperation(const QString& id);
-//    Q_INVOKABLE void addFlow(int indexStart, int operationIndex2, const QVariantMap &flowpoints, int outRectIndex, int inRectIndex);
-//    Q_INVOKABLE void deleteOperation(int index);
-//    Q_INVOKABLE void deleteFlow(int operationIndex1, int operationIndex2, int indexStart, int indexEnd);
-
-//    Q_INVOKABLE bool hasValueDefined(int operationIndex, int parameterIndex);
-
-//    Q_INVOKABLE QString implicitIndexes(int operationIndex);
-
-//    QQmlListProperty<NodePropObject> getNodes() ;
-//    QQmlListProperty<EdgePropObject> getEdges();
-
-//    Q_INVOKABLE int vertex2ItemID(int vertex);
-
-//    Q_INVOKABLE void store(const QStringList &coordinates);
-//    Q_INVOKABLE void load();
-
-//    Q_INVOKABLE void createMetadata();
-
-//private:
     QString makeOutputPath(const QString& filename);
 
     Q_PROPERTY(QQmlListProperty<NodePropObject>  nodes READ getNodes CONSTANT)
     Q_PROPERTY(QQmlListProperty<EdgePropObject>  edges READ getEdges CONSTANT)
 
-    Q_INVOKABLE void asignConstantInputData(QString inputData, int operationIndex);
+    Q_INVOKABLE QStringList asignConstantInputData(QString inputData, int operationIndex);
     Q_INVOKABLE void addOperation(const QString& id);
-    Q_INVOKABLE void addFlow(int indexStart, int operationIndex2, const QVariantMap &flowpoints, int outRectIndex, int inRectIndex);
-    Q_INVOKABLE void deleteOperation(int index);
-    Q_INVOKABLE void deleteFlow(int operationIndex1, int operationIndex2, int indexStart, int indexEnd);
+    Q_INVOKABLE QStringList addFlow(int indexStart, int operationIndex2, const QVariantMap &flowpoints, int outRectIndex, int inRectIndex);
+    Q_INVOKABLE QStringList deleteOperation(int index);
+    Q_INVOKABLE QStringList deleteFlow(int operationIndex1, int operationIndex2, int indexStart, int indexEnd);
 
     Q_INVOKABLE bool hasValueDefined(int operationIndex, int parameterIndex);
 

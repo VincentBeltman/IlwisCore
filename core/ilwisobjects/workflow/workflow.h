@@ -117,6 +117,8 @@ public:
     void removeOperation(OVertex vertex);
     void removeOperationFlow(OEdge edge);
 
+    QList<int>* getWorkflowParameterIndex(const OVertex &v) const;
+    int getWorkflowParameterIndex(const OVertex &v, int index) const;
     QList<OVertex> getNodesWithExternalInput();
     QList<OVertex> getNodesWithExternalOutputs();
 

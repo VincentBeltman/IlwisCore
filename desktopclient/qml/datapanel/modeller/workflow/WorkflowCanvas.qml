@@ -298,7 +298,10 @@ Modeller.ModellerWorkArea {
                 for( var i=0; i < operationsList.length; i++){
                     operationsList[i].drawFlows(ctx)
 
-                    operationNames[wfCanvas.operationsList[i].operation.name] = {inParameterCount: wfCanvas.operationsList[i].operation.inParameterCount, outParameterCount: wfCanvas.operationsList[i].operation.outParameterCount};
+                    operationNames[wfCanvas.operationsList[i].operation.name] = {
+                        inParameterCount: wfCanvas.operationsList[i].operation.inParameterCount,
+                        outParameterCount: wfCanvas.operationsList[i].operation.outParameterCount
+                    };
                 }
                 //wfCanvas.requestPaint();
                 generateForm(operationNames)
@@ -463,6 +466,7 @@ Modeller.ModellerWorkArea {
 
                         implicitIndexes = workflow.implicitIndexes(operationSelected)
                         constantValues = workflow.getAsignedValuesByItemID(operationSelected)
+
                         if(implicitIndexes){
                             manager.showOperationFormWithHiddenFields(item, operationSelected, constantValues, implicitIndexes)
                         }else{
@@ -477,69 +481,23 @@ Modeller.ModellerWorkArea {
 
             }
 
-//            onDoubleClicked: {
-//                var pressed = -1, item = 0;
-//                for(var i=0; i < wfCanvas.operationsList.length; ++i){
-
-//                    item = wfCanvas.operationsList[i]
-//                    var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
-
-//                    if ( isContained && item.z > highestZ ) {
-//                        pressed = i
-//                        highestZ = item.z
-//                    }
-//                }
-//<<<<<<< HEAD
-//                if (pressed > -1) {
-//                    var resource = mastercatalog.id2Resource(item.operation.id)
-//                    var filter = "itemid=" + resource.id
-//                    bigthing.newCatalog(filter, "workflow",resource.url,"other")
-//=======
-//                wfCanvas.oldx = mouseX
-//                wfCanvas.oldy = mouseY
-//                wfCanvas.currentIndex = pressed
-//                if (pressed > -1) {
-//                    item = wfCanvas.operationsList[pressed]
-//                    item.isSelected = true
-
-//                    var definedValueIndexes = workflow.definedValueIndexes(pressed)
-
-//                    if(definedValueIndexes){
-//                        manager.showOperationFormWithHiddenFields(item.operation.id,pressed, definedValueIndexes)
-//                    }else{
-//                        manager.showOperationForm(item.operation.id, pressed)
-//                    }
-
-//                    manager.showMetaData(item.operation)
-//                } else {
-//                    manager.resetMetaData(workflow);
-//>>>>>>> master
-//                }
-//            }
-
             onDoubleClicked: {
-                var pressed = -1, item = 0;
+                var operationSelected = -1, item = 0, highestZ = 0;
                 for(var i=0; i < wfCanvas.operationsList.length; ++i){
 
                     item = wfCanvas.operationsList[i]
                     var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
 
-                    if ( isContained) {
-                        pressed = i
+                    if ( isContained && item.z > highestZ ) {
+                        operationSelected = i
+                        highestZ = item.z
                     }
                 }
-                if (pressed > -1) {
+                if (operationSelected > -1) {
                     var resource = mastercatalog.id2Resource(item.operation.id)
                     var filter = "itemid=" + resource.id
                     bigthing.newCatalog(filter, "workflow",resource.url,"other")
                 }
-
-
-            }
-
-            Keys.onEscapePressed: {
-                console.log("escape key");
-                wfCanvas.stopWorkingLine()
             }
 
             Keys.onEscapePressed: {
