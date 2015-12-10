@@ -248,7 +248,46 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     int oldOptionGroup = -1;
     int xshift = 0;
 
+    //Variables for workflow form
+    QVariantMap::iterator operationIndex = operationNames.begin();
+    int operationInParameterCount = 0;
+
     for(int i = 0; i < parameters.size(); ++i){
+        QString operationRowStart;
+        QString operationRowEnd;
+
+        if(!operationNames.empty()){
+            QVariant values = operationIndex.value();
+            QVariantMap map = values.toMap();
+
+            int inParameterCount;
+            if(input){
+                inParameterCount = map.value("inParameterCount").toInt();
+            }else{
+                inParameterCount = map.value("outParameterCount").toInt();
+            }
+
+            int number = std::distance( operationNames.begin(), operationIndex );
+
+            if(operationInParameterCount==0){
+                operationRowStart = QString("Row{width:parent.width;");
+                operationRowStart += QString("Column{height:parent.height; width:25;Rectangle{Text{anchors.fill:parent; text:\"%1.\";font.pixelSize:15}").arg(number);
+                operationRowStart += QString("Rectangle{anchors.bottom:parent.bottom;width : parent.width; height:1;color : \"black\"} width:parent.width;height:parent.height;}}");
+                operationRowStart += QString("Column{width:parent.width-25; ");
+            }
+
+            if(operationInParameterCount+1==inParameterCount){
+                operationRowEnd = "Rectangle{width : parent.width; height:3;color : \"white\"} Rectangle{width : parent.width; height:1;color : \"black\"}}}";
+
+                ++operationIndex;
+                operationInParameterCount = -1;
+            }
+
+            ++operationInParameterCount;
+
+            formRows += operationRowStart;
+        }
+
         QString visibile = "true";
         for(int j=0;j<invisibleFieldList.size();++j){
             if(i==invisibleFieldList[j].toInt()){
@@ -341,6 +380,8 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
                 results += "+ \"|\" +";
             results += QString("pin_%1.currentText").arg(i);
         }
+
+        formRows += operationRowEnd;
     }
     if ( !input){
         formRows.replace("pin_","pout_");
@@ -369,39 +410,12 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
     width *= 10;
     width = std::min(100, width);
 
-    QString inputpart;
-    if(operationNames.isEmpty()){
-        inputpart = makeFormPart(width, parameters, true, results, showEmptyOptionInList, invisibleFieldIndexes);
-    }else{
-        inputpart = makeFormPart(width, parameters, true, results, showEmptyOptionInList, invisibleFieldIndexes, operationNames);
-    }
-
-    //For the operation form numbering
-    QString formColumnStart;
-    QString formColumnEnd;
-    QString numberColumn;
-
-    if(!operationNames.empty()){
-        formColumnStart = QString("Column{ anchors{right: parent.right} width:parent.width-15; spacing:3;  ");
-        formColumnEnd = QString("}");
-
-        numberColumn = QString("Column{Rectangle{color:\"white\";} height:parent.height; width:15; spacing:0; ");
-
-        for(int i=0;i<operationNames.size();++i){
-            numberColumn += QString("Rectangle{width:parent.width; Text{text:\"%1.\";} height:100;}").arg(i);
-        }
-
-        numberColumn += QString("}");
-    }
+    QString inputpart = makeFormPart(width, parameters, true, results, showEmptyOptionInList, invisibleFieldIndexes, operationNames);
 
     QString outputPart;
     QString seperator;
     if ( showoutputformat){
-        if(operationNames.isEmpty()){
-            outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList);
-        }else{
-            outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList,"", operationNames);
-        }
+        outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList,"", operationNames);
 
         if (results.size() > 0) results = ": " + results;
         results = "property var outputFormats;property string formresult" + results;
@@ -413,11 +427,16 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
             }
         }
         results += ";";
-        seperator = "Rectangle{width : parent.width - 12; x: 6; height:2;color : \"#B3B3B3\"}";
+        if(operationNames.isEmpty()){
+            seperator = "Rectangle{width : parent.width - 12; x: 6; height:2;color : \"#B3B3B3\"}";
+        }else{
+            seperator = "Rectangle{width : parent.width - 12; x: 6; height:5;color : \"#B3B3B3\"}";
+        }
+
     }else
         results = "property string formresult : " + results + ";";
     columnStart = QString(columnStart).arg(results);
-    QString component = columnStart + numberColumn + formColumnStart + inputpart + seperator + outputPart + formColumnEnd + "}";
+    QString component = columnStart + inputpart + seperator + outputPart + "}";
 
     // for debugging, check if the qml is ok; can be retrieved from teh log file
     //kernel()->issues()->log(component);
