@@ -23,8 +23,8 @@ Rectangle {
         forms.item.showOperationForm(operation, itemId, constantValues)
     }
 
-    function showRunForm(workflowid, operationNames){
-        forms.item.showRunForm(workflowid, operationNames)
+    function showRunForm(workflowid, operationNames, parameterIndexes){
+        forms.item.showRunForm(workflowid, operationNames, parameterIndexes)
     }
 
     function retrieveRunFormValues(){

@@ -16,8 +16,10 @@ Modeller.ModellerWorkArea {
     property int highestZIndex : 1;
 
     function asignConstantInputData(inputData, itemId) {
-        workflow.asignConstantInputData(inputData, itemId)
+        var parameterIndexes = workflow.asignConstantInputData(inputData, itemId)
         wfCanvas.operationsList[itemId].resetInputModel()
+
+        generateForm(parameterIndexes)
     }
 
     function deleteSelectedOperation(){
@@ -94,7 +96,7 @@ Modeller.ModellerWorkArea {
             var flows = item.flowConnections;
 
             // First delete the operation at C++. THIS NEEDS TO BE DONE FIRST
-            workflow.deleteOperation(deleteItemIndex)
+            var parameterIndexes = workflow.deleteOperation(deleteItemIndex)
 
             // This removes 1 from the operation list beginning from deleteItemIndex
             wfCanvas.operationsList.splice(deleteItemIndex, 1)
@@ -132,6 +134,8 @@ Modeller.ModellerWorkArea {
             // Redraw lines
             wfCanvas.canvasValid = false
             wfCanvas.draw(true)
+
+            generateForm(parameterIndexes)
         }
         Component.onCompleted: visible = false
     }
@@ -148,10 +152,12 @@ Modeller.ModellerWorkArea {
             var inputIndex = flow.flowPoints.toParameterIndex
             var outputIndex = flow.flowPoints.fromParameterIndex
 
-            workflow.deleteFlow(from, to, outputIndex, inputIndex)
+            var parameterIndexes = workflow.deleteFlow(from, to, outputIndex, inputIndex)
             wfCanvas.operationsList[deleteItemIndex].flowConnections.splice(deleteEdgeIndex, 1)
             flow.target.resetInputModel()
             wfCanvas.canvasValid = false
+
+            generateForm(parameterIndexes)
         }
         Component.onCompleted: {
             visible = false
@@ -169,10 +175,21 @@ Modeller.ModellerWorkArea {
     /**
       Calls the create meta data method of the WorkflowModel and regenerates the form
       */
-    function generateForm(operationNames) {
+    function generateForm(parameterIndexes) {
         if (workflow){
+            var operationNames = {}
+            for( var i=0; i < wfCanvas.operationsList.length; i++){
+                var operationItem = wfCanvas.operationsList[i];
+                operationItem.drawFlows(wfCanvas.ctx)
+                operationNames[i + ". " + operationItem.operation.name] = {
+                    inParameterCount: operationItem.operation.inParameterCount,
+                    outParameterCount: operationItem.operation.outParameterCount
+                };
+
+            }
+
             workflow.createMetadata()
-            manager.showRunForm(workflow.id, operationNames)
+            manager.showRunForm(workflow.id, operationNames, parameterIndexes)
         }
     }
 
@@ -234,6 +251,7 @@ Modeller.ModellerWorkArea {
                 }
             }
         }
+        generateForm()
     }
 
     Canvas {
@@ -293,18 +311,9 @@ Modeller.ModellerWorkArea {
                     ctx.lineTo(workingLineEnd.x, workingLineEnd.y);
                     ctx.stroke();
                 }
-
-                var operationNames = {}
                 for( var i=0; i < operationsList.length; i++){
                     operationsList[i].drawFlows(ctx)
-                    operationNames[i + ". " + wfCanvas.operationsList[i].operation.name] = {
-                        inParameterCount: wfCanvas.operationsList[i].operation.inParameterCount,
-                        outParameterCount: wfCanvas.operationsList[i].operation.outParameterCount
-                    };
-
                 }
-                //wfCanvas.requestPaint();
-                generateForm(operationNames)
             }
         }
 
@@ -391,9 +400,11 @@ Modeller.ModellerWorkArea {
                     }
                     var oper = wfCanvas.getOperation(drag.source.ilwisobjectid)
                     wfCanvas.createItem(drag.x - 50, drag.y - 30,oper)
-                    workflow.addOperation(drag.source.ilwisobjectid)
+                    var paramterIndexes = workflow.addOperation(drag.source.ilwisobjectid)
 
                     wfCanvas.canvasValid = false
+
+                    generateForm(paramterIndexes)
                 }
             }
         }

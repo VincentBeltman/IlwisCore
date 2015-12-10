@@ -258,7 +258,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
         QString operationRowStart;
         QString operationRowEnd;
 
-        if(!operationNames.empty()){
+        if(!operationNames.empty() && false){ //TODO: true weghalen
             QVariant values = operationIndex.value();
             QVariantMap map = values.toMap();
 

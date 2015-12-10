@@ -42,7 +42,7 @@ public:
     Q_PROPERTY(QQmlListProperty<EdgePropObject>  edges READ getEdges CONSTANT)
 
     Q_INVOKABLE QStringList asignConstantInputData(QString inputData, int operationIndex);
-    Q_INVOKABLE void addOperation(const QString& id);
+    Q_INVOKABLE QStringList addOperation(const QString& id);
     Q_INVOKABLE QStringList addFlow(int indexStart, int operationIndex2, const QVariantMap &flowpoints, int outRectIndex, int inRectIndex);
     Q_INVOKABLE QStringList deleteOperation(int index);
     Q_INVOKABLE QStringList deleteFlow(int operationIndex1, int operationIndex2, int indexStart, int indexEnd);
@@ -56,6 +56,7 @@ public:
 
     Q_INVOKABLE int vertex2ItemID(int vertex);
     Q_INVOKABLE QStringList getAsignedValuesByItemID(int operationIndex);
+    Q_INVOKABLE int getInputParameterCount() { return _inputParameterCount;}
 
     Q_INVOKABLE void store(const QStringList &coordinates);
     Q_INVOKABLE void load();
@@ -67,6 +68,7 @@ private:
     std::vector<Ilwis::OVertex> _operationNodes;
     QList<NodePropObject *> _nodeProps;
     QList<EdgePropObject *> _edgeProps;
+    int _inputParameterCount = 0;
 };
 
 

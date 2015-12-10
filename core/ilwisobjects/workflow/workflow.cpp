@@ -120,16 +120,7 @@ void Workflow::removeOutputDataProperties(const OVertex &v, quint16 index)
 
 OVertex Workflow::addOperation(const NodeProperties &properties)
 {
-    OVertex v = boost::add_vertex(properties, _wfGraph);
-    IOperationMetaData meta = getOperationMetadata(v);
-    std::vector<SPOperationParameter> inputs = meta->getInputParameters();
-    for (int i = 0 ; i < inputs.size() ; i++) {
-        if ( !inputs.at(i)->isOptional()) {
-            // ensure required parameters has input assignment
-            assignInputData(v, i);
-        }
-    }
-    return v;
+    return boost::add_vertex(properties, _wfGraph);
 }
 
 void Workflow::removeOperation(OVertex vertex)
@@ -174,7 +165,7 @@ int Workflow::getWorkflowParameterIndex(const OVertex &v, int index) const
     boost::graph_traits<WorkflowGraph>::vertex_iterator vi, vi_end;
     for (boost::tie(vi,vi_end) = boost::vertices(_wfGraph); vi != vi_end; ++vi) {
         OVertex vertex = *vi;
-        for (const InputAssignment &inputAssignment : getInputAssignments(v)) {
+        for (const InputAssignment &inputAssignment : getInputAssignments(vertex)) {
             if (getAssignedInputData(inputAssignment)->value.isEmpty()) {
                 if (vertex == v && index == inputAssignment.second) {
                     return parameterIndex;
@@ -185,6 +176,7 @@ int Workflow::getWorkflowParameterIndex(const OVertex &v, int index) const
     }
     return -1;
 }
+
 
 // Gets all nodes which have input parameters which are open.
 QList<OVertex> Workflow::getNodesWithExternalInput()

@@ -40,10 +40,12 @@ QStringList WorkflowModel::asignConstantInputData(QString inputData, int operati
         QString value = inputParameters[i];
         if(_workflow->hasInputAssignment(vertex,i)){
             SPAssignedInputData constantInput = _workflow->getAssignedInputData({vertex, i});
+            bool oldValueFilled = constantInput->value.size() != 0;
 
             if (constantInput->value.isEmpty() && value.trimmed().size() > 0) {
                 int parameterIndex = _workflow->getWorkflowParameterIndex(vertex, i);
                 parameterEntrySet->push_back(QString::number(parameterIndex) + "|remove");
+                --_inputParameterCount;
             }
 
             if (value.trimmed().isEmpty()) {
@@ -52,27 +54,40 @@ QStringList WorkflowModel::asignConstantInputData(QString inputData, int operati
 
             constantInput->value = value;
 
-            if (value.isEmpty() && constantInput->value.size() != 0) {
+            if (value.isEmpty() && oldValueFilled) {
                 int parameterIndex = _workflow->getWorkflowParameterIndex(vertex, i);
                 parameterEntrySet->push_back(QString::number(parameterIndex) + "|insert");
+                ++_inputParameterCount;
             }
         }
     }
     return *parameterEntrySet;
 }
 
-void WorkflowModel::addOperation(const QString &id)
+QStringList WorkflowModel::addOperation(const QString &id)
 {
+    QStringList* parameterEntrySet = new QStringList();
     bool ok;
     quint64 opid = id.toULongLong(&ok);
     Resource res = mastercatalog()->id2Resource(opid);
 
     if ( ok && res.isValid()){
-        OVertex vertex = _workflow->addOperation({res});
-        _operationNodes.push_back(vertex);
+        OVertex v = _workflow->addOperation({res});
+        IOperationMetaData meta = _workflow->getOperationMetadata(v);
+        std::vector<SPOperationParameter> inputs = meta->getInputParameters();
+        for (int i = 0 ; i < inputs.size() ; i++) {
+            if ( !inputs.at(i)->isOptional()) {
+                _workflow->assignInputData(v, i);
+                ++_inputParameterCount;
+                int parameterIndex = _workflow->getWorkflowParameterIndex(v, i);
+                parameterEntrySet->push_back(QString::number(parameterIndex) + "|insert");
+            }
+        }
+        _operationNodes.push_back(v);
     }else {
        kernel()->issues()->log(QString(TR("Invalid operation id used in workflow %1")).arg(name()));
     }
+    return *parameterEntrySet;
 }
 
 QStringList WorkflowModel::addFlow(int operationIndex1, int operationIndex2, const QVariantMap& flowpoints, int outRectIndex, int inRectIndex)
@@ -87,6 +102,7 @@ QStringList WorkflowModel::addFlow(int operationIndex1, int operationIndex2, con
 
             int parameterIndex = _workflow->getWorkflowParameterIndex(toOperationVertex, inParamIndex);
             parameterEntrySet->push_back(QString::number(parameterIndex) + "|remove");
+            --_inputParameterCount;
 
             EdgeProperties flowPoperties(
                 outParamIndex, inParamIndex,
@@ -98,7 +114,7 @@ QStringList WorkflowModel::addFlow(int operationIndex1, int operationIndex2, con
            qDebug() << "False operation";
         }
     }
-    return parameterEntrySet;
+    return *parameterEntrySet;
 }
 
 bool WorkflowModel::hasValueDefined(int operationIndex, int parameterIndex){
@@ -145,8 +161,9 @@ QStringList WorkflowModel::deleteOperation(int index)
             }
 
 
-            for (int parameterIndex: _workflow->getWorkflowParameterIndex(operationVertex)) {
+            for (int parameterIndex: *_workflow->getWorkflowParameterIndex(operationVertex)) {
                 parameterEntrySet->push_back(QString::number(parameterIndex) + "|remove");
+                --_inputParameterCount;
             }
 
             _workflow->removeOperation(operationVertex);
@@ -183,6 +200,7 @@ QStringList WorkflowModel::deleteFlow(int operationIndex1, int operationIndex2, 
                 _workflow->removeOperationFlow(*ei);
                 int parameterIndex = _workflow->getWorkflowParameterIndex(targetNode, indexEnd);
                 parameterEntrySet->push_back(QString::number(parameterIndex) + "|insert");
+                ++_inputParameterCount;
             }
         }
     }

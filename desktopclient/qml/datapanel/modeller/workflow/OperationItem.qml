@@ -240,7 +240,7 @@ Rectangle {
             "flowPoints" : flowPoints,
             "isSelected" : false
         })
-        workflow.addFlow(
+        var parameterIndexes = workflow.addFlow(
             itemid,
             target.itemid,
             flowPoints,
@@ -249,6 +249,8 @@ Rectangle {
         )
         target.resetInputModel()
         wfCanvas.stopWorkingLine()
+
+        canvas.generateForm(parameterIndexes)
     }
 
     function attachFlow(target, attachRect){

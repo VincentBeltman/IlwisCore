@@ -20,17 +20,29 @@ Rectangle {
     /**
     Create a form for the workflow
     */
-    function showRunForm(metaid, operationNames) {
-        var validValues = [], parameterEntrySet = canvas.workflow.getParameterEntrySet();
+    function showRunForm(metaid, operationNames, parameterIndexes) {
+        var validValues = [], parameterindex, action;
 
         if (appFrame.currentAppForm != null) {
-            var currentValues = appFrame.currentAppForm.formresult.split('|')
-            for (var i = 0; i < parameterEntrySet.length; i++) {
-                if (!parameterEntrySet[i]) {
-                    validValues.push(currentValues[i])
+            validValues = appFrame.currentAppForm.formresult.split('|')
+            for (var i = 0; i < parameterIndexes.length; i++) {
+                parameterindex = parameterIndexes[i].split('|');
+                action = parameterindex[1];
+                parameterindex = parameterindex[0];
+
+                if (action === 'insert') {
+                    validValues.splice(parameterindex, 0, "")
+                } else if (action === 'remove') {
+                    validValues.splice(parameterindex, 1)
                 }
             }
+            validValues = validValues.slice(0, canvas.workflow.getInputParameterCount())
         }
+
+        for (var i =0; i < validValues.length; i++) {
+            console.log(validValues[i])
+        }
+        console.log('------------')
 
         var form = formbuilder.index2Form(metaid, true, false, "", operationNames, validValues)
         operationid = metaid
