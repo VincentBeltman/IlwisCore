@@ -50,9 +50,6 @@ Rectangle {
         return operationName.text
     }
 
-
-
-
     Image {
         id : box
         anchors.fill: parent

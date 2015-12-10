@@ -259,6 +259,8 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
 //    formRows += formColumnStart;
 
     for(int i = 0; i < parameters.size(); ++i){
+        QString constantValue = constantValues.value(i, "");
+        bool validConstant = constantValues.value(i, "").size() != 0;
         QString visibile = "true";
         for(int j=0;j<invisibleFieldList.size();++j){
             if(i==invisibleFieldList[j].toInt()){
@@ -292,7 +294,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
                     arg(imagewidth).
                     arg(xshift).
                     arg(input ? keys(parameters[i]._dataType) : "\"?\"").
-                    arg(constantValues.isEmpty() ? "" : constantValues[i]).
+                    arg(constantValue).
                     arg(checkEffects);
 
             QString parameterRow = QString(rowBodyText + textFieldPart + imagePart + "}").arg(check).arg(parameters[i]._label).arg(width).arg(i).arg(checkWidth).arg(xshift).arg(visibile);
@@ -314,16 +316,16 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
         }
         if ( parameters[i]._fieldType == ftRADIOBUTTON){
             QString buttons;
-            if (constantValues.isEmpty() && showEmptyOptionInList) {
-                buttons += QString(rowChoiceOption).arg(QString::number(i) + "empty_value").arg("- (empty)").arg("true").arg(i).arg("\"\"");
+            if (showEmptyOptionInList) {
+                buttons += QString(rowChoiceOption).arg(QString::number(i) + "empty_value").arg("- (empty)").arg(validConstant ? "false" : "true").arg(i).arg(" ");
             }
             for(auto choiceString : parameters[i]._choiceList){
                 QString choice = choiceString, state="false";
                 if (choice[0] == '!') {
                     choice = choice.mid(1);
-                    if (constantValues.isEmpty() && buttons.isEmpty()) state = "true";
+                    if (!validConstant && buttons.isEmpty()) state = "true";
                 }
-                if (constantValues.size() != 0 && constantValues[i] == choice) {
+                if (validConstant && constantValue == choice) {
                     state = "true";
                 }
                 buttons += QString(rowChoiceOption).arg(QString::number(i) + choice).arg(choice).arg(state).arg(i).arg(choice);
@@ -336,19 +338,19 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
         }
         if ( parameters[i]._fieldType == ftCOMBOBOX){
             QString choices = "[";
-            int j = 0;
+            int j = showEmptyOptionInList ? 1 : 0;
             int inputIndex = 0;
             for(QString choiceString : parameters[i]._choiceList){
-                if (constantValues.size() != 0 && constantValues[i] == choiceString) {
+                if ( choiceString[0] == '!'){
+                    choiceString = choiceString.mid(1);
+                }
+                if (validConstant && constantValue == choiceString) {
                     inputIndex = j;
                 }
                 if ( choices.size() > 1)
                     choices += ",";
                 else if ( showEmptyOptionInList )
                     choices += "\" \",";
-                if ( choiceString[0] == '!'){
-                    choiceString = choiceString.mid(1);
-                }
                 choices += "\"" + choiceString + "\"";
                 ++j;
             }
@@ -394,10 +396,11 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
     QString outputPart;
     QString seperator;
     if ( showoutputformat){
-        outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList,"", operationNames, constantValues);
+        outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList,"", operationNames);
 
         if (results.size() > 0) results = ": " + results;
         results = "property var outputFormats;property string formresult" + results;
+
         for(int i = 0; i < outparameters.size(); ++i){
             results += QString(";property string outputfield_%1").arg(i);
             if ( hasType(outparameters[i]._dataType, itCOVERAGE | itTABLE)){
@@ -412,7 +415,7 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
     QString component = columnStart + inputpart + seperator + outputPart + "}";
 
     // for debugging, check if the qml is ok; can be retrieved from teh log file
-    //kernel()->issues()->log(component);
+//    kernel()->issues()->log(component);
 
     return component;
 

@@ -47,6 +47,8 @@
 #include "models/datapanemodel.h"
 #include "models/objectcreator.h"
 #include "models/ilwisobjectcreatormodel.h"
+#include "models/workflow/edgepropobject.h"
+#include "models/workflow/nodepropobject.h"
 #include "models/workflow/scenariodesignermodel.h"
 #include "ilwiscoreui/propertyeditors/numericrepresentationsetter.h"
 #include "ilwiscoreui/propertyeditors/itemrepresentationsetter.h"
