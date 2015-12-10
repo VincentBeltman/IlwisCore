@@ -88,6 +88,32 @@ bool WorkflowModel::hasValueDefined(int operationIndex, int parameterIndex){
 }
 
 /**
+ * Returns the number of input parameters of an operations, this is the same amount as can be seen in the run/workflow form.
+ * @param operationIndex the operation who's input parameter count to get.
+ * @return The number of input parameters
+ */
+int WorkflowModel::operationInputParameterCount(int operationIndex){
+    const OVertex& operationVertex = _operationNodes[operationIndex];
+
+    QString impIndexes = implicitIndexes(operationIndex);
+    QStringList impIndexesList;
+    if(!impIndexes.isEmpty()){
+        impIndexesList = impIndexes.split("|");
+    }
+    int implicitIndexCount = impIndexesList.length();
+
+    qDebug() << "impindexcount: " << implicitIndexCount;
+
+    QList<SPAssignedInputData> list = _workflow->getAssignedInputData(operationVertex);
+
+    for(int i=0;i<list.size();++i){
+        qDebug() << list[i]->value;
+    }
+
+    return 0;
+}
+
+/**
  * Returns the values of an operation which have already been defined (a flow has been drawn to it)
  * @param operationIndex the operation to check
  * @return a string of fields which have been defined, seperated by |

@@ -77,7 +77,8 @@ public:
 
     Q_INVOKABLE bool hasValueDefined(int operationIndex, int parameterIndex);
 
-  Q_INVOKABLE QString implicitIndexes(int operationIndex);
+    Q_INVOKABLE int operationInputParameterCount(int operationIndex);
+    Q_INVOKABLE QString implicitIndexes(int operationIndex);
 
     QQmlListProperty<NodePropObject> getNodes() ;
     QQmlListProperty<EdgePropObject> getEdges();

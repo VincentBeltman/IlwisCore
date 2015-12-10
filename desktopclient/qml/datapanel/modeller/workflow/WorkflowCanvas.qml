@@ -169,8 +169,17 @@ Modeller.ModellerWorkArea {
     /**
       Calls the create meta data method of the WorkflowModel and regenerates the form
       */
-    function generateForm(operationNames) {
+    function generateForm() {
         if (workflow){
+            var operationNames = {}
+
+            for( var i=0; i < wfCanvas.operationsList.length; i++){
+                workflow.operationInputParameterCount(i)
+                wfCanvas.operationsList[i].drawFlows(wfCanvas.ctx)
+
+                operationNames[i + ". " + wfCanvas.operationsList[i].operation.name] = {inParameterCount: wfCanvas.operationsList[i].operation.inParameterCount, outParameterCount: wfCanvas.operationsList[i].operation.outParameterCount};
+            }
+
             workflow.createMetadata()
             manager.showRunForm(workflow.id, operationNames)
         }
@@ -293,15 +302,7 @@ Modeller.ModellerWorkArea {
                     ctx.lineTo(workingLineEnd.x, workingLineEnd.y);
                     ctx.stroke();
                 }
-
-                var operationNames = {}
-                for( var i=0; i < operationsList.length; i++){
-                    operationsList[i].drawFlows(ctx)
-
-                    operationNames[i + ". " + wfCanvas.operationsList[i].operation.name] = {inParameterCount: wfCanvas.operationsList[i].operation.inParameterCount, outParameterCount: wfCanvas.operationsList[i].operation.outParameterCount};
-                }
-                //wfCanvas.requestPaint();
-                generateForm(operationNames)
+                generateForm()
             }
         }
 
