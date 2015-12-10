@@ -16,8 +16,10 @@ Modeller.ModellerWorkArea {
     property int highestZIndex : 1;
 
     function asignConstantInputData(inputData, itemId) {
-        workflow.asignConstantInputData(inputData, itemId)
+        var parameterIndexes = workflow.asignConstantInputData(inputData, itemId)
         wfCanvas.operationsList[itemId].resetInputModel()
+
+        generateForm(parameterIndexes)
     }
 
     function deleteSelectedOperation(){
@@ -94,7 +96,7 @@ Modeller.ModellerWorkArea {
             var flows = item.flowConnections;
 
             // First delete the operation at C++. THIS NEEDS TO BE DONE FIRST
-            workflow.deleteOperation(deleteItemIndex)
+            var parameterIndexes = workflow.deleteOperation(deleteItemIndex)
 
             // This removes 1 from the operation list beginning from deleteItemIndex
             wfCanvas.operationsList.splice(deleteItemIndex, 1)
@@ -132,6 +134,8 @@ Modeller.ModellerWorkArea {
             // Redraw lines
             wfCanvas.canvasValid = false
             wfCanvas.draw(true)
+
+            generateForm(parameterIndexes)
         }
         Component.onCompleted: visible = false
     }
@@ -148,10 +152,12 @@ Modeller.ModellerWorkArea {
             var inputIndex = flow.flowPoints.toParameterIndex
             var outputIndex = flow.flowPoints.fromParameterIndex
 
-            workflow.deleteFlow(from, to, outputIndex, inputIndex)
+            var parameterIndexes = workflow.deleteFlow(from, to, outputIndex, inputIndex)
             wfCanvas.operationsList[deleteItemIndex].flowConnections.splice(deleteEdgeIndex, 1)
             flow.target.resetInputModel()
             wfCanvas.canvasValid = false
+
+            generateForm(parameterIndexes)
         }
         Component.onCompleted: {
             visible = false
@@ -169,19 +175,20 @@ Modeller.ModellerWorkArea {
     /**
       Calls the create meta data method of the WorkflowModel and regenerates the form
       */
-    function generateForm() {
+    function generateForm(parameterIndexes) {
         if (workflow){
             var operationNames = {}
-
             for( var i=0; i < wfCanvas.operationsList.length; i++){
-                workflow.operationInputParameterCount(i)
-                wfCanvas.operationsList[i].drawFlows(wfCanvas.ctx)
-
-                operationNames[i + ". " + wfCanvas.operationsList[i].operation.name] = {inParameterCount: wfCanvas.operationsList[i].operation.inParameterCount, outParameterCount: wfCanvas.operationsList[i].operation.outParameterCount};
+                var operationItem = wfCanvas.operationsList[i];
+                operationItem.drawFlows(wfCanvas.ctx)
+                operationNames[i + ". " + operationItem.operation.name] = {
+                    inParameterCount: operationItem.operation.inParameterCount,
+                    outParameterCount: operationItem.operation.outParameterCount
+                };
             }
 
             workflow.createMetadata()
-            manager.showRunForm(workflow.id, operationNames)
+            manager.showRunForm(workflow.id, operationNames, parameterIndexes)
         }
     }
 
@@ -243,6 +250,7 @@ Modeller.ModellerWorkArea {
                 }
             }
         }
+        generateForm()
     }
 
     Canvas {
@@ -302,7 +310,13 @@ Modeller.ModellerWorkArea {
                     ctx.lineTo(workingLineEnd.x, workingLineEnd.y);
                     ctx.stroke();
                 }
+<<<<<<< HEAD
                 generateForm()
+=======
+                for( var i=0; i < operationsList.length; i++){
+                    operationsList[i].drawFlows(ctx)
+                }
+>>>>>>> 6a854d5e62f1246a0b596887e57d1c19f0059443
             }
         }
 
@@ -389,9 +403,11 @@ Modeller.ModellerWorkArea {
                     }
                     var oper = wfCanvas.getOperation(drag.source.ilwisobjectid)
                     wfCanvas.createItem(drag.x - 50, drag.y - 30,oper)
-                    workflow.addOperation(drag.source.ilwisobjectid)
+                    var paramterIndexes = workflow.addOperation(drag.source.ilwisobjectid)
 
                     wfCanvas.canvasValid = false
+
+                    generateForm(paramterIndexes)
                 }
             }
         }
@@ -463,7 +479,8 @@ Modeller.ModellerWorkArea {
                         item.isSelected = true
 
                         implicitIndexes = workflow.implicitIndexes(operationSelected)
-                        constantValues = workflow.getAsignedValuesByItemID(item.itemdId)
+                        constantValues = workflow.getAsignedValuesByItemID(operationSelected)
+
                         if(implicitIndexes){
                             manager.showOperationFormWithHiddenFields(item, operationSelected, constantValues, implicitIndexes)
                         }else{
@@ -478,69 +495,23 @@ Modeller.ModellerWorkArea {
 
             }
 
-//            onDoubleClicked: {
-//                var pressed = -1, item = 0;
-//                for(var i=0; i < wfCanvas.operationsList.length; ++i){
-
-//                    item = wfCanvas.operationsList[i]
-//                    var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
-
-//                    if ( isContained && item.z > highestZ ) {
-//                        pressed = i
-//                        highestZ = item.z
-//                    }
-//                }
-//<<<<<<< HEAD
-//                if (pressed > -1) {
-//                    var resource = mastercatalog.id2Resource(item.operation.id)
-//                    var filter = "itemid=" + resource.id
-//                    bigthing.newCatalog(filter, "workflow",resource.url,"other")
-//=======
-//                wfCanvas.oldx = mouseX
-//                wfCanvas.oldy = mouseY
-//                wfCanvas.currentIndex = pressed
-//                if (pressed > -1) {
-//                    item = wfCanvas.operationsList[pressed]
-//                    item.isSelected = true
-
-//                    var definedValueIndexes = workflow.definedValueIndexes(pressed)
-
-//                    if(definedValueIndexes){
-//                        manager.showOperationFormWithHiddenFields(item.operation.id,pressed, definedValueIndexes)
-//                    }else{
-//                        manager.showOperationForm(item.operation.id, pressed)
-//                    }
-
-//                    manager.showMetaData(item.operation)
-//                } else {
-//                    manager.resetMetaData(workflow);
-//>>>>>>> master
-//                }
-//            }
-
             onDoubleClicked: {
-                var pressed = -1, item = 0;
+                var operationSelected = -1, item = 0, highestZ = 0;
                 for(var i=0; i < wfCanvas.operationsList.length; ++i){
 
                     item = wfCanvas.operationsList[i]
                     var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
 
-                    if ( isContained) {
-                        pressed = i
+                    if ( isContained && item.z > highestZ ) {
+                        operationSelected = i
+                        highestZ = item.z
                     }
                 }
-                if (pressed > -1) {
+                if (operationSelected > -1) {
                     var resource = mastercatalog.id2Resource(item.operation.id)
                     var filter = "itemid=" + resource.id
                     bigthing.newCatalog(filter, "workflow",resource.url,"other")
                 }
-
-
-            }
-
-            Keys.onEscapePressed: {
-                console.log("escape key");
-                wfCanvas.stopWorkingLine()
             }
 
 //            Keys.onEscapePressed: {

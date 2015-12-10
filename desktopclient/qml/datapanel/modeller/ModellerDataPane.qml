@@ -192,13 +192,6 @@ Item {
                 canvas.asignConstantInputData(vertexIndex, parameterIndex, value)
             }
 
-
-//            function asignConstantInputData(vertexIndex, parameterIndex, value){
-//                canvas.asignConstantInputData(vertexIndex, parameterIndex, value)
-//            }
-
-
-
             WorkFlow.WorkflowCanvas {
                 id: canvas
                 state : "visible"
