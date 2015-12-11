@@ -250,7 +250,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
 
     //Variables for workflow form
     QVariantMap::iterator operationIndex = operationNames.begin();
-    int operationInParameterCount = 0;
+    int operationInParameterCount = 1;
 
     for(int i = 0; i < parameters.size(); ++i){
         QString constantValue = constantValues.value(i, "");
@@ -258,7 +258,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
         QString operationRowStart;
         QString operationRowEnd;
 
-        if(!operationNames.empty() && false){ //TODO: true weghalen
+        if(!operationNames.empty()){
             QVariant values = operationIndex.value();
             QVariantMap map = values.toMap();
 
@@ -269,20 +269,33 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
                 inParameterCount = map.value("outParameterCount").toInt();
             }
 
+            while(inParameterCount<=0){
+                ++operationIndex;
+
+                values = operationIndex.value();
+                map = values.toMap();
+
+                if(input){
+                    inParameterCount = map.value("inParameterCount").toInt();
+                }else{
+                    inParameterCount = map.value("outParameterCount").toInt();
+                }
+            }
+
             int number = std::distance( operationNames.begin(), operationIndex );
 
-            if(operationInParameterCount==0){
+            if(operationInParameterCount==1){
                 operationRowStart = QString("Row{width:parent.width;");
                 operationRowStart += QString("Column{height:parent.height; width:25;Rectangle{Text{anchors.fill:parent; text:\"%1.\";font.pixelSize:15}").arg(number);
                 operationRowStart += QString("Rectangle{anchors.bottom:parent.bottom;width : parent.width; height:1;color : \"black\"} width:parent.width;height:parent.height;}}");
                 operationRowStart += QString("Column{width:parent.width-25; ");
             }
 
-            if(operationInParameterCount+1==inParameterCount){
+            if(operationInParameterCount==inParameterCount){
                 operationRowEnd = "Rectangle{width : parent.width; height:3;color : \"white\"} Rectangle{width : parent.width; height:1;color : \"black\"}}}";
 
                 ++operationIndex;
-                operationInParameterCount = -1;
+                operationInParameterCount = 0;
             }
 
             ++operationInParameterCount;
@@ -425,7 +438,7 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
 
     QString outputPart;
     QString seperator;
-    if ( showoutputformat){
+    if ( showoutputformat){ //TODO change to showoutputformat
         outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList,"", operationNames);
 
         if (results.size() > 0) results = ": " + results;

@@ -134,22 +134,37 @@ bool WorkflowModel::hasValueDefined(int operationIndex, int parameterIndex){
 int WorkflowModel::operationInputParameterCount(int operationIndex){
     const OVertex& operationVertex = _operationNodes[operationIndex];
 
-    QString impIndexes = implicitIndexes(operationIndex);
-    QStringList impIndexesList;
-    if(!impIndexes.isEmpty()){
-        impIndexesList = impIndexes.split("|");
-    }
-    int implicitIndexCount = impIndexesList.length();
-
-    qDebug() << "impindexcount: " << implicitIndexCount;
-
     QList<SPAssignedInputData> list = _workflow->getAssignedInputData(operationVertex);
 
+    int inParameterCount = list.length();
+
     for(int i=0;i<list.size();++i){
-        qDebug() << list[i]->value;
+        if(list[i]->value != ""){
+            --inParameterCount;
+        }
     }
 
-    return 0;
+    return inParameterCount;
+}
+
+/**
+ * Returns the number of output parameters of an operations, this is the same amount as can be seen in the run/workflow form.
+ * @param operationIndex the operation who's output parameter count to get.
+ * @return The number of output parameters
+ */
+int WorkflowModel::operationOutputParameterCount(int operationIndex){
+    const OVertex& operationVertex = _operationNodes[operationIndex];
+
+    QList<OVertex> operationsWithExternalOutput = _workflow->getNodesWithExternalOutputs();
+
+    int occurences = 0;
+    for(int i=0;i<operationsWithExternalOutput.length();++i){
+        if(operationsWithExternalOutput[i] == operationVertex){
+            ++occurences;
+        }
+    }
+
+    return occurences;
 }
 
 /**

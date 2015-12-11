@@ -177,14 +177,18 @@ Modeller.ModellerWorkArea {
       */
     function generateForm(parameterIndexes) {
         if (workflow){
+            workflow.createMetadata()
+
             var operationNames = {}
             for( var i=0; i < wfCanvas.operationsList.length; i++){
+
                 var operationItem = wfCanvas.operationsList[i];
                 operationItem.drawFlows(wfCanvas.ctx)
                 operationNames[i + ". " + operationItem.operation.name] = {
-                    inParameterCount: operationItem.operation.inParameterCount,
-                    outParameterCount: operationItem.operation.outParameterCount
+                    inParameterCount: workflow.operationInputParameterCount(i),
+                    outParameterCount: workflow.operationOutputParameterCount(i)
                 };
+
             }
 
             workflow.createMetadata()
@@ -310,13 +314,10 @@ Modeller.ModellerWorkArea {
                     ctx.lineTo(workingLineEnd.x, workingLineEnd.y);
                     ctx.stroke();
                 }
-<<<<<<< HEAD
-                generateForm()
-=======
+
                 for( var i=0; i < operationsList.length; i++){
                     operationsList[i].drawFlows(ctx)
                 }
->>>>>>> 6a854d5e62f1246a0b596887e57d1c19f0059443
             }
         }
 
