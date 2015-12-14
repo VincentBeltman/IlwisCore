@@ -250,7 +250,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
 
     //Variables for workflow form
     QVariantMap::iterator operationIndex = operationNames.begin();
-    int operationInParameterCount = 1;
+    int operationParameterCount = 1;
 
     for(int i = 0; i < parameters.size(); ++i){
         QString constantValue = constantValues.value(i, "");
@@ -262,43 +262,47 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
             QVariant values = operationIndex.value();
             QVariantMap map = values.toMap();
 
-            int inParameterCount;
+            int parameterCount;
             if(input){
-                inParameterCount = map.value("inParameterCount").toInt();
+                parameterCount = map.value("inParameterCount").toInt();
             }else{
-                inParameterCount = map.value("outParameterCount").toInt();
+                parameterCount = map.value("outParameterCount").toInt();
             }
 
-            while(inParameterCount<=0){
+            while(parameterCount==0){
                 ++operationIndex;
 
                 values = operationIndex.value();
                 map = values.toMap();
 
                 if(input){
-                    inParameterCount = map.value("inParameterCount").toInt();
+                    parameterCount = map.value("inParameterCount").toInt();
                 }else{
-                    inParameterCount = map.value("outParameterCount").toInt();
+                    parameterCount = map.value("outParameterCount").toInt();
                 }
             }
 
             int number = std::distance( operationNames.begin(), operationIndex );
 
-            if(operationInParameterCount==1){
+            if(operationParameterCount==1){
                 operationRowStart = QString("Row{width:parent.width;");
                 operationRowStart += QString("Column{height:parent.height; width:25;Rectangle{Text{anchors.fill:parent; text:\"%1.\";font.pixelSize:15}").arg(number);
-                operationRowStart += QString("Rectangle{anchors.bottom:parent.bottom;width : parent.width; height:1;color : \"black\"} width:parent.width;height:parent.height;}}");
+                if(operationIndex != operationNames.end()-1) operationRowStart += QString("Rectangle{anchors.bottom:parent.bottom;width : parent.width; height:1;color : \"black\"}");
+                operationRowStart += QString("width:parent.width;height:parent.height;}}");
                 operationRowStart += QString("Column{width:parent.width-25; ");
             }
 
-            if(operationInParameterCount==inParameterCount){
-                operationRowEnd = "Rectangle{width : parent.width; height:3;color : \"white\"} Rectangle{width : parent.width; height:1;color : \"black\"}}}";
-
+            if(operationParameterCount==parameterCount){
                 ++operationIndex;
-                operationInParameterCount = 0;
+
+                if(operationIndex != operationNames.end()) operationRowEnd = "Rectangle{width : parent.width; height:3;color : \"white\"} Rectangle{width : parent.width; height:1;color : \"black\"}";
+
+                operationRowEnd += "}}";
+
+                operationParameterCount = 0;
             }
 
-            ++operationInParameterCount;
+            ++operationParameterCount;
 
             formRows += operationRowStart;
         }
