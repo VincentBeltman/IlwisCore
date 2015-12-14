@@ -193,7 +193,7 @@ public:
     void removeInputAssignment(const OVertex &v, quint16 index);
     /*!
      * \brief Cleans all input assignments of the vertex. Usefull when deleting operations.
-     * \param v
+     * \param v The vertex
      */
     void removeAllInputAssignments(const OVertex &v);
     /*!

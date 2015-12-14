@@ -13,8 +13,8 @@ public:
     /*!
      * \brief Executes the workflow
      * \param globalCtx the context to save the output to
-     * \param globalSymTable
-     * \return true when succesfull false otherhwise
+     * \param globalSymTable The symbol table to use for saving
+     * \return true when succesful false otherhwise
      */
     bool execute(ExecutionContext *globalCtx, SymbolTable& globalSymTable);
     /*!
@@ -26,7 +26,7 @@ public:
     static Ilwis::OperationImplementation *create(quint64 metaid,const Ilwis::OperationExpression& expr);
     /*!
      * \brief Prepares before executing
-     * \param ctx
+     * \param ctx The current context
      * \return State of object.
      */
     Ilwis::OperationImplementation::State prepare(Ilwis::ExecutionContext *ctx, const SymbolTable &);
@@ -55,7 +55,7 @@ private:
      * \param v The vertex
      * \param ctx Context to save to
      * \param symTable The symbol table
-     * \return  true when succesfull
+     * \return  true when succesful
      */
     bool executeInputNode(const OVertex &v, ExecutionContext *ctx, SymbolTable &symTable);
     /*!
@@ -63,7 +63,7 @@ private:
      * \param v The vertex
      * \param ctx Context to save to
      * \param symTable The symbol table
-     * \return  true when succesfull
+     * \return  true when succesful
      */
     bool reverseFollowExecutionPath(const OVertex &v, ExecutionContext *ctx, SymbolTable &symTable);
 
