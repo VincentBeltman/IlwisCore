@@ -16,6 +16,19 @@ Modeller.ModellerWorkArea {
     property var deleteEdgeIndex;
     property int highestZIndex : 1;
 
+    function getContext()
+    {
+        return wfCanvas.ctx;
+    }
+
+    function panOperations(x, y)
+    {
+        for( var i=0; i < wfCanvas.operationsList.length; i++){
+            console.log("Pan operation " + x + " " + y);
+            wfCanvas.operationsList[i].panOperation(x,y);
+        }
+    }
+
     function asignConstantInputData(inputData, itemId) {
         workflow.asignConstantInputData(inputData, itemId)
         wfCanvas.operationsList[itemId].resetInputModel()
@@ -248,6 +261,10 @@ Modeller.ModellerWorkArea {
         id : wfCanvas
         anchors.fill: parent
 
+        transform : Scale{
+            id : tform
+        }
+
 
         property var ctx: getContext('2d')
         property bool canvasValid: true
@@ -264,14 +281,13 @@ Modeller.ModellerWorkArea {
 
 
         property double scaleFactor: 1.1;
-        property int lastX: canvas.width/2;
-        property int lastY: canvas.height/2;
+        property int lastX: wfCanvas.width/2;
+        property int lastY: wfCanvas.height/2;
+        property int lastOpX: canvas.width/2;
+        property int lastOpY: canvas.height/2;
         property var dragStart;
         property bool dragged;
-        //property var ctx;
         property var matrix: new Matrix.Matrix();
-        property double sxx: 0;
-        property double syy: 0;
 
         Timer {
             interval: 30;
@@ -305,13 +321,15 @@ Modeller.ModellerWorkArea {
                 if ( workingLineBegin.x !== -1 && workingLineEnd.x !== -1){
                     ctx.beginPath();
                     ctx.lineWidth = 2;
-                    ctx.moveTo(workingLineBegin.x, workingLineBegin.y);
+                    var pt1 = transformedPoint(workingLineBegin.x, workingLineBegin.y);
+                    var pt2 = transformedPoint(workingLineEnd.x, workingLineEnd.y);
+                    ctx.moveTo(pt1.x, pt1.y);
                     ctx.strokeStyle = "red"
-                    ctx.lineTo(workingLineEnd.x, workingLineEnd.y);
+                    ctx.lineTo(pt2.x, pt2.y);
                     ctx.stroke();
                 }
                 for( var i=0; i < operationsList.length; i++){
-                    operationsList[i].drawFlows(ctx)
+                    operationsList[i].drawFlows(ctx, wfCanvas.matrix);
                 }
                 generateForm()
             }
@@ -427,17 +445,18 @@ Modeller.ModellerWorkArea {
 
             onWheel: {
                 handleScroll(wheel);
-                console.log("handle scroll");
-                //wheel scroll here
             }
 
             onPressed: {
 
                 if (canvasActive) {
+
                     wfCanvas.canvasValid = false;
 
                     wfCanvas.lastX = mouseX;
                     wfCanvas.lastY = mouseY;
+                    wfCanvas.lastOpX = mouseX;
+                    wfCanvas.lastOpY = mouseY;
                     wfCanvas.dragStart = transformedPoint(wfCanvas.lastX,wfCanvas.lastY);
                     wfCanvas.dragged = false;
 
@@ -492,6 +511,7 @@ Modeller.ModellerWorkArea {
                                 operationSelected = i
                                 highestZ = item.z
                             }
+
                             item.isSelected = false
                         }
                         wfCanvas.oldx = mouseX
@@ -516,6 +536,11 @@ Modeller.ModellerWorkArea {
                             manager.resetMetaData();
                         }
                     }
+
+//                    if(!selected)
+//                    {
+
+//                    }
                 }
             }
 
@@ -543,14 +568,17 @@ Modeller.ModellerWorkArea {
             }
 
             onPositionChanged: {
+
                 wfCanvas.lastX = mouseX;
                 wfCanvas.lastY = mouseY;
                 wfCanvas.dragged = true;
                 if (wfCanvas.dragStart){
                     var pt = transformedPoint(wfCanvas.lastX,wfCanvas.lastY);
                     translate(pt.x-wfCanvas.dragStart.x,pt.y-wfCanvas.dragStart.y);
+                    panOperation((wfCanvas.lastX - wfCanvas.lastOpX),(wfCanvas.lastY - wfCanvas.lastOpY));
+                    wfCanvas.lastOpX = mouseX;
+                    wfCanvas.lastOpY = mouseY;
                 }
-
 
                 if ( attachementForm.state == "invisible"){
                     if ( wfCanvas.workingLineBegin.x !== -1){
@@ -571,8 +599,8 @@ Modeller.ModellerWorkArea {
             }
 
             onReleased: {
-                wfCanvas.dragStart = null;
                 wfCanvas.stopWorkingLine()
+                wfCanvas.dragStart = null;
             }
         }
 
@@ -589,19 +617,24 @@ Modeller.ModellerWorkArea {
     }
 
     function zoom(clicks){
+
         var pt = transformedPoint(wfCanvas.lastX,wfCanvas.lastY);
+
         translate(pt.x,pt.y);
+
         var factor = Math.pow(wfCanvas.scaleFactor,clicks);
+
         scale(factor,factor);
-        translate(-pt.x,-pt.y);
-        console.log("zooming");
-        //wfCanvas.draw(true);
+        scaleOperation(factor);
+
+        translate(-pt.x, -pt.y);
+
+        replacePanOperation();
     }
 
     function handleScroll(wheel){
 
         var delta = wheel.angleDelta.y/40;
-        console.log(delta);
         if (delta) zoom(delta);
     }
 
@@ -610,11 +643,7 @@ Modeller.ModellerWorkArea {
         wfCanvas.matrix = wfCanvas.matrix.scaleX(sx);
         wfCanvas.matrix = wfCanvas.matrix.scaleY(sy);
 
-        wfCanvas.sxx = sx;
-        wfCanvas.syy = sy;
-
         wfCanvas.ctx.scale(sx, sy);
-        console.log("Scaling");
     }
 
     function translate(dx, dy)
@@ -624,11 +653,57 @@ Modeller.ModellerWorkArea {
         wfCanvas.ctx.translate(dx,dy);
     }
 
+    function panOperation(x,y)
+    {
+        for(var i=0; i < wfCanvas.operationsList.length; i++)
+        {
+            wfCanvas.operationsList[i].panOperation(x,y);
+        }
+    }
+
+    function panZoomOperation(x,y)
+    {
+        for(var i=0; i < wfCanvas.operationsList.length; i++)
+        {
+            wfCanvas.operationsList[i].panZoomOperation(x,y);
+        }
+    }
+
+    function replacePanOperation(x,y)
+    {
+        for(var i=0; i < wfCanvas.operationsList.length; i++)
+        {
+            var xy = wfCanvas.operationsList[i].getXYcoords();
+            var ptOp = getScreenCoords(xy.x,xy.y);
+            wfCanvas.operationsList[i].replacePanOperation(ptOp.x,ptOp.y);
+        }
+    }
+
+//    function calculatePan(x,y)
+//    {
+//        var pt = currentItem.calculatePan(x, y);
+//        return pt;
+//    }
+
+    function scaleOperation(scaleFactor)
+    {
+        for(var i=0; i < wfCanvas.operationsList.length; i++)
+        {
+            wfCanvas.operationsList[i].scaleOperation(scaleFactor);
+        }
+    }
+
     function transformedPoint(x, y)
     {
         return {
             x: wfCanvas.matrix.inverse().a * x + wfCanvas.matrix.inverse().c * y + wfCanvas.matrix.inverse().e,
             y: wfCanvas.matrix.inverse().b * x + wfCanvas.matrix.inverse().d * y + wfCanvas.matrix.inverse().f
         }
+    }
+
+    function getScreenCoords(x, y) {
+        var xn = wfCanvas.matrix.e + x * wfCanvas.matrix.a;
+        var yn = wfCanvas.matrix.f + y * wfCanvas.matrix.d;
+        return { x: xn, y: yn };
     }
 }

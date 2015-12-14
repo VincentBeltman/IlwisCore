@@ -7,6 +7,7 @@ import ScenarioBuilderModel 1.0
 import ScenarioDesignerModel 1.0
 import "./workflow" as WorkFlow
 import "../../Global.js" as Global
+import "../../matrix.js" as Matrix
 
 Item {
     id: modellerDataPane
@@ -192,15 +193,57 @@ Item {
                 canvas.asignConstantInputData(vertexIndex, parameterIndex, value)
             }
 
-
-
             WorkFlow.WorkflowCanvas {
+
+                property double scaleF: 1.1;
+                property int lastX: canvas.width/2;
+                property int lastY: canvas.height/2;
+                property var dragStart;
+                property bool dragged;
+                property var matrix: new Matrix.Matrix();
+                property double sxx: 0;
+                property double syy: 0;
+
                 id: canvas
                 state : "visible"
                 transform : Scale{
                     id : tform
                 }
+
 //                MouseArea {
+
+//                    anchors.fill: parent
+//                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+//                    hoverEnabled: true
+
+//                    onWheel: {
+//                        handleScroll(wheel);
+//                        console.log("handle scroll");
+//                    }
+
+//                    onPressed: {
+//                        canvas.lastX = mouseX;
+//                        canvas.lastY = mouseY;
+//                        canvas.dragStart = transformedPoint(canvas.lastX,canvas.lastY);
+//                        canvas.dragged = false;
+//                    }
+
+//                    onPositionChanged: {
+//                        canvas.lastX = mouseX;
+//                        canvas.lastY = mouseY;
+//                        canvas.dragged = true;
+//                        if (canvas.dragStart){
+//                            var pt = transformedPoint(canvas.lastX,canvas.lastY);
+//                            translate(pt.x-canvas.dragStart.x,pt.y-canvas.dragStart.y);
+//                        }
+//                    }
+
+//                    onReleased: {
+//                        canvas.dragStart = null;
+//                    }
+
+
+
 //                    anchors.fill: parent
 //                    propagateComposedEvents: true
 //                    onWheel: {

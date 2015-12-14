@@ -11,8 +11,34 @@ Rectangle {
     id : operationItem
     width: 200
     height: 120
-    scale: 1
+    transformOrigin: Item.TopLeft;
     z: 0
+    transform: Translate { id: transformTl }
+
+    function panOperation(x, y)
+    {
+        transformTl.x += x;
+        transformTl.y += y;
+    }
+
+    function getXYcoords()
+    {
+        var pt = {x: 0, y: 0};
+        pt.x = operationItem.x;
+        pt.y = operationItem.y;
+        return pt;
+    }
+
+    function replacePanOperation(x, y)
+    {
+        transformTl.x = x - operationItem.x ;
+        transformTl.y = y - operationItem.y ;
+    }
+
+    function scaleOperation(scaleFactor)
+    {
+        operationItem.scale *= scaleFactor;
+    }
 
     property OperationModel operation
     property int itemid
@@ -182,18 +208,36 @@ Rectangle {
         att1.isSelected = att2.isSelected = att3.isSelected = att4.isSelected = att5.isSelected = att6.isSelected = att7.isSelected = att8.isSelected = false
     }
 
-    function drawFlows(ctx){
+    function transformedPoint(matrix, x, y)
+    {
+        return {
+            x: matrix.inverse().a * x + matrix.inverse().c * y + matrix.inverse().e,
+            y: matrix.inverse().b * x + matrix.inverse().d * y + matrix.inverse().f
+        }
+    }
+
+    function getScreenCoords(matrix, x, y) {
+        var xn = matrix.e + x * matrix.a;
+        var yn = matrix.f + y * matrix.d;
+        return { x: xn, y: yn };
+    }
+
+    function drawFlows(ctx, matrix){
 
         for(var i=0; i < flowConnections.length; i++){
 
             var item = flowConnections[i]
 
-            var startPoint = item.attachsource.center()
-            var endPoint = item.attachtarget.center()
-            var fromx = startPoint.x
-            var fromy = startPoint.y
-            var tox = endPoint.x
-            var toy = endPoint.y
+            var startPoint = item.attachsource.center();
+            var endPoint = item.attachtarget.center();
+
+            var pt1 = transformedPoint(matrix, startPoint.x, startPoint.y);
+            var pt2 = transformedPoint(matrix, endPoint.x, endPoint.y);
+
+            var fromx = pt1.x
+            var fromy = pt1.y
+            var tox = pt2.x
+            var toy = pt2.y
             var headlen = 15;   // length of head in pixels
             var angle = Math.atan2(toy-fromy,tox-fromx);
 
