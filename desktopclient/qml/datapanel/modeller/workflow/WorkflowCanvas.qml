@@ -538,11 +538,6 @@ Modeller.ModellerWorkArea {
                 wfCanvas.stopWorkingLine()
             }
 
-            Keys.onEscapePressed: {
-                console.log("escape key");
-                wfCanvas.stopWorkingLine()
-            }
-
             onPositionChanged: {
                 if ( attachementForm.state == "invisible"){
                     if ( wfCanvas.workingLineBegin.x !== -1){
