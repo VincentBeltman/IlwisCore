@@ -90,13 +90,13 @@ QStringList WorkflowModel::addOperation(const QString &id)
     return *parameterEntrySet;
 }
 
-QStringList WorkflowModel::addFlow(int operationIndex1, int operationIndex2, const QVariantMap& flowpoints, int outRectIndex, int inRectIndex)
+QStringList WorkflowModel::addFlow(int vertexFrom, int vertexTo, const QVariantMap& flowpoints, int rectFrom, int rectTo)
 {
     QStringList* parameterEntrySet = new QStringList();
-    if ( operationIndex1 >= 0 && operationIndex2 >= 0 && flowpoints.size() == 2) {
+    if ( vertexFrom >= 0 && vertexTo >= 0 && flowpoints.size() == 2) {
         try {
-            const OVertex& fromOperationVertex = _operationNodes[operationIndex1];
-            const OVertex& toOperationVertex = _operationNodes[operationIndex2];
+            const OVertex& fromOperationVertex = _operationNodes[vertexFrom];
+            const OVertex& toOperationVertex = _operationNodes[vertexTo];
             int outParamIndex = flowpoints["fromParameterIndex"].toInt();
             int inParamIndex = flowpoints["toParameterIndex"].toInt();
 
@@ -106,7 +106,7 @@ QStringList WorkflowModel::addFlow(int operationIndex1, int operationIndex2, con
 
             EdgeProperties flowPoperties(
                 outParamIndex, inParamIndex,
-                outRectIndex, inRectIndex
+                rectFrom, rectTo
             );
 
             _workflow->addOperationFlow(fromOperationVertex,toOperationVertex,flowPoperties);
@@ -220,26 +220,26 @@ QStringList WorkflowModel::deleteOperation(int index)
     }
 }
 
-QStringList WorkflowModel::deleteFlow(int operationIndex1, int operationIndex2, int indexStart, int indexEnd)
+QStringList WorkflowModel::deleteFlow(int vertexFrom, int vertexTo, int parameterFrom, int parameterto)
 {
     QStringList* parameterEntrySet = new QStringList();
-    OVertex sourceNode = _operationNodes[operationIndex1];
+    OVertex sourceNode = _operationNodes[vertexFrom];
     boost::graph_traits<WorkflowGraph>::out_edge_iterator ei, ei_end;
     for (boost::tie(ei,ei_end) = _workflow->getOutEdges(sourceNode); ei != ei_end; ++ei) {
 
         OVertex targetNode = _workflow->getTargetOperationNode(*ei);
 
         NodeProperties npNode = _workflow->nodeProperties(targetNode);
-        NodeProperties npTarget = _workflow->nodeProperties(_operationNodes[operationIndex2]);
+        NodeProperties npTarget = _workflow->nodeProperties(_operationNodes[vertexTo]);
 
         if(npNode._operationid == npTarget._operationid)
         {
             EdgeProperties ep = _workflow->edgeProperties(*ei);
 
-            if(ep._outputParameterIndex == indexStart && ep._inputParameterIndex == indexEnd)
+            if(ep._outputParameterIndex == parameterFrom && ep._inputParameterIndex == parameterto)
             {
                 _workflow->removeOperationFlow(*ei);
-                int parameterIndex = _workflow->getWorkflowParameterIndex(targetNode, indexEnd);
+                int parameterIndex = _workflow->getWorkflowParameterIndex(targetNode, parameterto);
                 parameterEntrySet->push_back(QString::number(parameterIndex) + "|insert");
                 ++_inputParameterCount;
             }

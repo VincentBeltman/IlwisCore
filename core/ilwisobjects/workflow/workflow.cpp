@@ -341,11 +341,6 @@ bool Workflow::hasValueDefined(const OVertex &operationVertex, int parameterInde
     return false;
 }
 
-/**
- * Returns the inputs of an operation which have already been defined (if they for example have a flow drawn to them)
- * @param operationVertex the operations
- * @return A string seperated by |
- */
 QString Workflow::implicitIndexes(const OVertex &operationVertex){
     QString definedValues;
 
