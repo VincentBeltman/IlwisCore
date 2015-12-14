@@ -57,6 +57,7 @@ Modeller.ModellerWorkArea {
 
             workflow.deleteFlow(from, to, outputIndex, inputIndex)
             operationObject.flowConnections.splice(deleteEdgeIndex, 1)
+
             flow.target.resetInputModel()
             wfCanvas.canvasValid = false
 
@@ -519,6 +520,46 @@ Modeller.ModellerWorkArea {
                 }
             }
 
+//            onDoubleClicked: {
+//                var pressed = -1, item = 0;
+//                for(var i=0; i < wfCanvas.operationsList.length; ++i){
+
+//                    item = wfCanvas.operationsList[i]
+//                    var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
+
+//                    if ( isContained && item.z > highestZ ) {
+//                        pressed = i
+//                        highestZ = item.z
+//                    }
+//                }
+//<<<<<<< HEAD
+//                if (pressed > -1) {
+//                    var resource = mastercatalog.id2Resource(item.operation.id)
+//                    var filter = "itemid=" + resource.id
+//                    bigthing.newCatalog(filter, "workflow",resource.url,"other")
+//=======
+//                wfCanvas.oldx = mouseX
+//                wfCanvas.oldy = mouseY
+//                wfCanvas.currentIndex = pressed
+//                if (pressed > -1) {
+//                    item = wfCanvas.operationsList[pressed]
+//                    item.isSelected = true
+
+//                    var definedValueIndexes = workflow.definedValueIndexes(pressed)
+
+//                    if(definedValueIndexes){
+//                        manager.showOperationFormWithHiddenFields(item.operation.id,pressed, definedValueIndexes)
+//                    }else{
+//                        manager.showOperationForm(item.operation.id, pressed)
+//                    }
+
+//                    manager.showMetaData(item.operation)
+//                } else {
+//                    manager.resetMetaData(workflow);
+//>>>>>>> master
+//                }
+//            }
+
             onDoubleClicked: {
                 var pressed = -1, item = 0;
                 for(var i=0; i < wfCanvas.operationsList.length; ++i){
@@ -535,6 +576,13 @@ Modeller.ModellerWorkArea {
                     var filter = "itemid=" + resource.id
                     bigthing.newCatalog(filter, "workflow",resource.url,"other")
                 }
+
+
+            }
+
+            Keys.onEscapePressed: {
+                console.log("escape key");
+                wfCanvas.stopWorkingLine()
             }
 
             Keys.onEscapePressed: {
