@@ -123,10 +123,6 @@ Item {
         canvas.asignConstantInputData(inputData, operationid);
     }
 
-    function asignConstantInputData(inputData, operationid) {
-        canvas.asignConstantInputData(inputData, operationid);
-    }
-
     /**
       Calls the WorkflowCanvas's run method
       */
@@ -187,42 +183,6 @@ Item {
         orientation: Qt.Vertical
         height : parent.height - modellertools.height
 
-
-        ModellerErrorView {
-            height: 0
-            id : errorview
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            anchors.right: parent.right
-            state: "smaller"
-
-            states: [
-                State {
-                    name : "bigger"
-                    PropertyChanges {
-                        target: errorview
-                        height : 80
-                    }
-                    PropertyChanges {
-                        target: datapane
-                        height : parent.height - modellertools.height - 170 - 80
-                    }
-                },
-                State { name: "smaller"
-
-                    PropertyChanges {
-                        target: errorview
-                        height : 0
-                    }
-                }
-            ]
-            transitions: [
-                Transition {
-                    NumberAnimation { properties: "height"; duration : 750 ; easing.type: Easing.InOutCubic }
-                }
-            ]
-        }
-
         Item {
             id : datapane
             width : parent.width
@@ -231,13 +191,6 @@ Item {
             function asignConstantInputData(vertexIndex, parameterIndex, value){
                 canvas.asignConstantInputData(vertexIndex, parameterIndex, value)
             }
-
-
-            function asignConstantInputData(vertexIndex, parameterIndex, value){
-                canvas.asignConstantInputData(vertexIndex, parameterIndex, value)
-            }
-
-
 
             WorkFlow.WorkflowCanvas {
                 id: canvas
