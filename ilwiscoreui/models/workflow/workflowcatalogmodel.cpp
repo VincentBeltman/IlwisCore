@@ -81,7 +81,6 @@ QString WorkflowCatalogModel::executeworkflow(quint64 workflowid, const QString 
 {
     // TODO execute workflow on a datastructure ... we have to enable debug flags
 
-
     if ( workflowid == 0 || parameters == "")
         return sUNDEF;
 
