@@ -55,8 +55,8 @@ HEADERS += \
     baseoperations/creators/createpalettedomain.h \
     baseoperations/creators/createcornersgeoreference.h \
     baseoperations/creators/createprojectedcoordinatesystem.h \
-    baseoperations/conditions/numbercondition.h \
-    baseoperations/util/testoperation.h
+    baseoperations/util/testoperation.h \
+    baseoperations/conditions/numbercondition.h
 
 SOURCES += \
     baseoperations/baseoperationsmodule.cpp \
@@ -98,11 +98,14 @@ SOURCES += \
     baseoperations/creators/createpalettedomain.cpp \
     baseoperations/creators/createcornersgeoreference.cpp \
     baseoperations/creators/createprojectedcoordinatesystem.cpp \
-    baseoperations/conditions/numbercondition.cpp \
-    baseoperations/util/testoperation.cpp
+    baseoperations/util/testoperation.cpp \
+    baseoperations/conditions/numbercondition.cpp
 
 OTHER_FILES += \
-    baseoperations/baseoperations.json
+    baseoperations/baseoperations.json \
+    desktopclient/asd.qml \
+    desktopclient/asdadfdafs.qml \
+    desktopclient/sad.qml
 
 LIBS += -L$$PWD/../libraries/$$PLATFORM$$CONF/ -lilwiscore
 

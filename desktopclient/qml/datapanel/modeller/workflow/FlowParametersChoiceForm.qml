@@ -21,8 +21,9 @@ Rectangle {
     property OperationModel operationTo
     property var attachRect
     property var target
+    property var source
     radius : 4
-    z : 1
+    z : ontTopZValue
     clip : true
 
     onOperationToChanged: {
@@ -119,12 +120,17 @@ Rectangle {
             var fromIndex = getIndex(textid.currentText)
             var toIndex = getIndex(textid2.currentText)
             var flowPoints = { "fromParameterIndex" : fromIndex, "toParameterIndex" : toIndex};
-            if (wfCanvas.currentItem.operation.isLegalFlow(operationFrom, operationTo)){
-                wfCanvas.operationsList[wfCanvas.currentIndex].setFlow(target,attachRect, flowPoints)
+
+            if (!source) {
+                source = wfCanvas.operationsList[wfCanvas.currentIndex]
+            }
+            if (source.operation.isLegalFlow(operationFrom, operationTo)){
+                source.setFlow(target, attachRect, flowPoints)
             }
             flowParameterForm.state = "invisible"
             wfCanvas.canvasValid = false
-
+            canvasActive = true
+            source = null
         }
     }
 

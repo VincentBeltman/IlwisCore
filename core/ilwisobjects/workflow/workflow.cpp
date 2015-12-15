@@ -120,21 +120,11 @@ void Workflow::removeOutputDataProperties(const OVertex &v, quint16 index)
 
 OVertex Workflow::addOperation(const NodeProperties &properties)
 {
-    OVertex v = boost::add_vertex(properties, _wfGraph);
-    IOperationMetaData meta = getOperationMetadata(v);
-    std::vector<SPOperationParameter> inputs = meta->getInputParameters();
-    for (int i = 0 ; i < inputs.size() ; i++) {
-        if ( !inputs.at(i)->isOptional()) {
-            // ensure required parameters has input assignment
-            assignInputData(v, i);
-        }
-    }
-    return v;
+    return boost::add_vertex(properties, _wfGraph);
 }
 
 void Workflow::removeOperation(OVertex vertex)
 {
-    boost::clear_vertex(vertex, _wfGraph);
     boost::remove_vertex(vertex, _wfGraph);
     removeAllInputAssignments(vertex);
 }
@@ -148,6 +138,45 @@ EdgeProperties Workflow::edgeProperties(const OEdge &e)
 {
     return edgeIndex()[e];
 }
+
+
+QList<int>* Workflow::getWorkflowParameterIndex(const OVertex &v) const
+{
+    QList<int>* parameterIndexes = new QList<int>();
+    int parameterIndex;
+    boost::graph_traits<WorkflowGraph>::vertex_iterator vi, vi_end;
+    for (boost::tie(vi,vi_end) = boost::vertices(_wfGraph); vi != vi_end; ++vi) {
+        OVertex vertex = *vi;
+        for (const InputAssignment &inputAssignment : getInputAssignments(v)) {
+            if (getAssignedInputData(inputAssignment)->value.isEmpty()) {
+                if (vertex == v) {
+                    parameterIndexes->push_back(parameterIndex);
+                }
+                ++parameterIndex;
+            }
+        }
+    }
+    return parameterIndexes;
+}
+
+int Workflow::getWorkflowParameterIndex(const OVertex &v, int index) const
+{
+    int parameterIndex = 0;
+    boost::graph_traits<WorkflowGraph>::vertex_iterator vi, vi_end;
+    for (boost::tie(vi,vi_end) = boost::vertices(_wfGraph); vi != vi_end; ++vi) {
+        OVertex vertex = *vi;
+        for (const InputAssignment &inputAssignment : getInputAssignments(vertex)) {
+            if (getAssignedInputData(inputAssignment)->value.isEmpty()) {
+                if (vertex == v && index == inputAssignment.second) {
+                    return parameterIndex;
+                }
+                ++parameterIndex;
+            }
+        }
+    }
+    return -1;
+}
+
 
 // Gets all nodes which have input parameters which are open.
 QList<OVertex> Workflow::getNodesWithExternalInput()
@@ -179,7 +208,7 @@ QList<InputAssignment> Workflow::getConstantInputAssignments(const OVertex &v) c
     QList<InputAssignment> assignedPins;
     for (InputAssignment assignment : _inputAssignments.keys()) {
         if (assignment.first == v) {
-            if (_inputAssignments.value(assignment)->value.isValid()) {
+            if (_inputAssignments.value(assignment)->value.size() > 0) {
                 assignedPins.push_back(assignment);
             }
         }
@@ -204,7 +233,7 @@ QList<InputAssignment> Workflow::getImplicitInputAssignments(const OVertex &v)
     boost::graph_traits<WorkflowGraph>::in_edge_iterator ei, ei_end;
     for (boost::tie(ei,ei_end) = getInEdges(v); ei != ei_end; ++ei) {
         // internal pins
-        InputAssignment assignment = std::make_pair(v, edgeProperties(*ei)._inputIndexNextOperation);
+        InputAssignment assignment = std::make_pair(v, edgeProperties(*ei)._inputParameterIndex);
         assignedPins.push_back(assignment);
     }
     return assignedPins;
@@ -247,7 +276,7 @@ std::vector<quint16> Workflow::getAssignedPouts(const OVertex &v)
     boost::graph_traits<WorkflowGraph>::out_edge_iterator ei, ei_end;
     for (boost::tie(ei,ei_end) = getOutEdges(v); ei != ei_end; ++ei) {
         // implicitly assigned pins via edges
-        assignedPouts.push_back(edgeProperties(*ei)._outputIndexLastOperation);
+        assignedPouts.push_back(edgeProperties(*ei)._outputParameterIndex);
     }
     for (SPAssignedOutputData output : _outputProperties[v]) {
         // explicitly assigned pins via edges
@@ -271,6 +300,17 @@ std::pair<OutEdgeIterator,OutEdgeIterator> Workflow::getOutEdges(const OVertex &
     return boost::out_edges(v, _wfGraph);
 }
 
+QList<InputAssignment> Workflow::getInputAssignments(const OVertex &v) const
+{
+    QList<InputAssignment> assignedPins;
+    for (InputAssignment assignment : _inputAssignments.keys()) {
+        if (assignment.first == v) {
+            assignedPins.push_back(assignment);
+        }
+    }
+    return assignedPins;
+}
+
 void Workflow::updateNodeProperties(OVertex v, const NodeProperties &properties)
 {
     boost::put(nodeIndex(), v, properties);
@@ -283,8 +323,9 @@ void Workflow::updateEdgeProperties(OEdge e, const EdgeProperties &properties)
 
 bool Workflow::hasValueDefined(const OVertex &operationVertex, int parameterIndex)
 {
+
     boost::graph_traits<WorkflowGraph>::vertex_iterator vi, vi_end;
-    // Loop through all vertices
+    // Loop through all vertices.
     for (boost::tie(vi, vi_end) = boost::vertices(_wfGraph); vi != vi_end; ++vi) {
         // Does it exist?
         if ((*vi) == operationVertex) {
@@ -294,24 +335,47 @@ bool Workflow::hasValueDefined(const OVertex &operationVertex, int parameterInde
                    return true;
                 }
             }
-            return _inputAssignments.value({operationVertex, parameterIndex})->value.isValid();
+            return _inputAssignments.value({operationVertex, parameterIndex})->value.size() > 0;
         }
     }
     return false;
+}
+
+/**
+ * Returns the inputs of an operation which have already been defined (if they for example have a flow drawn to them)
+ * @param operationVertex the operations
+ * @return A string seperated by |
+ */
+QString Workflow::implicitIndexes(const OVertex &operationVertex){
+    QString definedValues;
+
+    for (const InputAssignment& assignment : getImplicitInputAssignments(operationVertex)) {
+        if(definedValues.size() != 0){
+            definedValues += "|";
+        }
+        definedValues += QString::number(assignment.second);
+    }
+
+    return definedValues;
 }
 
 OEdge Workflow::addOperationFlow(const OVertex &from, const OVertex &to, const EdgeProperties &properties)
 {
     // TODO allow multiple edges between v1 and v2?
 
-    removeInputAssignment(to, properties._inputIndexNextOperation);
+    removeInputAssignment(to, properties._inputParameterIndex);
     return (boost::add_edge(from, to, properties, _wfGraph)).first;
 }
 
 void Workflow::removeOperationFlow(OEdge edge) {
     EdgeProperties edgeProps = edgeProperties(edge);
-    assignInputData(boost::target(edge, _wfGraph), edgeProps._inputIndexNextOperation);
+    assignInputData(boost::target(edge, _wfGraph), edgeProps._inputParameterIndex);
     boost::remove_edge(edge, _wfGraph);
+}
+
+void Workflow::addConditionContainer() {
+    _conditionContainers.push_back({});
+    qDebug << "added container to list" ;
 }
 
 IlwisTypes Workflow::ilwisType() const
@@ -541,4 +605,12 @@ void Workflow::debugWorkflowMetadata() const
 void Workflow::debugOperationParameter(const SPOperationParameter parameter) const
 {
     qDebug() << "\tterm: " << parameter->term() << ", " << "(name: " << parameter->name() << ", optional: " << parameter->isOptional() << ")";
+}
+
+bool Workflow::isInternalObject() const
+{
+    if ( isAnonymous())
+        return true;
+    //named workflows are never internal as there is a localized file backing it up;
+    return false;
 }

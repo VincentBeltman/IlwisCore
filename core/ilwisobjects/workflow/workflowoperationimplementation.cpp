@@ -134,9 +134,9 @@ void WorkflowOperationImplementation::parseInputNodeArguments(const QList<OVerte
                     arguments.insert(i, inputs.value(inputData));
                 } else {
                     QString argument;
-                    if (inputData->value.isValid()) {
+                    if (inputData->value.size() > 0) {
                         // constant input value
-                        argument = inputData->value.toString();
+                        argument = inputData->value;
                     } else {
                         argument = _expression.parm(inputParamIndex).value();
                         inputParamIndex++;
@@ -164,9 +164,9 @@ void WorkflowOperationImplementation::parseInputNodeArguments(const QList<OVerte
                         arguments.insert(optionalIndex, namedOptional.arg(inputs.value(inputData)));
                     } else {
                         QString argument;
-                        if (inputData->value.isValid()) {
+                        if (inputData->value.size() > 0) {
                             // constant input value
-                            argument = inputData->value.toString();
+                            argument = inputData->value;
                         } else {
                             argument = _expression.parm(inputParamIndex).value();
                             inputParamIndex++;
@@ -225,7 +225,7 @@ bool WorkflowOperationImplementation::reverseFollowExecutionPath(const OVertex &
 
     for (InputAssignment assignment : workflow->getConstantInputAssignments(v)) {
         SPAssignedInputData input = workflow->getAssignedInputData(assignment);
-        arguments.insert(assignment.second, input->value.toString());
+        arguments.insert(assignment.second, input->value);
     }
 
     ExecutionContext localCtx;
@@ -240,8 +240,8 @@ bool WorkflowOperationImplementation::reverseFollowExecutionPath(const OVertex &
             std::vector<SPOperationParameter> outputs = meta->getOutputParameters();
             EdgeProperties edgeProperties = workflow->edgeProperties(*ei);
 
-            quint16 inIdx = edgeProperties._inputIndexNextOperation;
-            quint16 outIdx = edgeProperties._outputIndexLastOperation;
+            quint16 inIdx = edgeProperties._inputParameterIndex;
+            quint16 outIdx = edgeProperties._outputParameterIndex;
             QString resultName = localCtx._results[outIdx];
             Symbol tmpResult = localSymTable.getSymbol(resultName);
             //copyToContext(tmpResult, resultName, ctx, symTable);

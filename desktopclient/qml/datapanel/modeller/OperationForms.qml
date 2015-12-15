@@ -13,20 +13,62 @@ Rectangle {
     id : operationForm
     width : 210
     height : parent.height
+    visible : height > 0
     property var operationid
     property int itemId: -1
 
-    function newForm(metaid, title, newItemId){
-        newFormWithOutput(metaid,title,false, newItemId)
+    /**
+    Create a form for the workflow
+    */
+    function showRunForm(metaid, operationNames, parameterIndexes) {
+        var validValues = [], parameterindex, action;
+
+        if (appFrame.currentAppForm != null) {
+            validValues = appFrame.currentAppForm.formresult.split('|')
+            for (var i = 0; i < parameterIndexes.length; i++) {
+                parameterindex = parameterIndexes[i].split('|');
+                action = parameterindex[1];
+                parameterindex = parameterindex[0];
+
+                if (action === 'insert') {
+                    validValues.splice(parameterindex, 0, "")
+                } else if (action === 'remove') {
+                    validValues.splice(parameterindex, 1)
+                }
+            }
+            validValues = validValues.slice(0, canvas.workflow.getInputParameterCount())
+        }
+
+        for (var i =0; i < validValues.length; i++) {
+            console.log(validValues[i])
+        }
+        console.log('------------')
+
+        var form = formbuilder.index2Form(metaid, true, false, "", operationNames, validValues)
+        operationid = metaid
+        appFrame.formQML = form
+        appFrame.formTitle = qsTr("Set run values for workflow")
+        appFrame.opacity = 1
+        //canvas.workflow.resetParameterEntrySet()
+    }
+
+    function showForm(item, title, newItemId, constantValues){
+        fillAppFrame(item.operation.id, title + "(" + item.getTitle() + ")", false, true, "", constantValues)
         itemId = newItemId
     }
 
     /**
-      Shows the operation's form. A boolean (showOutput) has to be passed to this method which decides whether an ouput form is shown.
+      Shows the operation's form. Passes the hidden fields to the index2Form method.
       */
-    function newFormWithOutput(metaid, title, showOutput){
+    function showOperationFormWithHiddenFields(item, title, newItemId, constantValues, hiddenFields){
+        fillAppFrame(item.operation.id, title + "(" + item.getTitle() + ")", false, true, hiddenFields, constantValues)
+        itemId = newItemId
+    }
+
+    function fillAppFrame(metaid, title, output, showEmpty, hiddenFields, constantValues) {
+        var form= formbuilder.index2Form(metaid, output, showEmpty, hiddenFields, {}, constantValues)
         operationid = metaid
-        var form= formbuilder.index2Form(metaid, showOutput)
+        appFrame.formQML = ""
         appFrame.formQML = form
         appFrame.formTitle = title
         appFrame.opacity = 1
@@ -45,7 +87,7 @@ Rectangle {
 
         Bench.ApplicationForm{
             id : appFrame
-            width : operationForm.width - 15
+            width : operationForm.width - 20
             height : operationForm.height - 30 < 0 ?  0 : operationForm.height - 30
             opacity : 0
         }

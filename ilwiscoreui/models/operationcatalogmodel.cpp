@@ -57,7 +57,6 @@ void OperationCatalogModel::refresh()
     CatalogModel::refresh();
     _currentOperations.clear();
     _operationsByKey.clear();
-    _refresh = true;
     emit operationsChanged();
 }
 
@@ -281,31 +280,46 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
     if ( !operationresource.isValid())
         return sUNDEF;
 
+    em->clearList();
+
     QString expression;
     QStringList parms = parameters.split("|");
-    bool hasMissingParameters = false;
+    bool hasInvalidParameters = false;
 
-    for(int i = 0; i < parms.size(); ++ i){ // -1 because the last is the output parameter
-        if (operationresource.ilwisType() & itWORKFLOW && parms[i].size() == 0){
-            if (operationresource[QString("pout_%1_optional").arg(i)] == "false" && i < operationresource["outparameters"].toInt()) {
-                em->addError(1, "Error message 1");
-                //qDebug() << "Param " << i << " is undefined with name " << operationresource[QString("pout_%1_name").arg(i)].toString();
-                hasMissingParameters = true;
+    for(int i = 0; i < parms.size(); ++ i){
+        if (operationresource.ilwisType() & itWORKFLOW){
+            int parm = i + 1;
+            if (operationresource[QString("pout_%1_optional").arg(parm)] == "false" && i < operationresource["outparameters"].toInt()) {
+                QString value = parms[i + operationresource["inparameters"].toInt()];
+
+                QString output = value.split("@@")[0];
+                if (output.size() == 0) {
+                    em->addError(1, "Output parameter " + QString::number(i) + " is undefined with name " +  operationresource[QString("pout_%1_name").arg(parm)].toString());
+                    hasInvalidParameters = true;
+                } else {
+                    for (const char& c : output.toStdString()) {
+                        if (!isalnum(c) && c != ':' && c != '/' && c != '\\' && c != '.') {
+                            em->addError(1, "Output parameter " + QString::number(i) + " is not a valid name");
+                            hasInvalidParameters = true;
+                            break;
+                        }
+                    }
+                }
+
             }
-            if (operationresource[QString("pin_%1_optional").arg(i)] == "false" && i < operationresource["inparameters"].toInt()) {
-                em->addError(2, "Error message 2");
-                //qDebug() << "Param " << i << " is undefined with name " << operationresource[QString("pin_%1_name").arg(i)].toString();
-                hasMissingParameters = true;
+            if (operationresource[QString("pin_%1_optional").arg(parm)] == "false" && i < operationresource["inparameters"].toInt() && parms[i].size() == 0) {
+                em->addError(1, "Input parameter " + QString::number(i) + " is undefined with name " +  operationresource[QString("pin_%1_name").arg(parm)].toString());
+                hasInvalidParameters = true;
             }
         }
-        if(i<operationresource["inparameters"].toInt()){
+        if(i < operationresource["inparameters"].toInt()){
             if ( expression.size() != 0)
                 expression += ",";
             expression += parms[i];
         }
     }
 
-    if (hasMissingParameters) return sUNDEF;
+    if (hasInvalidParameters) return sUNDEF;
 
     QString allOutputsString;
 
@@ -335,7 +349,7 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             //Add the duplicate name to the list of duplicate names
             if(occurences>1){
                 duplicateFileNames = true;
-                em->addError(111, "Workflow did not execute, multiple occurences of an output name");
+                em->addError(1, "Workflow did not execute, multiple occurences of an output name");
             }
 
             QString formatName = parts[1];
@@ -461,8 +475,6 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
         else
             expression = QString("script %1=%2(%3)").arg(allOutputsString).arg(operationresource.name()).arg(expression);
 
-        qDebug() << "Expression: " << expression;
-
         OperationExpression opExpr(expression);
 
         try {
@@ -479,15 +491,19 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
         } catch (const ErrorObject& err){
             emit error(err.message());
         }
-        return sUNDEF;
     }
+    return sUNDEF;
 }
 
 OperationModel *OperationCatalogModel::operation(const QString &id)
 {
     for(auto *operation : _currentOperations)    {
-        if ( operation->id() == id)
+        if ( operation->id() == id){
+            if ( operation->type() == itWORKFLOW) {
+                operation = new OperationModel(operation->resource(), this);
+            }
             return operation;
+        }
     }
     return 0;
 }
@@ -497,10 +513,23 @@ WorkflowModel *OperationCatalogModel::createWorkFlow(const QString &filter)
     return 0;
 }
 
-void OperationCatalogModel::refresh()
+void OperationCatalogModel::keyFilter(const QString &keyf)
 {
-    _currentOperations = QList<OperationModel *>();
-    _refresh = true;
-    emit operationsChanged();
+    QStringList parts= keyf.split(" ",QString::SkipEmptyParts);
+   QString result;
+   for(QString part : parts){
+       if ( part.toLower() == "or")
+           result += " or ";
+       else if ( part.toLower() == "and")
+           result += " and ";
+       else {
+           result += "keyword='" + part + "'";
+       }
 
+   }
+   _currentOperations.clear();
+   _operationsByKey.clear();
+   _refresh = true;
+   CatalogModel::filter(result);
+   emit operationsChanged();
 }
