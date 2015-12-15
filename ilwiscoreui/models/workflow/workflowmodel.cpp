@@ -31,37 +31,68 @@ WorkflowModel::WorkflowModel(const Ilwis::Resource &source, QObject *parent) : O
     _workflow.prepare(source);
 }
 
-void WorkflowModel::asignConstantInputData(QString inputData, int operationIndex) {
+QStringList WorkflowModel::asignConstantInputData(QString inputData, int operationIndex) {
     QStringList inputParameters = inputData.split('|');
+    OVertex vertex = _operationNodes[operationIndex];
+    QStringList* parameterEntrySet = new QStringList();
+
     for (int i = 0; i < inputParameters.length(); ++i) {
         QString value = inputParameters[i];
-        OVertex vertex = _operationNodes[operationIndex];
         if(_workflow->hasInputAssignment(vertex,i)){
             SPAssignedInputData constantInput = _workflow->getAssignedInputData({vertex, i});
-            if (value.trimmed().size() == 0)
+            bool oldValueFilled = constantInput->value.size() != 0;
+
+            if (constantInput->value.isEmpty() && value.trimmed().size() > 0) {
+                int parameterIndex = _workflow->getWorkflowParameterIndex(vertex, i);
+                parameterEntrySet->push_back(QString::number(parameterIndex) + "|remove");
+                --_inputParameterCount;
+            }
+
+            if (value.trimmed().isEmpty()) {
                 value = value.trimmed();
+            }
+
             constantInput->value = value;
+
+            if (value.isEmpty() && oldValueFilled) {
+                int parameterIndex = _workflow->getWorkflowParameterIndex(vertex, i);
+                parameterEntrySet->push_back(QString::number(parameterIndex) + "|insert");
+                ++_inputParameterCount;
+            }
         }
     }
+    return *parameterEntrySet;
 }
 
-void WorkflowModel::addOperation(const QString &id)
+QStringList WorkflowModel::addOperation(const QString &id)
 {
+    QStringList* parameterEntrySet = new QStringList();
     bool ok;
     quint64 opid = id.toULongLong(&ok);
-    Resource res=mastercatalog()->id2Resource(opid);
+    Resource res = mastercatalog()->id2Resource(opid);
+
     if ( ok && res.isValid()){
-        auto vertex = _workflow->addOperation({res});
-        _operationNodes.push_back(vertex);
+        OVertex v = _workflow->addOperation({res});
+        IOperationMetaData meta = _workflow->getOperationMetadata(v);
+        std::vector<SPOperationParameter> inputs = meta->getInputParameters();
+        for (int i = 0 ; i < inputs.size() ; i++) {
+            if ( !inputs.at(i)->isOptional()) {
+                _workflow->assignInputData(v, i);
+                ++_inputParameterCount;
+                int parameterIndex = _workflow->getWorkflowParameterIndex(v, i);
+                parameterEntrySet->push_back(QString::number(parameterIndex) + "|insert");
+            }
+        }
+        _operationNodes.push_back(v);
     }else {
        kernel()->issues()->log(QString(TR("Invalid operation id used in workflow %1")).arg(name()));
     }
-    auto vertex = _workflow->addOperation({_workflow->source()});
-    _operationNodes.push_back(vertex);
+    return *parameterEntrySet;
 }
 
-void WorkflowModel::addFlow(int operationIndex1, int operationIndex2, const QVariantMap& flowpoints, int outRectIndex, int inRectIndex)
+QStringList WorkflowModel::addFlow(int operationIndex1, int operationIndex2, const QVariantMap& flowpoints, int outRectIndex, int inRectIndex)
 {
+    QStringList* parameterEntrySet = new QStringList();
     if ( operationIndex1 >= 0 && operationIndex2 >= 0 && flowpoints.size() == 2) {
         try {
             const OVertex& fromOperationVertex = _operationNodes[operationIndex1];
@@ -69,15 +100,21 @@ void WorkflowModel::addFlow(int operationIndex1, int operationIndex2, const QVar
             int outParamIndex = flowpoints["fromParameterIndex"].toInt();
             int inParamIndex = flowpoints["toParameterIndex"].toInt();
 
+            int parameterIndex = _workflow->getWorkflowParameterIndex(toOperationVertex, inParamIndex);
+            parameterEntrySet->push_back(QString::number(parameterIndex) + "|remove");
+            --_inputParameterCount;
+
             EdgeProperties flowPoperties(
                 outParamIndex, inParamIndex,
                 outRectIndex, inRectIndex
             );
+
             _workflow->addOperationFlow(fromOperationVertex,toOperationVertex,flowPoperties);
         } catch (std::out_of_range e) {
            qDebug() << "False operation";
         }
     }
+    return *parameterEntrySet;
 }
 
 bool WorkflowModel::hasValueDefined(int operationIndex, int parameterIndex){
@@ -87,6 +124,47 @@ bool WorkflowModel::hasValueDefined(int operationIndex, int parameterIndex){
     } catch (std::out_of_range e) {
        return false;
     }
+}
+
+/**
+ * Returns the number of input parameters of an operations, this is the same amount as can be seen in the run/workflow form.
+ * @param operationIndex the operation who's input parameter count to get.
+ * @return The number of input parameters
+ */
+int WorkflowModel::operationInputParameterCount(int operationIndex){
+    const OVertex& operationVertex = _operationNodes[operationIndex];
+
+    QList<SPAssignedInputData> list = _workflow->getAssignedInputData(operationVertex);
+
+    int inParameterCount = list.length();
+
+    for(int i=0;i<list.size();++i){
+        if(list[i]->value != ""){
+            --inParameterCount;
+        }
+    }
+
+    return inParameterCount;
+}
+
+/**
+ * Returns the number of output parameters of an operations, this is the same amount as can be seen in the run/workflow form.
+ * @param operationIndex the operation who's output parameter count to get.
+ * @return The number of output parameters
+ */
+int WorkflowModel::operationOutputParameterCount(int operationIndex){
+    const OVertex& operationVertex = _operationNodes[operationIndex];
+
+    QList<OVertex> operationsWithExternalOutput = _workflow->getNodesWithExternalOutputs();
+
+    int occurences = 0;
+    for(int i=0;i<operationsWithExternalOutput.length();++i){
+        if(operationsWithExternalOutput[i] == operationVertex){
+            ++occurences;
+        }
+    }
+
+    return occurences;
 }
 
 /**
@@ -104,8 +182,9 @@ QString WorkflowModel::implicitIndexes(int operationIndex){
     }
 }
 
-void WorkflowModel::deleteOperation(int index)
+QStringList WorkflowModel::deleteOperation(int index)
 {
+    QStringList* parameterEntrySet = new QStringList();
     try {
         if ( index < _operationNodes.size()){
             const OVertex& operationVertex = _operationNodes[index];
@@ -122,19 +201,28 @@ void WorkflowModel::deleteOperation(int index)
                 _workflow->removeOperationFlow(*iter);
             }
 
+
+            for (int parameterIndex: *_workflow->getWorkflowParameterIndex(operationVertex)) {
+                parameterEntrySet->push_back(QString::number(parameterIndex) + "|remove");
+                --_inputParameterCount;
+            }
+
             _workflow->removeOperation(operationVertex);
             _operationNodes.erase(_operationNodes.begin() + index);
 
         } else {
             qDebug() << "There are no operations";
         }
+        return *parameterEntrySet;
     } catch (std::out_of_range e) {
         qDebug() << "False operation";
+        return *(new QStringList());
     }
 }
 
-void WorkflowModel::deleteFlow(int operationIndex1, int operationIndex2, int indexStart, int indexEnd)
+QStringList WorkflowModel::deleteFlow(int operationIndex1, int operationIndex2, int indexStart, int indexEnd)
 {
+    QStringList* parameterEntrySet = new QStringList();
     OVertex sourceNode = _operationNodes[operationIndex1];
     boost::graph_traits<WorkflowGraph>::out_edge_iterator ei, ei_end;
     for (boost::tie(ei,ei_end) = _workflow->getOutEdges(sourceNode); ei != ei_end; ++ei) {
@@ -151,9 +239,13 @@ void WorkflowModel::deleteFlow(int operationIndex1, int operationIndex2, int ind
             if(ep._outputParameterIndex == indexStart && ep._inputParameterIndex == indexEnd)
             {
                 _workflow->removeOperationFlow(*ei);
+                int parameterIndex = _workflow->getWorkflowParameterIndex(targetNode, indexEnd);
+                parameterEntrySet->push_back(QString::number(parameterIndex) + "|insert");
+                ++_inputParameterCount;
             }
         }
     }
+    return *parameterEntrySet;
 }
 
 /**
@@ -213,6 +305,26 @@ int WorkflowModel::vertex2ItemID(int vertex)
     return iUNDEF;
 }
 
+QStringList WorkflowModel::getAsignedValuesByItemID(int itemId)
+{
+    QStringList* results = new QStringList();
+    OVertex v = _operationNodes[itemId];
+
+    // Add edge values to fill empty spots
+    auto edgeIterators = _workflow->getInEdges(v);
+    for (auto &iter = edgeIterators.first; iter < edgeIterators.second; ++iter) {
+        results->insert(_workflow->edgeProperties(*iter)._inputParameterIndex, "");
+    }
+
+    // Constant values
+    QList<InputAssignment> inputs = _workflow->getInputAssignments(_operationNodes[itemId]);
+    for (const InputAssignment &input : inputs) {
+        results->insert(input.second, _workflow->getAssignedInputData(input)->value);
+    }
+
+    return *results;
+}
+
 void WorkflowModel::store(const QStringList &coordinates)
 {
     try {
@@ -247,16 +359,6 @@ void WorkflowModel::load()
     } catch (const ErrorObject& err){
 
     }
-}
-
-QStringList WorkflowModel::getAsignedValuesByItemID(int itemId)
-{
-    QStringList* results = new QStringList();
-    QList<InputAssignment> assignedInputs = _workflow->getConstantInputAssignments(_operationNodes[itemId]);
-    for (const InputAssignment &assignedInput : assignedInputs) {
-        results->push_back(_workflow->getAssignedInputData(assignedInput)->value);
-    }
-    return *results;
 }
 
 void WorkflowModel::createMetadata()

@@ -70,6 +70,10 @@ Item {
         }
     }
 
+    function newCondition() {
+        canvas.newCondition()
+    }
+
     function deleteSelectedOperation(){
         canvas.deleteSelectedOperation()
     }

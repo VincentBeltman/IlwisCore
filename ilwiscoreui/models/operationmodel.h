@@ -46,13 +46,12 @@ public:
     Q_INVOKABLE QStringList parameterIndexes(const QString &typefilter, bool fromOperation);
 
 
-    QStringList inParamNames() const;
-    QStringList outParamNames() const;
-    QString inParameterCount() const;
-    QString outParameterCount() const;
-    QStringList inParameterIconList() const;
-    QStringList outParameterIconList() const;
-
+    Q_INVOKABLE QStringList inParamNames() const;
+    Q_INVOKABLE QStringList outParamNames() const;
+    Q_INVOKABLE QString inParameterCount() const;
+    Q_INVOKABLE QString outParameterCount() const;
+    Q_INVOKABLE QStringList inParameterIconList() const;
+    Q_INVOKABLE QStringList outParameterIconList() const;
 
 private:
 

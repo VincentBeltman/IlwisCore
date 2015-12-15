@@ -18,6 +18,8 @@ Rectangle {
     property bool isSelected : false
     property var flowConnections: []
 
+    property alias name:operationName
+
     function iconsource(name) {
         if ( name.indexOf("/") !== -1)
             return name
@@ -30,8 +32,6 @@ Rectangle {
 
 
     function resetInputModel(){
-        operations.refresh()
-        operation = operations.operation(operation.id)
         operationInParameters.model = null
         operationInParameters.model = operation.inParamNames
     }
@@ -240,7 +240,7 @@ Rectangle {
             "flowPoints" : flowPoints,
             "isSelected" : false
         })
-        workflow.addFlow(
+        var parameterIndexes = workflow.addFlow(
             itemid,
             target.itemid,
             flowPoints,
@@ -249,6 +249,8 @@ Rectangle {
         )
         target.resetInputModel()
         wfCanvas.stopWorkingLine()
+
+        canvas.generateForm(parameterIndexes)
     }
 
     function attachFlow(target, attachRect){

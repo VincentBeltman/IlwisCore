@@ -30,9 +30,9 @@ Rectangle {
     /**
       * Shows the run form for the whole workflow
       */
-    function showRunForm(workflowid){
+    function showRunForm(workflowid, operationNames, parameterIndexes){
         if ( workflowid){
-            workflowForm.item.showFormWithOutput(workflowid, qsTr("Set run values for workflow"))
+            workflowForm.item.showRunForm(workflowid, operationNames, parameterIndexes)
         }
     }
 
