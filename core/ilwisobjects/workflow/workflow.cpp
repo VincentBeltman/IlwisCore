@@ -375,7 +375,7 @@ void Workflow::removeOperationFlow(OEdge edge) {
 
 void Workflow::addConditionContainer() {
     _conditionContainers.push_back({});
-    qDebug << "added container to list" ;
+    qDebug() << "added container to list" ;
 }
 
 IlwisTypes Workflow::ilwisType() const
