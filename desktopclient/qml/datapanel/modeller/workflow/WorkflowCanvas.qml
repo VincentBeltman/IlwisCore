@@ -5,6 +5,7 @@ import OperationModel 1.0
 import WorkflowModel 1.0
 import QtQuick.Dialogs 1.1
 import ".." as Modeller
+import "../../../matrix.js" as Matrix
 
 
 Modeller.ModellerWorkArea {
@@ -14,6 +15,14 @@ Modeller.ModellerWorkArea {
    property var deleteItemIndex;
    property var deleteEdgeIndex;
    property int highestZIndex : 1;
+
+   function panOperations(x, y)
+   {
+       for( var i=0; i < wfCanvas.operationsList.length; i++){
+           console.log("Pan operation " + x + " " + y);
+           wfCanvas.operationsList[i].panOperation(x,y);
+       }
+   }
 
    function asignConstantInputData(inputData, itemId) {
        var parameterIndexes = workflow.asignConstantInputData(inputData, itemId)
@@ -280,12 +289,22 @@ Modeller.ModellerWorkArea {
        property var currentItem;
        property var operationsList: []
 
+       property double scaleFactor: 1.1;
+       property int lastX: wfCanvas.width/2;
+       property int lastY: wfCanvas.height/2;
+       property int lastOpX: canvas.width/2;
+       property int lastOpY: canvas.height/2;
+       property var dragStart;
+       property bool dragged;
+       property var matrix: new Matrix.Matrix();
+       property double scale: 1
+
        Timer {
            interval: 30;
            running: true;
            repeat: true
            onTriggered: {
-               wfCanvas.draw()
+               wfCanvas.draw(true)
            }
        }
 
@@ -303,22 +322,32 @@ Modeller.ModellerWorkArea {
        }
 
        function draw(force){
+
+           var p1 = transformedPoint(0,0);
+           var p2 = transformedPoint(width, height);
+           ctx.clearRect(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);
+
            if (canvasValid == false || (force !== null && force)) {
-               clear();
+
                canvasValid = true
                if ( workingLineBegin.x !== -1 && workingLineEnd.x !== -1){
                    ctx.beginPath();
                    ctx.lineWidth = 2;
-                   ctx.moveTo(workingLineBegin.x, workingLineBegin.y);
+                   var pt1 = transformedPoint(workingLineBegin.x, workingLineBegin.y);
+                   var pt2 = transformedPoint(workingLineEnd.x, workingLineEnd.y);
+                   console.log(pt1.x + " " + pt1.y);
+                   ctx.moveTo(pt1.x, pt1.y);
                    ctx.strokeStyle = "red"
-                   ctx.lineTo(workingLineEnd.x, workingLineEnd.y);
+                   ctx.lineTo(pt2.x, pt2.y);
                    ctx.stroke();
                }
 
                for( var i=0; i < operationsList.length; i++){
-                   operationsList[i].drawFlows(ctx)
+                   operationsList[i].drawFlows(ctx, matrix)
                }
            }
+
+           wfCanvas.requestPaint();
        }
 
        function createItem(x,y, resource) {
@@ -332,7 +361,7 @@ Modeller.ModellerWorkArea {
 
        function finishCreation(x,y,resource) {
            if (component.status == Component.Ready) {
-               currentItem = component.createObject(wfCanvas, {"x": x, "y": y, "operation" : resource,"itemid" : operationsList.length});
+               currentItem = component.createObject(wfCanvas, {"x": x, "y": y, "operation" : resource, "itemid" : operationsList.length, "scale": wfCanvas.scale});
                if (currentItem == null) {
                    // Error Handling
                    console.log("Error creating object");
@@ -420,10 +449,15 @@ Modeller.ModellerWorkArea {
            id: area
            anchors.fill: parent
            acceptedButtons: Qt.LeftButton | Qt.RightButton
-           hoverEnabled: wfCanvas.workingLineBegin.x !== -1
+           hoverEnabled: true
+
+           onWheel: {
+               handleScroll(wheel);
+           }
 
            onPressed: {
                if (canvasActive) {
+
                    wfCanvas.canvasValid = false;
 
                    var operationSelected = -1, highestZ = -1, smallestDistance = 100000,
@@ -432,7 +466,16 @@ Modeller.ModellerWorkArea {
                    for(var i=0; i < wfCanvas.operationsList.length; ++i){
 
                        var item = wfCanvas.operationsList[i]
-                       var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
+                       var startCoords = item.getXYcoordsCanvas();
+
+                       var endX = (startCoords.x + (item.width * item.scale));
+                       var endY = (startCoords.y + (item.height * item.scale));
+
+                       var EndCoords = transformedPoint(endX, endY);
+
+                       console.log("Scale " + item.scale);
+
+                       var isContained = mouseX >= (startCoords.x) && mouseY >= (startCoords.y) && mouseX <= endX && mouseY <= endY;
 
                        for(var j=0; j < item.flowConnections.length; j++)
                        {
@@ -473,6 +516,17 @@ Modeller.ModellerWorkArea {
                    wfCanvas.oldx = mouseX
                    wfCanvas.oldy = mouseY
                    wfCanvas.currentIndex = operationSelected
+
+                   if(!selectedFlow && operationSelected == -1)
+                   {
+                       wfCanvas.lastX = mouseX;
+                       wfCanvas.lastY = mouseY;
+                       wfCanvas.lastOpX = mouseX;
+                       wfCanvas.lastOpY = mouseY;
+                       wfCanvas.dragStart = transformedPoint(wfCanvas.lastX,wfCanvas.lastY);
+                       wfCanvas.dragged = false;
+                   }
+
                    if (selectedFlow && operationSelected == -1) {
                        selectedFlow.isSelected = true
                    } else if (operationSelected > -1) {
@@ -521,6 +575,20 @@ Modeller.ModellerWorkArea {
 //            }
 
            onPositionChanged: {
+
+               wfCanvas.lastX = mouseX;
+               wfCanvas.lastY = mouseY;
+               wfCanvas.dragged = true;
+               if (wfCanvas.dragStart){
+                   var pt = transformedPoint(wfCanvas.lastX,wfCanvas.lastY);
+                   translate(pt.x-wfCanvas.dragStart.x,pt.y-wfCanvas.dragStart.y);
+                   panOperation((wfCanvas.lastX - wfCanvas.lastOpX),(wfCanvas.lastY - wfCanvas.lastOpY));
+                   wfCanvas.lastOpX = mouseX;
+                   wfCanvas.lastOpY = mouseY;
+               }
+
+
+
                if ( attachementForm.state == "invisible"){
                    if ( wfCanvas.workingLineBegin.x !== -1){
                        wfCanvas.workingLineEnd = Qt.point( mouseX, mouseY)
@@ -541,6 +609,7 @@ Modeller.ModellerWorkArea {
 
            onReleased: {
                wfCanvas.stopWorkingLine()
+               wfCanvas.dragStart = null;
            }
        }
 
@@ -554,6 +623,92 @@ Modeller.ModellerWorkArea {
        }
 
        workflow.store(coordinates)
+   }
+
+   function zoom(clicks){
+
+       var pt = transformedPoint(wfCanvas.lastX,wfCanvas.lastY);
+
+       translate(pt.x,pt.y);
+
+       var factor = Math.pow(wfCanvas.scaleFactor,clicks);
+       wfCanvas.scale *= factor;
+
+       scale(factor,factor);
+       scaleOperation(factor);
+
+       translate(-pt.x, -pt.y);
+
+       replacePanOperation();
+   }
+
+   function handleScroll(wheel){
+
+       var delta = wheel.angleDelta.y/40;
+       if (delta) zoom(delta);
+   }
+
+   function scale(sx, sy)
+   {
+       wfCanvas.matrix = wfCanvas.matrix.scaleX(sx);
+       wfCanvas.matrix = wfCanvas.matrix.scaleY(sy);
+
+       wfCanvas.ctx.scale(sx, sy);
+   }
+
+   function translate(dx, dy)
+   {
+       var translate = wfCanvas.ctx.translate;
+       wfCanvas.matrix = wfCanvas.matrix.translate(dx, dy);
+       wfCanvas.ctx.translate(dx,dy);
+   }
+
+   function panOperation(x,y)
+   {
+       for(var i=0; i < wfCanvas.operationsList.length; i++)
+       {
+           wfCanvas.operationsList[i].panOperation(x,y);
+       }
+   }
+
+   function panZoomOperation(x,y)
+   {
+       for(var i=0; i < wfCanvas.operationsList.length; i++)
+       {
+           wfCanvas.operationsList[i].panZoomOperation(x,y);
+       }
+   }
+
+   function replacePanOperation(x,y)
+   {
+       for(var i=0; i < wfCanvas.operationsList.length; i++)
+       {
+           //var xy = wfCanvas.operationsList[i].getXYcoords();
+           var ptOp = getScreenCoords(wfCanvas.operationsList[i].x,wfCanvas.operationsList[i].y);
+           wfCanvas.operationsList[i].replacePanOperation(ptOp.x,ptOp.y);
+       }
+   }
+
+   function scaleOperation(scaleFactor)
+   {
+       for(var i=0; i < wfCanvas.operationsList.length; i++)
+       {
+           wfCanvas.operationsList[i].scaleOperation(scaleFactor);
+       }
+   }
+
+   function transformedPoint(x, y)
+   {
+       return {
+           x: wfCanvas.matrix.inverse().a * x + wfCanvas.matrix.inverse().c * y + wfCanvas.matrix.inverse().e,
+           y: wfCanvas.matrix.inverse().b * x + wfCanvas.matrix.inverse().d * y + wfCanvas.matrix.inverse().f
+       }
+   }
+
+   function getScreenCoords(x, y) {
+       var xn = wfCanvas.matrix.e + x * wfCanvas.matrix.a;
+       var yn = wfCanvas.matrix.f + y * wfCanvas.matrix.d;
+       return { x: xn, y: yn };
    }
 }
 
