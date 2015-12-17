@@ -208,7 +208,6 @@ QStringList WorkflowModel::deleteOperation(int index)
             }
 
             _workflow->removeOperation(operationVertex);
-//            _operationNodes.erase(_operationNodes.begin() + index);
 
         } else {
             qDebug() << "There are no operations";
