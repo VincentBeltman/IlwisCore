@@ -107,6 +107,15 @@ void Workflow::removeAllInputAssignments(const OVertex &v)
     for (InputAssignment assignment : _inputAssignments.keys()) {
         if (assignment.first == v) {
             _inputAssignments.remove(assignment);
+        }else if (assignment.first > v) {
+            SPAssignedInputData oldInputData = _inputAssignments.value(assignment);
+
+            _inputAssignments.remove(assignment);
+
+            InputAssignment newAssignment = assignment;
+            newAssignment.first -= 1;
+
+            _inputAssignments.insert(newAssignment, oldInputData);
         }
     }
 }
@@ -139,15 +148,24 @@ EdgeProperties Workflow::edgeProperties(const OEdge &e)
     return edgeIndex()[e];
 }
 
+int Workflow::getOperationCount(){
+    int operationCount;
+
+    boost::graph_traits<WorkflowGraph>::vertex_iterator vi, vi_end;
+    for (boost::tie(vi,vi_end) = boost::vertices(_wfGraph); vi != vi_end; ++vi) {
+        ++operationCount;
+    }
+    return operationCount;
+}
 
 QList<int>* Workflow::getWorkflowParameterIndex(const OVertex &v) const
 {
     QList<int>* parameterIndexes = new QList<int>();
-    int parameterIndex;
+    int parameterIndex = 0;
     boost::graph_traits<WorkflowGraph>::vertex_iterator vi, vi_end;
     for (boost::tie(vi,vi_end) = boost::vertices(_wfGraph); vi != vi_end; ++vi) {
         OVertex vertex = *vi;
-        for (const InputAssignment &inputAssignment : getInputAssignments(v)) {
+        for (const InputAssignment &inputAssignment : getInputAssignments(vertex)) {
             if (getAssignedInputData(inputAssignment)->value.isEmpty()) {
                 if (vertex == v) {
                     parameterIndexes->push_back(parameterIndex);
