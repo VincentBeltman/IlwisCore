@@ -343,7 +343,7 @@ void WorkflowModel::store(const QStringList &coordinates)
 
 void WorkflowModel::load()
 {
-    _workflow->connectTo(QUrl("ilwis://internalcatalog/" + _workflow->name() + "_workflow"), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmINPUT);
+//    _workflow->connectTo(QUrl("ilwis://internalcatalog/" + _workflow->name() + "_workflow"), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmINPUT);
 }
 
 void WorkflowModel::createMetadata()
