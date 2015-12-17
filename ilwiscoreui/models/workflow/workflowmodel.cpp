@@ -33,7 +33,7 @@ WorkflowModel::WorkflowModel(const Ilwis::Resource &source, QObject *parent) : O
 
 QStringList WorkflowModel::asignConstantInputData(QString inputData, int operationIndex) {
     QStringList inputParameters = inputData.split('|');
-    OVertex vertex = _operationNodes[operationIndex];
+    OVertex vertex = operationIndex;
     QStringList* parameterEntrySet = new QStringList();
 
     for (int i = 0; i < inputParameters.length(); ++i) {
@@ -83,7 +83,6 @@ QStringList WorkflowModel::addOperation(const QString &id)
                 parameterEntrySet->push_back(QString::number(parameterIndex) + "|insert");
             }
         }
-        _operationNodes.push_back(v);
     }else {
        kernel()->issues()->log(QString(TR("Invalid operation id used in workflow %1")).arg(name()));
     }
@@ -95,8 +94,8 @@ QStringList WorkflowModel::addFlow(int vertexFrom, int vertexTo, const QVariantM
     QStringList* parameterEntrySet = new QStringList();
     if ( vertexFrom >= 0 && vertexTo >= 0 && flowpoints.size() == 2) {
         try {
-            const OVertex& fromOperationVertex = _operationNodes[vertexFrom];
-            const OVertex& toOperationVertex = _operationNodes[vertexTo];
+            const OVertex& fromOperationVertex = vertexFrom;
+            const OVertex& toOperationVertex = vertexTo;
             int outParamIndex = flowpoints["fromParameterIndex"].toInt();
             int inParamIndex = flowpoints["toParameterIndex"].toInt();
 
@@ -119,7 +118,7 @@ QStringList WorkflowModel::addFlow(int vertexFrom, int vertexTo, const QVariantM
 
 bool WorkflowModel::hasValueDefined(int operationIndex, int parameterIndex){
     try {
-        const OVertex& operationVertex = _operationNodes[operationIndex];
+        const OVertex& operationVertex = operationIndex;
         return _workflow->hasValueDefined(operationVertex, parameterIndex);
     } catch (std::out_of_range e) {
        return false;
@@ -132,7 +131,7 @@ bool WorkflowModel::hasValueDefined(int operationIndex, int parameterIndex){
  * @return The number of input parameters
  */
 int WorkflowModel::operationInputParameterCount(int operationIndex){
-    const OVertex& operationVertex = _operationNodes[operationIndex];
+    const OVertex& operationVertex = operationIndex;
 
     QList<SPAssignedInputData> list = _workflow->getAssignedInputData(operationVertex);
 
@@ -153,7 +152,7 @@ int WorkflowModel::operationInputParameterCount(int operationIndex){
  * @return The number of output parameters
  */
 int WorkflowModel::operationOutputParameterCount(int operationIndex){
-    const OVertex& operationVertex = _operationNodes[operationIndex];
+    const OVertex& operationVertex = operationIndex;
 
     QList<OVertex> operationsWithExternalOutput = _workflow->getNodesWithExternalOutputs();
 
@@ -175,7 +174,7 @@ int WorkflowModel::operationOutputParameterCount(int operationIndex){
 
 QString WorkflowModel::implicitIndexes(int operationIndex){
     try {
-        const OVertex& operationVertex = _operationNodes[operationIndex];
+        const OVertex& operationVertex = operationIndex;
         return _workflow->implicitIndexes(operationVertex);
     } catch (std::out_of_range e) {
        return "";
@@ -186,8 +185,9 @@ QStringList WorkflowModel::deleteOperation(int index)
 {
     QStringList* parameterEntrySet = new QStringList();
     try {
-        if ( index < _operationNodes.size()){
-            const OVertex& operationVertex = _operationNodes[index];
+
+        if ( index < _workflow->getOperationCount()){
+            const OVertex& operationVertex = index;
 
             // In edges
             std::pair<InEdgeIterator,InEdgeIterator> inIterators = _workflow->getInEdges(operationVertex);
@@ -208,7 +208,7 @@ QStringList WorkflowModel::deleteOperation(int index)
             }
 
             _workflow->removeOperation(operationVertex);
-            _operationNodes.erase(_operationNodes.begin() + index);
+//            _operationNodes.erase(_operationNodes.begin() + index);
 
         } else {
             qDebug() << "There are no operations";
@@ -223,14 +223,14 @@ QStringList WorkflowModel::deleteOperation(int index)
 QStringList WorkflowModel::deleteFlow(int vertexFrom, int vertexTo, int parameterFrom, int parameterto)
 {
     QStringList* parameterEntrySet = new QStringList();
-    OVertex sourceNode = _operationNodes[vertexFrom];
+    OVertex sourceNode = vertexFrom;
     boost::graph_traits<WorkflowGraph>::out_edge_iterator ei, ei_end;
     for (boost::tie(ei,ei_end) = _workflow->getOutEdges(sourceNode); ei != ei_end; ++ei) {
 
         OVertex targetNode = _workflow->getTargetOperationNode(*ei);
 
         NodeProperties npNode = _workflow->nodeProperties(targetNode);
-        NodeProperties npTarget = _workflow->nodeProperties(_operationNodes[vertexTo]);
+        NodeProperties npTarget = _workflow->nodeProperties(vertexTo);
 
         if(npNode._operationid == npTarget._operationid)
         {
@@ -297,18 +297,13 @@ QQmlListProperty<EdgePropObject> WorkflowModel::getEdges()
  */
 int WorkflowModel::vertex2ItemID(int vertex)
 {
-    for (int i = 0; i < _operationNodes.size(); ++i) {
-        if (_operationNodes[i] == vertex) {
-            return i;
-        }
-    }
-    return iUNDEF;
+    return vertex;
 }
 
 QStringList WorkflowModel::getAsignedValuesByItemID(int itemId)
 {
     QStringList* results = new QStringList();
-    OVertex v = _operationNodes[itemId];
+    OVertex v = itemId;
 
     // Add edge values to fill empty spots
     auto edgeIterators = _workflow->getInEdges(v);
@@ -317,7 +312,7 @@ QStringList WorkflowModel::getAsignedValuesByItemID(int itemId)
     }
 
     // Constant values
-    QList<InputAssignment> inputs = _workflow->getInputAssignments(_operationNodes[itemId]);
+    QList<InputAssignment> inputs = _workflow->getInputAssignments(itemId);
     for (const InputAssignment &input : inputs) {
         results->insert(input.second, _workflow->getAssignedInputData(input)->value);
     }
@@ -330,7 +325,7 @@ void WorkflowModel::store(const QStringList &coordinates)
     try {
         for (int i = 0; i< coordinates.size(); i++) {
             QStringList split = coordinates[i].split('|');
-            OVertex v = _operationNodes[i];
+            OVertex v = i;
             NodeProperties props = _workflow->nodeProperties(v);
             props._x = split[0].toInt();
             props._y = split[1].toInt();
@@ -349,16 +344,7 @@ void WorkflowModel::store(const QStringList &coordinates)
 
 void WorkflowModel::load()
 {
-    //_workflow->connectTo(QUrl("ilwis://internalcatalog/" + _workflow->name() + "_workflow"), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmINPUT);
-
-    try{
-        std::pair<WorkflowVertexIterator, WorkflowVertexIterator> nodeIterators = _workflow->getNodeIterators();
-        for (auto &iter = nodeIterators.first; iter < nodeIterators.second; ++iter) {
-            _operationNodes.push_back(*iter);
-        }
-    } catch (const ErrorObject& err){
-
-    }
+    _workflow->connectTo(QUrl("ilwis://internalcatalog/" + _workflow->name() + "_workflow"), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmINPUT);
 }
 
 void WorkflowModel::createMetadata()

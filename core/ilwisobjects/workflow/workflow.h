@@ -227,6 +227,11 @@ public:
      */
     void removeOperationFlow(OEdge edge);
     /*!
+     * \brief getOperationCount returns the amout of vertexes
+     * \return the amount of vertexes
+     */
+    int getOperationCount();
+    /*!
      * \brief Gets the indexes from within the workflow input set that belong to the given vertex
      *
      * Searches for the given vertex through all inputs of this workflow. Returns all indexes of these inputs that belong to that vertex.

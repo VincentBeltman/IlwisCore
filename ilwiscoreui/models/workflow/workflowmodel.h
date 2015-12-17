@@ -155,7 +155,6 @@ public:
 
 private:
     Ilwis::IWorkflow _workflow;
-    std::vector<Ilwis::OVertex> _operationNodes;
     QList<NodePropObject *> _nodeProps;
     QList<EdgePropObject *> _edgeProps;
     int _inputParameterCount = 0;
