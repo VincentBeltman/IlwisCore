@@ -290,15 +290,6 @@ QQmlListProperty<EdgePropObject> WorkflowModel::getEdges()
     return  QQmlListProperty<EdgePropObject>(this, _edgeProps);
 }
 
-/**
- * Runs the createMetadata function on the workflow.
- * The workflow will be put in the master catalog and will be usable.
- */
-int WorkflowModel::vertex2ItemID(int vertex)
-{
-    return vertex;
-}
-
 QStringList WorkflowModel::getAsignedValuesByItemID(int itemId)
 {
     QStringList* results = new QStringList();

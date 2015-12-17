@@ -223,8 +223,8 @@ Modeller.ModellerWorkArea {
             if (nodeEdges) {
                 for (var j = 0; j < nodeEdges.length; j++) {
                     edge = nodeEdges[j]
-                    fromItemid = workflow.vertex2ItemID(node.vertex) //TODO: Temporary
-                    toItemId = workflow.vertex2ItemID(edge.toVertex) //TODO: Temporary
+                    fromItemid = node.vertex //TODO: Temporary
+                    toItemId = edge.toVertex //TODO: Temporary
 
                     for (var k = 0; k < wfCanvas.operationsList.length; k++) {
                         if (!fromOperation && wfCanvas.operationsList[k].itemid == fromItemid) {
