@@ -140,6 +140,11 @@ public:
     Q_INVOKABLE int getInputParameterCount() { return _inputParameterCount;}
 
     /*!
+      * \brief calls the workflow to add an empty conditioncontainer to the workflow
+      */
+    Q_INVOKABLE void addConditionContainer(){_workflow->addConditionContainer();}
+
+    /*!
      * \brief saves the workflow and the coordinates of all vertexes
      * \param coordinates The coordinates of all vertexes
      */

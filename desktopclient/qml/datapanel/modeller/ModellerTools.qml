@@ -20,6 +20,7 @@ ToolBar{
             id : editingtools
 
             Button {
+                id : newcondition
                 height : 25
                 width : 25
                 Image {
@@ -27,6 +28,10 @@ ToolBar{
                     anchors.horizontalCenter: parent.horizontalCenter
 
                     source : iconsource("choice20.png")
+                }
+                onClicked: {
+                    modellerDataPane.newCondition()
+
                 }
             }
 

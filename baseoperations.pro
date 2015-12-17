@@ -98,8 +98,8 @@ SOURCES += \
     baseoperations/creators/createpalettedomain.cpp \
     baseoperations/creators/createcornersgeoreference.cpp \
     baseoperations/creators/createprojectedcoordinatesystem.cpp \
-    baseoperations/conditions/numbercondition.cpp \
-    baseoperations/util/testoperation.cpp
+    baseoperations/util/testoperation.cpp \
+    baseoperations/conditions/numbercondition.cpp
 
 OTHER_FILES += \
     baseoperations/baseoperations.json \

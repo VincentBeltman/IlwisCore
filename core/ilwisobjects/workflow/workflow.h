@@ -35,6 +35,10 @@ struct AssignedOutputData {
     QString outputName;
 };
 
+struct ConditionContainer {
+    ConditionContainer() {}
+};
+
 typedef std::shared_ptr<AssignedInputData> SPAssignedInputData;
 typedef std::shared_ptr<AssignedOutputData> SPAssignedOutputData;
 
@@ -226,6 +230,12 @@ public:
      * \param edge The edge that should be deleted.
      */
     void removeOperationFlow(OEdge edge);
+
+    /*!
+     * \brief adds an empty conditioncontainer to the workflow.
+     */
+    void addConditionContainer();
+
     /*!
      * \brief Gets the indexes from within the workflow input set that belong to the given vertex
      *
@@ -388,6 +398,7 @@ private:
     QList<OVertex> _inputNodes;
     // Is only used in loading the graph (DONT TOUCH)
     QList<OVertex> _outputNodes;
+    QList<ConditionContainer> _conditionContainers;
 
     // The inputassignments looks as following: [<vetex, parameter>, {inputName, value}]
     QMap<InputAssignment, SPAssignedInputData> _inputAssignments;

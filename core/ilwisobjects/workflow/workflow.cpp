@@ -325,7 +325,7 @@ bool Workflow::hasValueDefined(const OVertex &operationVertex, int parameterInde
 {
 
     boost::graph_traits<WorkflowGraph>::vertex_iterator vi, vi_end;
-    // Loop through all vertices
+    // Loop through all vertices.
     for (boost::tie(vi, vi_end) = boost::vertices(_wfGraph); vi != vi_end; ++vi) {
         // Does it exist?
         if ((*vi) == operationVertex) {
@@ -366,6 +366,10 @@ void Workflow::removeOperationFlow(OEdge edge) {
     EdgeProperties edgeProps = edgeProperties(edge);
     assignInputData(boost::target(edge, _wfGraph), edgeProps._inputParameterIndex);
     boost::remove_edge(edge, _wfGraph);
+}
+
+void Workflow::addConditionContainer() {
+    _conditionContainers.push_back({});
 }
 
 IlwisTypes Workflow::ilwisType() const
