@@ -39,11 +39,6 @@ Rectangle {
             validValues = validValues.slice(0, canvas.workflow.getInputParameterCount())
         }
 
-        for (var i =0; i < validValues.length; i++) {
-            console.log(validValues[i])
-        }
-        console.log('------------')
-
         var form = formbuilder.index2Form(metaid, true, false, "", operationNames, validValues)
         operationid = metaid
         appFrame.formQML = form

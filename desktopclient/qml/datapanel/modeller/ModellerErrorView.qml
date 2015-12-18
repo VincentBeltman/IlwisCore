@@ -18,7 +18,7 @@ Rectangle {
 
         errorModel.onErrorlistChanged: {
 
-            if(errormodel.getCount() != 0)
+            if(errorModel.getCount() != 0)
             {
                 if(errorview.state == "smaller")
                 {

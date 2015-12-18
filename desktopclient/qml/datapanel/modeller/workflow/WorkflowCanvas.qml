@@ -20,7 +20,6 @@ Modeller.ModellerWorkArea {
    function panOperations(x, y)
    {
        for( var i=0; i < wfCanvas.operationsList.length; i++){
-           console.log("Pan operation " + x + " " + y);
            wfCanvas.operationsList[i].panOperation(x,y);
        }
    }
@@ -196,14 +195,11 @@ Modeller.ModellerWorkArea {
 
             var operationNames = {}
             for( var i=0; i < wfCanvas.operationsList.length; i++){
-
                 var operationItem = wfCanvas.operationsList[i];
-                operationItem.drawFlows(wfCanvas.ctx)
                 operationNames[i + ". " + operationItem.operation.name] = {
                     inParameterCount: workflow.operationInputParameterCount(i),
                     outParameterCount: workflow.operationOutputParameterCount(i)
                 };
-
             }
 
             workflow.createMetadata()
@@ -341,7 +337,6 @@ Modeller.ModellerWorkArea {
                    ctx.lineWidth = 2;
                    var pt1 = transformedPoint(workingLineBegin.x, workingLineBegin.y);
                    var pt2 = transformedPoint(workingLineEnd.x, workingLineEnd.y);
-                   console.log(pt1.x + " " + pt1.y);
                    ctx.moveTo(pt1.x, pt1.y);
                    ctx.strokeStyle = "red"
                    ctx.lineTo(pt2.x, pt2.y);
@@ -501,8 +496,6 @@ Modeller.ModellerWorkArea {
 
                        var EndCoords = transformedPoint(endX, endY);
 
-                       console.log("Scale " + item.scale);
-
                        var isContained = mouseX >= (startCoords.x) && mouseY >= (startCoords.y) && mouseX <= endX && mouseY <= endY;
 
                        for(var j=0; j < item.flowConnections.length; j++)
@@ -598,7 +591,6 @@ Modeller.ModellerWorkArea {
            }
 
             Keys.onEscapePressed: {
-                console.log("escape key");
                 wfCanvas.stopWorkingLine()
             }
 
