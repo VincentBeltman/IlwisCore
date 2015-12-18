@@ -6,13 +6,14 @@ import QtQuick.Controls.Styles 1.0
 ToolBar{
     id : modellertools
     width : parent.width
-    height : 55
+    height : 35
 
     property alias zoomLevel: zoomLabel
 
     Column {
         height:parent.height
-        width: parent.height/2
+        width: parent.width/3
+        id : editingColumn
         Row {
             width : parent.width
             height : 25
@@ -79,6 +80,18 @@ ToolBar{
                 }
             }
         }
+
+    }
+
+    Column {
+        height:parent.height
+        width: parent.width/3
+
+        anchors{
+            right: zoomTools.left
+            left: editingColumn.right
+        }
+
         Row {
             width : parent.width
             height : 25
@@ -151,12 +164,13 @@ ToolBar{
     }
 
     Column{
+        id:zoomTools
         anchors{
             right: parent.right
         }
 
         height: parent.height
-        width: parent.width/2
+        width: parent.width/3
         Row{
             height : 25
             spacing : 2
@@ -201,21 +215,13 @@ ToolBar{
                     modellerDataPane.canvasZoomIn()
                 }
             }
-        }
 
-        Row{
-            height : 25
-            spacing : 2
-            anchors{
-                right: parent.right
-            }
             Text{
                 id:zoomLabel
                 text:"100%"
                 font.pixelSize: 18
             }
         }
-
 
     }
 }
