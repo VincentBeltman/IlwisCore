@@ -154,16 +154,9 @@ int WorkflowModel::operationInputParameterCount(int operationIndex){
 int WorkflowModel::operationOutputParameterCount(int operationIndex){
     const OVertex& operationVertex = operationIndex;
 
-    QList<OVertex> operationsWithExternalOutput = _workflow->getNodesWithExternalOutputs();
+    QStringList terms = _workflow->getOutputTerms(operationVertex);
 
-    int occurences = 0;
-    for(int i=0;i<operationsWithExternalOutput.length();++i){
-        if(operationsWithExternalOutput[i] == operationVertex){
-            ++occurences;
-        }
-    }
-
-    return occurences;
+    return terms.length();
 }
 
 /**

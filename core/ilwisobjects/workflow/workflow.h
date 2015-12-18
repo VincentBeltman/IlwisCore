@@ -396,6 +396,9 @@ public:
 
     virtual bool isInternalObject() const;
 
+    QStringList getInputTerms(const OVertex &v);
+    QStringList getOutputTerms(const OVertex &v);
+
 private:
     // The graph representation of the workflow
     WorkflowGraph _wfGraph;
@@ -427,8 +430,6 @@ private:
     QStringList createSyntaxTerms(const OVertex &v, const std::vector<SPOperationParameter> &parameters, const QString &inoutPart);
     QString createParametersCountString(const QStringList &mandatory, const QStringList &optionals) const;
 
-    QStringList getInputTerms(const OVertex &v);
-    QStringList getOutputTerms(const OVertex &v);
     QList<InputAssignment> getOpenInputAssignments(const OVertex &v) const;
     QList<InputAssignment> getConstantInputAssignments(const OVertex &v) const;
     QList<InputAssignment> getImplicitInputAssignments(const OVertex &v);
