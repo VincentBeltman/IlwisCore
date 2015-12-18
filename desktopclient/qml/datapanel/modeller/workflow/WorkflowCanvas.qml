@@ -274,15 +274,16 @@ Modeller.ModellerWorkArea {
 
         property var ctx: getContext('2d')
         property bool canvasValid: true
-
         property double oldx : -1.0
         property double oldy : -1.0
         property point workingLineBegin : Qt.point(-1,-1)
         property point workingLineEnd : Qt.point(-1,-1)
+        property int currentConditionContainer: -1
         property int currentIndex : 0
         property var component;
         property var currentItem;
         property var operationsList: []
+        property var conditionBoxList: []
 
         Timer {
             interval: 30;
@@ -340,11 +341,33 @@ Modeller.ModellerWorkArea {
                     // Error Handling
                     console.log("Error creating object");
                 }
-                workflow.addConditionContainer()
+                workflow.addConditionContainer();
+                conditionBoxList.push(currentItem);
             } else if (component.status == Component.Error) {
                 // Error Handling
                 console.log("Error loading component:", component.errorString());
             }
+        }
+
+        function isInsideCondition(centreX, centreY) {
+            for (var i = 0; i < wfCanvas.conditionBoxList.length; i++) {
+                var box = wfCanvas.conditionBoxList[i]
+                if(centreX > box.x && centreY > box.y && centreX < (box.x + box.width) && centreY < (box.y + box.height))
+                {
+                    box.setCanvasColor("grey");
+                    currentConditionContainer = i;
+                    return;
+                }
+                box.setCanvasColor("white");
+            }
+            currentConditionContainer = -1;
+        }
+        function addCurrentOperationToCondition(item) {
+            var box = conditionBoxList[currentConditionContainer];
+            box.addToOperationList(item.itemid);
+            workflow.addOperationToContainer(currentConditionContainer, item.itemid);
+            box.setCanvasColor("white");
+           currentConditionContainer = -1;
         }
 
         function createItem(x,y, resource) {
@@ -430,7 +453,14 @@ Modeller.ModellerWorkArea {
                     }
                     var oper = wfCanvas.getOperation(drag.source.ilwisobjectid)
                     wfCanvas.createItem(drag.x - 50, drag.y - 30,oper)
+
                     var paramterIndexes = workflow.addOperation(drag.source.ilwisobjectid)
+
+                    var item = wfCanvas.currentItem;
+                    wfCanvas.isInsideCondition(item.x + (item.width/2), item.y + (item.height/2));
+                    if(wfCanvas.currentConditionContainer != -1) {
+                        wfCanvas.addCurrentOperationToCondition(item);
+                    }
 
                     wfCanvas.canvasValid = false
 
@@ -447,7 +477,6 @@ Modeller.ModellerWorkArea {
             anchors.fill: parent
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             hoverEnabled: wfCanvas.workingLineBegin.x !== -1
-
             onPressed: {
                 if (canvasActive) {
                     wfCanvas.canvasValid = false;
@@ -504,6 +533,7 @@ Modeller.ModellerWorkArea {
                     } else if (operationSelected > -1) {
                         item = wfCanvas.operationsList[operationSelected]
                         item.isSelected = true
+                        wfCanvas.currentItem = item;
 
                         implicitIndexes = workflow.implicitIndexes(operationSelected)
                         constantValues = workflow.getAsignedValuesByItemID(operationSelected)
@@ -556,21 +586,28 @@ Modeller.ModellerWorkArea {
                     if ( wfCanvas.oldx >= 0 && wfCanvas.oldy >= 0 && wfCanvas.currentIndex >= 0)    {
 
                         var item = wfCanvas.operationsList[wfCanvas.currentIndex]
-                        if ( item){
+                        if (item){
                             item.x += ( mouseX - wfCanvas.oldx)
                             item.y += (mouseY - wfCanvas.oldy)
                             wfCanvas.oldx = mouseX
                             wfCanvas.oldy = mouseY
+
+                            wfCanvas.isInsideCondition((item.x + (item.width/2)),(item.y + (item.height/2)));
                         }
                     }
+
                 }
             }
 
             onReleased: {
                 wfCanvas.stopWorkingLine()
+                if(wfCanvas.currentConditionContainer != -1) {
+                    wfCanvas.addCurrentOperationToCondition(wfCanvas.currentItem);
+                } else {
+                    //Uit conditiebox slepen of helemaal niet in conditiebox geweest.
+                }
             }
         }
-
     }
 
     Component.onDestruction: {

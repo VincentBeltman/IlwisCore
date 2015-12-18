@@ -145,6 +145,12 @@ public:
     Q_INVOKABLE void addConditionContainer(){_workflow->addConditionContainer();}
 
     /*!
+      * \brief connects and operation to the container it is dragged on.
+      * \param the index of the operation
+      */
+    Q_INVOKABLE void addOperationToContainer(quint16 containerIndex, quint16 operationId){_workflow->addOperationToContainer(containerIndex,operationId);}
+
+    /*!
      * \brief saves the workflow and the coordinates of all vertexes
      * \param coordinates The coordinates of all vertexes
      */

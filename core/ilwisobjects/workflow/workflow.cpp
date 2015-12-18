@@ -362,6 +362,16 @@ OEdge Workflow::addOperationFlow(const OVertex &from, const OVertex &to, const E
     return (boost::add_edge(from, to, properties, _wfGraph)).first;
 }
 
+void Workflow::addOperationToContainer(quint16 containerId, quint16 operationVertexId) {
+    ConditionContainer* container = &_conditionContainers[containerId];
+
+    if(!container->operationVertexIds.contains(operationVertexId)) {
+        qDebug() << "added" ;
+        container->operationVertexIds.push_back(operationVertexId);
+    }
+
+}
+
 void Workflow::removeOperationFlow(OEdge edge) {
     EdgeProperties edgeProps = edgeProperties(edge);
     assignInputData(boost::target(edge, _wfGraph), edgeProps._inputParameterIndex);
@@ -369,7 +379,7 @@ void Workflow::removeOperationFlow(OEdge edge) {
 }
 
 void Workflow::addConditionContainer() {
-    _conditionContainers.push_back({});
+    _conditionContainers.push_back(ConditionContainer());
 }
 
 IlwisTypes Workflow::ilwisType() const
