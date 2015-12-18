@@ -234,57 +234,52 @@ Rectangle {
     }
 
     function drawFlows(ctx, matrix){
+        if (matrix){
+            for(var i=0; i < flowConnections.length; i++){
+                var item = flowConnections[i]
 
-        for(var i=0; i < flowConnections.length; i++){
+                var startPoint = item.attachsource.center()
+                var endPoint = item.attachtarget.center()
 
+                var pt1 = transformedPoint(matrix, startPoint.x, startPoint.y);
+                var pt2 = transformedPoint(matrix, endPoint.x, endPoint.y);
 
+                var fromx = pt1.x
+                var fromy = pt1.y
+                var tox = pt2.x
+                var toy = pt2.y
+                var headlen = 15;   // length of head in pixels
+                var angle = Math.atan2(toy-fromy,tox-fromx);
 
-            var item = flowConnections[i]
+                ctx.beginPath();
+                ctx.moveTo(fromx, fromy);
+                ctx.lineTo(tox, toy);
+                ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
+                ctx.moveTo(tox, toy);
+                ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
 
-            var startPoint = item.attachsource.center()
-            var endPoint = item.attachtarget.center()
+                if(item.isSelected)
+                {
+                    ctx.strokeStyle = "red"
+                    ctx.lineWidth = 3
+                }else {
+                    ctx.strokeStyle = "blue"
+                    ctx.lineWidth = 1
+                }
 
-            var pt1 = transformedPoint(matrix, startPoint.x, startPoint.y);
-            var pt2 = transformedPoint(matrix, endPoint.x, endPoint.y);
+                ctx.stroke()
 
-
-
-            var fromx = pt1.x
-            var fromy = pt1.y
-            console.log(fromx + " " + fromy);
-            var tox = pt2.x
-            var toy = pt2.y
-            var headlen = 15;   // length of head in pixels
-            var angle = Math.atan2(toy-fromy,tox-fromx);
-
-            ctx.beginPath();
-            ctx.moveTo(fromx, fromy);
-            ctx.lineTo(tox, toy);
-            ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
-            ctx.moveTo(tox, toy);
-            ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
-
-            if(item.isSelected)
-            {
-                ctx.strokeStyle = "red"
-                ctx.lineWidth = 3
-            }else {
-                ctx.strokeStyle = "blue"
-                ctx.lineWidth = 1
-            }
-
-            ctx.stroke()
-
-            if ( item.flowPoints){
-                var p1 = item.flowPoints.fromParameterIndex
-                var p2 = item.flowPoints.toParameterIndex
-                var xcenter = (fromx + tox) / 2
-                var ycenter = (fromy + toy) / 2
-                var label = p1 + " > "+  p2
-                ctx.fillStyle="#D8F6CE";
-                ctx.fillRect(xcenter - 15 ,ycenter - 10,35,15);
-                ctx.fillStyle = "#000";
-                ctx.fillText(label, xcenter-10, ycenter + 2);
+                if ( item.flowPoints){
+                    var p1 = item.flowPoints.fromParameterIndex
+                    var p2 = item.flowPoints.toParameterIndex
+                    var xcenter = (fromx + tox) / 2
+                    var ycenter = (fromy + toy) / 2
+                    var label = p1 + " > "+  p2
+                    ctx.fillStyle="#D8F6CE";
+                    ctx.fillRect(xcenter - 15 ,ycenter - 10,35,15);
+                    ctx.fillStyle = "#000";
+                    ctx.fillText(label, xcenter-10, ycenter + 2);
+                }
             }
         }
     }
