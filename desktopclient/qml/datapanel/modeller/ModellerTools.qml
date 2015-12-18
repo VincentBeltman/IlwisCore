@@ -93,9 +93,10 @@ ToolBar{
         }
 
         Row {
-            width : parent.width
+            anchors.horizontalCenter: parent.horizontalCenter
             height : 25
             spacing : 2
+
             Button {
                 height : 25
                 width : 25
