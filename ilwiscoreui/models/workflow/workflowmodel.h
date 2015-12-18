@@ -119,14 +119,6 @@ public:
      * \return a list with all information about all edges
      */
     QQmlListProperty<EdgePropObject> getEdges();
-
-    /*!
-     * \brief translates a vertex to an itemid
-     * \param vertex The vertex
-     * \return The item id of the vertex
-     */
-    Q_INVOKABLE int vertex2ItemID(int vertex);
-
     /*!
      * \brief Returns all values (even empty) of a vertex
      * \param operationIndex The vertex
@@ -166,7 +158,6 @@ public:
 
 private:
     Ilwis::IWorkflow _workflow;
-    std::vector<Ilwis::OVertex> _operationNodes;
     QList<NodePropObject *> _nodeProps;
     QList<EdgePropObject *> _edgeProps;
     int _inputParameterCount = 0;
