@@ -154,9 +154,11 @@ int WorkflowModel::operationInputParameterCount(int operationIndex){
 int WorkflowModel::operationOutputParameterCount(int operationIndex){
     const OVertex& operationVertex = operationIndex;
 
-    QStringList terms = _workflow->getOutputTerms(operationVertex);
+    QStringList operationOutputs = _workflow->getOutputTerms(operationVertex);
 
-    return terms.length();
+    std::vector<quint16> assignedOuputs = _workflow->getAssignedPouts(operationVertex);
+
+    return operationOutputs.length()-assignedOuputs.size();
 }
 
 /**

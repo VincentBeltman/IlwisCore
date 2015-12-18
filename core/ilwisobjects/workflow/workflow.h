@@ -399,6 +399,8 @@ public:
     QStringList getInputTerms(const OVertex &v);
     QStringList getOutputTerms(const OVertex &v);
 
+    std::vector<quint16> getAssignedPouts(const OVertex &v);
+
 private:
     // The graph representation of the workflow
     WorkflowGraph _wfGraph;
@@ -433,7 +435,6 @@ private:
     QList<InputAssignment> getOpenInputAssignments(const OVertex &v) const;
     QList<InputAssignment> getConstantInputAssignments(const OVertex &v) const;
     QList<InputAssignment> getImplicitInputAssignments(const OVertex &v);
-    std::vector<quint16> getAssignedPouts(const OVertex &v);
 };
 
 typedef IlwisData<Workflow> IWorkflow;
