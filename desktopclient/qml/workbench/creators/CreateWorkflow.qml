@@ -48,7 +48,6 @@ Controls.DropableItem{
                     height : 20
                     width : 100
                     font.bold: true
-                    font.pointSize: fontSize
                 }
 
                 Rectangle {
