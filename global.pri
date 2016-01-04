@@ -26,7 +26,7 @@ win32{
 unix{
     INCLUDEPATH += $$PWD/../geos-3.5.0/include
     DEPENDPATH += $$PWD/../geos-3.5.0/include
-
+}
 linux{
     BOOST=/usr/include
     GEOSINCL=/usr/include
