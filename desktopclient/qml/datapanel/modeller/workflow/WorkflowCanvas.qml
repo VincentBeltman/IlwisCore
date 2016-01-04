@@ -99,56 +99,56 @@ Modeller.ModellerWorkArea {
 
    MessageDialog {
        id: deleteOperationDialog
-       title: "Deleting operation"
-       text: "Are you sure you want to delete this operation?"
-       standardButtons: StandardButton.Yes | StandardButton.No
-       onYes: {
-           var item = wfCanvas.operationsList[deleteItemIndex]
-           var flows = item.flowConnections;
+      title: "Deleting operation"
+      text: "Are you sure you want to delete this operation?"
+      standardButtons: StandardButton.Yes | StandardButton.No
+      onYes: {
+          var item = wfCanvas.operationsList[deleteItemIndex]
+          var flows = item.flowConnections;
 
-           // First delete the operation at C++. THIS NEEDS TO BE DONE FIRST
-           var parameterIndexes = workflow.deleteOperation(deleteItemIndex)
+          // First delete the operation at C++. THIS NEEDS TO BE DONE FIRST
+          var parameterIndexes = workflow.deleteOperation(deleteItemIndex)
 
-           // This removes 1 from the operation list beginning from deleteItemIndex
-           wfCanvas.operationsList.splice(deleteItemIndex, 1)
+          // This removes 1 from the operation list beginning from deleteItemIndex
+          wfCanvas.operationsList.splice(deleteItemIndex, 1)
 
-           // Delete incomming connections of the operation which will be deleted
-           for (var i = 0; i < wfCanvas.operationsList.length; i++) {
-               var operation = wfCanvas.operationsList[i]
-               var deleteFlows = [];
-               // Search for deletable connections
-               for (var j = 0; j < operation.flowConnections.length; j++) {
-                   var flow = operation.flowConnections[j]
-                   // If target is same as deleted operation
-                   if (flow.target.itemid == item.itemid) {
-                       deleteFlows.push(j)
-                   }
-               }
-               // Delete the connections
-               for (var j = 0; j < deleteFlows.length; j++) {
-                   wfCanvas.operationsList[i].flowConnections.splice(deleteFlows[j] - j, 1)
-               }
-           }
-           // Loop through all operations after the deleted item. We need to reset their itemid
-           for (var i = deleteItemIndex; i < wfCanvas.operationsList.length; i++) {
-               wfCanvas.operationsList[i].itemid = i
-           }
+          // Delete incomming connections of the operation which will be deleted
+          for (var i = 0; i < wfCanvas.operationsList.length; i++) {
+              var operation = wfCanvas.operationsList[i]
+              var deleteFlows = [];
+              // Search for deletable connections
+              for (var j = 0; j < operation.flowConnections.length; j++) {
+                  var flow = operation.flowConnections[j]
+                  // If target is same as deleted operation
+                  if (flow.target.itemid == item.itemid) {
+                      deleteFlows.push(j)
+                  }
+              }
+              // Delete the connections
+              for (var j = 0; j < deleteFlows.length; j++) {
+                  wfCanvas.operationsList[i].flowConnections.splice(deleteFlows[j] - j, 1)
+              }
+          }
+          // Loop through all operations after the deleted item. We need to reset their itemid
+          for (var i = deleteItemIndex; i < wfCanvas.operationsList.length; i++) {
+              wfCanvas.operationsList[i].itemid = i
+          }
 
-           // Destroy the QML object.
-           item.destroy()
+          // Destroy the QML object.
+          item.destroy()
 
-           // Reset all targets of the flows of the deleted operation
-           for (var i = 0; i < flows.length; i++) {
-               flows[i].target.resetInputModel()
-           }
+          // Reset all targets of the flows of the deleted operation
+          for (var i = 0; i < flows.length; i++) {
+              flows[i].target.resetInputModel()
+          }
 
-           // Redraw lines
-           wfCanvas.canvasValid = false
-           wfCanvas.draw(true)
+          // Redraw lines
+          wfCanvas.canvasValid = false
+          wfCanvas.draw(true)
 
-           generateForm(parameterIndexes)
-       }
-       Component.onCompleted: visible = false
+          generateForm(parameterIndexes)
+      }
+      Component.onCompleted: visible = false
    }
 
    MessageDialog {
