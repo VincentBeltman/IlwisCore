@@ -66,7 +66,8 @@ std::vector<ApplicationFormExpressionParser::FormParameter> ApplicationFormExpre
     if ( outparms == "0")
         return parameters;
 
-    for ( int order = 0; order < outparms.toInt(); ++order){
+    QStringList parts = outparms.split("|");
+    for ( int order = 0; order < parts.last().toInt(); ++order){
         QString prefix = "pout_" + QString::number(order + 1) + "_";
        FormParameter parm;
        parm._fieldType = isService ? ftTEXTAREA :  ftTEXTEDIT;
