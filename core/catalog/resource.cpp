@@ -60,6 +60,8 @@ Resource::Resource(const Resource &resource) : Identity(resource)
     _dimensions = resource._dimensions;
     _ilwtype = resource._ilwtype;
     _extendedType = resource._extendedType;
+    _modifiedTime = resource._modifiedTime;
+    _createTime = resource._createTime;
 }
 
 Resource::Resource(const QString& resourceName, quint64 tp, bool isNew) :
@@ -74,7 +76,8 @@ Resource::Resource(const QString& resourceName, quint64 tp, bool isNew) :
 
     if ( isNew)
         prepare();
-
+    _createTime = Time::now();
+    _modifiedTime = Time::now();
     int index = resourceName.indexOf(":");
     if ( index != -1 && index < 6) {
         _normalizedUrl = QUrl(resourceName);
@@ -140,6 +143,8 @@ Resource::Resource(const QUrl &url, quint64 tp, bool isNew) :
     _extendedType(itUNKNOWN)
 {
     stringAsUrl(url.toString(), tp, isNew);
+    _createTime = Time::now();
+    _modifiedTime = Time::now();
 }
 
 Resource::Resource(const QUrl& normalizedUrl,const QUrl &rawurl, quint64 tp, bool isNew) :
@@ -151,6 +156,8 @@ Resource::Resource(const QUrl& normalizedUrl,const QUrl &rawurl, quint64 tp, boo
     _extendedType(itUNKNOWN)
 {
     stringAsUrl(normalizedUrl.toString(), tp, isNew);
+    _createTime = Time::now();
+    _modifiedTime = Time::now();
 }
 
 Resource::Resource(quint64 tp, const QUrl &normalizedUrl, const QUrl& rawUrl) :
@@ -175,6 +182,8 @@ Resource::Resource(quint64 tp, const QUrl &normalizedUrl, const QUrl& rawUrl) :
     if ( index != -1){
         addContainer(nm.left(index));
     }
+    _createTime = Time::now();
+    _modifiedTime = Time::now();
 
 }
 
@@ -192,6 +201,9 @@ Resource::Resource(const QSqlRecord &rec) : Identity(rec.value("name").toString(
     _dimensions = rec.value("dimensions").toString();
     _ilwtype = rec.value("type").toLongLong();
     _extendedType = rec.value("extendedtype").toLongLong();
+    bool ok;
+    _modifiedTime = rec.value("modifiedtime").toDouble(&ok);
+    _createTime = rec.value("createtime").toDouble();
 
     QString query = QString("Select * from catalogitemproperties where itemid=%1").arg(id());
     InternalDatabaseConnection db;
@@ -428,6 +440,8 @@ bool Resource::store(InternalDatabaseConnection &queryItem, InternalDatabaseConn
     queryItem.bindValue(":extendedtype", _extendedType);
     queryItem.bindValue(":size", size());
     queryItem.bindValue(":dimensions", _dimensions);
+    queryItem.bindValue(":modifiedtime", (double)_modifiedTime);
+    queryItem.bindValue(":createtime", (double)_createTime);
     ok = queryItem.exec();
     if (!ok) {
         kernel()->issues()->logSql(queryProperties.lastError());
@@ -473,6 +487,8 @@ bool Resource::load(QDataStream &stream){
     _rawContainer = url;
     stream >> _size;
     stream >> _dimensions;
+    stream >> _createTime;
+    stream >> _modifiedTime;
     stream >> _ilwtype;
     stream >> _extendedType;
 
@@ -495,6 +511,8 @@ bool Resource::store(QDataStream &stream) const
     stream << _rawContainer.toString();
     stream << _size;
     stream << _dimensions;
+    stream << _createTime;
+    stream << _modifiedTime;
     stream << _ilwtype;
     stream << _extendedType;
 
@@ -677,3 +695,23 @@ Resource Resource::property2Resource(const QString& propertyName, IlwisTypes typ
 }
 
 
+double Resource::modifiedTime() const
+{
+
+    return _modifiedTime;
+}
+
+void Resource::modifiedTime(const double &tme)
+{
+    _modifiedTime = tme;
+}
+
+double Resource::createTime() const
+{
+    return _createTime;
+}
+
+void Resource::createTime(const double &time)
+{
+    _createTime = time;
+}
