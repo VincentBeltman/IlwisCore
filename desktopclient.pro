@@ -24,7 +24,7 @@ include(deployment.pri)
 
 # Add more folders to ship with the application, here
 folder_01.source = desktopclient/qml
-folder_01.target = ../../../output/$$PLATFORM$$CONF/bin
+folder_01.target = ../output/$$PLATFORM$$CONF/bin
 DEPLOYMENTFOLDERS = folder_01
 
 
@@ -147,10 +147,10 @@ DISTFILES += \
     desktopclient/qml/datapanel/visualization/propertyeditors/LayerOpacity.qml \
     desktopclient/qml/datapanel/workflow/AttachmentRectangle.qml \
     desktopclient/qml/workbench/creators/PaletteColorList.qml \
-    desktopclient/qml/workbench/creators/CreateGeorefCorners.qml
+    desktopclient/qml/workbench/creators/CreateGeorefCorners.qml \
+    desktopclient/qml/workbench/preferences/Locations.qml
 
 unix{
     QMAKE_CXXFLAGS = -mmacosx-version-min=10.7 -std=c++11 -stdlib=libc++
     CONFIG +=c++11
 }
-

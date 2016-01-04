@@ -27,6 +27,7 @@ unix{
     INCLUDEPATH += $$PWD/../geos-3.5.0/include
     DEPENDPATH += $$PWD/../geos-3.5.0/include
 
+linux{
     BOOST=/usr/include
     GEOSINCL=/usr/include
     GEOSLIB=/usr/local/lib
@@ -38,6 +39,14 @@ unix{
 
     QMAKE_CXXFLAGS = -mmacosx-version-min=10.7 -std=c++11 -stdlib=libc++
     CONFIG +=c++11
+}
+
+linux-g++{
+   !contains(QT_ARCH, x86_64){
+       LINUXLIB=/usr/lib/i386-linux-gnu/
+    } else {
+       LINUXLIB=/usr/lib/x86_64-linux-gnu/
+   }
 }
 
 EXTERNAL=../external
