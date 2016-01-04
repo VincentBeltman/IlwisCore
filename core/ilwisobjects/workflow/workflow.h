@@ -37,6 +37,7 @@ struct AssignedOutputData {
 
 struct ConditionContainer {
     ConditionContainer() {}
+    QList<quint16> operationVertexIds;
 };
 
 typedef std::shared_ptr<AssignedInputData> SPAssignedInputData;
@@ -220,6 +221,14 @@ public:
      * \return The index of our new edge
      */
     OEdge addOperationFlow(const OVertex &from, const OVertex &to, const EdgeProperties &properties);
+
+    /*!
+     * \brief adds an operation to a container
+     * \param id of the container the condition gets added to
+     * \param id of the operation added to the container
+     */
+    void addOperationToContainer(quint16 containerId, quint16 operationVertexId);
+
     /*!
      * \brief Removes the operation on the given index
      * \param vertex The index of the vertex thats need to be deleted

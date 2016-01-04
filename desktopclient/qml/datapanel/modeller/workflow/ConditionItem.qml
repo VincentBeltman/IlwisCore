@@ -13,6 +13,24 @@ Rectangle {
     color: "#80bfff"
     border.width: 1
     border.color: "black"
+    property var operationList : []
+
+    function setCanvasColor(color){
+        conditionRectangle.color = color;
+    }
+
+    function addToOperationList(operationIndex) {
+        if(operationList.indexOf(operationIndex) == -1) {
+            operationList.push(operationIndex);
+        }
+    }
+
+    function removeFromOperationList(operationIndex) {
+        if(operationList.indexOf(operationIndex) > -1) {
+            operationList.pop(operationIndex);
+        }
+    }
+
 
     ListModel {
         id: testModel
