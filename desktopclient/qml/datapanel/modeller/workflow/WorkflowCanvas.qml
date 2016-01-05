@@ -17,6 +17,17 @@ Modeller.ModellerWorkArea {
    property var deleteEdgeIndex;
    property int highestZIndex : 1;
 
+   function scalee(x,y)
+   {
+       wfCanvas.scale(x,y);
+       wfCanvas.replacePanOperation(x, y);
+   }
+
+   function getScale()
+   {
+       return wfCanvas.scale;
+   }
+
    function panOperations(x, y)
    {
        for( var i=0; i < wfCanvas.operationsList.length; i++){
@@ -481,6 +492,7 @@ Modeller.ModellerWorkArea {
 
            onWheel: {
                handleScroll(wheel);
+               modellerDataPane.setPercentage();
            }
 
            onPressed: {
