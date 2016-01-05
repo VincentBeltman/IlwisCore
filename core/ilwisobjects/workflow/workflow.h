@@ -37,6 +37,7 @@ struct AssignedOutputData {
 
 struct ConditionContainer {
     ConditionContainer() {}
+    QList<quint16> operationVertexIds;
 };
 
 typedef std::shared_ptr<AssignedInputData> SPAssignedInputData;
@@ -220,6 +221,14 @@ public:
      * \return The index of our new edge
      */
     OEdge addOperationFlow(const OVertex &from, const OVertex &to, const EdgeProperties &properties);
+
+    /*!
+     * \brief adds an operation to a container
+     * \param id of the container the condition gets added to
+     * \param id of the operation added to the container
+     */
+    void addOperationToContainer(quint16 containerId, quint16 operationVertexId);
+
     /*!
      * \brief Removes the operation on the given index
      * \param vertex The index of the vertex thats need to be deleted
@@ -396,6 +405,11 @@ public:
 
     virtual bool isInternalObject() const;
 
+    QStringList getInputTerms(const OVertex &v);
+    QStringList getOutputTerms(const OVertex &v);
+
+    std::vector<quint16> getAssignedPouts(const OVertex &v);
+
 private:
     // The graph representation of the workflow
     WorkflowGraph _wfGraph;
@@ -427,12 +441,9 @@ private:
     QStringList createSyntaxTerms(const OVertex &v, const std::vector<SPOperationParameter> &parameters, const QString &inoutPart);
     QString createParametersCountString(const QStringList &mandatory, const QStringList &optionals) const;
 
-    QStringList getInputTerms(const OVertex &v);
-    QStringList getOutputTerms(const OVertex &v);
     QList<InputAssignment> getOpenInputAssignments(const OVertex &v) const;
     QList<InputAssignment> getConstantInputAssignments(const OVertex &v) const;
     QList<InputAssignment> getImplicitInputAssignments(const OVertex &v);
-    std::vector<quint16> getAssignedPouts(const OVertex &v);
 };
 
 typedef IlwisData<Workflow> IWorkflow;

@@ -167,9 +167,21 @@ QString ApplicationFormExpressionParser::keys(IlwisTypes type) const{
         if ( keypart != "") keypart += ",";
         keypart += "\""+ TypeHelper::type2name(itTABLE) + "\"";
     }
-    if ( hasType(type, itFEATURE)){
+    if ( type == itPOINT){
         if ( keypart != "") keypart += ",";
-        keypart += "\""+ TypeHelper::type2name(itFEATURE) + "\"";
+        keypart += "\""+ TypeHelper::type2name(itPOINT) + "\"";
+    }
+    if ( type == itLINE){
+        if ( keypart != "") keypart += ",";
+        keypart += "\""+ TypeHelper::type2name(itLINE) + "\"";
+    }
+    if ( type == itPOLYGON){
+        if ( keypart != "") keypart += ",";
+        keypart += "\""+ TypeHelper::type2name(itPOLYGON) + "\"";
+    }
+    if ( type == itFEATURE){
+        if ( keypart != "") keypart += ",";
+        keypart += "\""+ TypeHelper::type2name(itFEATURE) + "\"," + "\""+ TypeHelper::type2name(itPOINT) + "\"," + "\""+ TypeHelper::type2name(itLINE) + "\"," + "\""+ TypeHelper::type2name(itPOLYGON) + "\"";
     }
     if ( hasType(type, itDOMAIN)){
         if ( keypart != "") keypart += ",";
@@ -289,13 +301,13 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
                 operationRowStart += QString("Column{height:parent.height; width:25;Rectangle{Text{anchors.fill:parent; text:\"%1.\";font.pixelSize:15}").arg(number);
                 if(operationIndex != operationNames.end()-1) operationRowStart += QString("Rectangle{anchors.bottom:parent.bottom;width : parent.width; height:1;color : \"black\"}");
                 operationRowStart += QString("width:parent.width;height:parent.height;}}");
-                operationRowStart += QString("Column{width:parent.width-25; ");
+                operationRowStart += QString("Column{spacing:10;width:parent.width-25; ");
             }
 
             if(operationParameterCount==parameterCount){
                 ++operationIndex;
 
-                if(operationIndex != operationNames.end()) operationRowEnd = "Rectangle{width : parent.width; height:3;color : \"white\"} Rectangle{width : parent.width; height:1;color : \"black\"}";
+                if(operationIndex != operationNames.end()) operationRowEnd = "Rectangle{width : parent.width; height:1;color : \"black\"}";
 
                 operationRowEnd += "}}";
 

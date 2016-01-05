@@ -7,7 +7,7 @@
 #include "symboltable.h"
 #include "commandhandler.h"
 #include "featurecoverage.h"
-#include "workflowerrormodel.h"
+#include "../workflowerrormodel.h"
 #include "ilwiscontext.h"
 //#include "../../IlwisCore/core/ilwiscontext.h"
 
@@ -154,16 +154,11 @@ int WorkflowModel::operationInputParameterCount(int operationIndex){
 int WorkflowModel::operationOutputParameterCount(int operationIndex){
     const OVertex& operationVertex = operationIndex;
 
-    QList<OVertex> operationsWithExternalOutput = _workflow->getNodesWithExternalOutputs();
+    QStringList operationOutputs = _workflow->getOutputTerms(operationVertex);
 
-    int occurences = 0;
-    for(int i=0;i<operationsWithExternalOutput.length();++i){
-        if(operationsWithExternalOutput[i] == operationVertex){
-            ++occurences;
-        }
-    }
+    std::vector<quint16> assignedOuputs = _workflow->getAssignedPouts(operationVertex);
 
-    return occurences;
+    return operationOutputs.length()-assignedOuputs.size();
 }
 
 /**
