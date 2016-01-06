@@ -387,10 +387,6 @@ void Workflow::addOperationToContainer(quint16 containerId, OVertex operationVer
 
     if(!container->operationVertexes.contains(operationVertex)) {
         container->operationVertexes.push_back(operationVertex);
-
-        for(OVertex v : container->operationVertexes) {
-           qDebug() << "++" << v;
-        }
     }
 
 }
@@ -399,10 +395,6 @@ void Workflow::removeOperationFromContainer(quint16 containerId, OVertex operati
 
     if(container->operationVertexes.contains(operationVertex)) {
         container->operationVertexes.removeOne(operationVertex);
-
-        for(OVertex v : container->operationVertexes) {
-           qDebug() << "++" << v;
-        }
     }
 }
 

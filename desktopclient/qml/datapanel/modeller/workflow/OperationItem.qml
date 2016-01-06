@@ -14,6 +14,7 @@ Rectangle {
     height: 120
     transformOrigin: Item.TopLeft;
     z: 0
+    color:"transparent"
     transform: Translate { id: transformTl }
 
     function isSelected(matrix, mouseX, mouseY)

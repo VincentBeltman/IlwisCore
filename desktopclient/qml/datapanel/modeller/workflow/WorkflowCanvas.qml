@@ -690,6 +690,7 @@ Modeller.ModellerWorkArea {
                        wfCanvas.removeCurrentOperationFromCondition(item)
                        wfCanvas.addCurrentOperationToCondition(item)
                    }
+                   wfCanvas.conditionBoxList[containerIndex].resizeOneTime()
                    wfCanvas.conditionBoxList[containerIndex].setCanvasColor(Global.mainbackgroundcolor)
                 } else {
                    if(item.containerIndex !== -1)
