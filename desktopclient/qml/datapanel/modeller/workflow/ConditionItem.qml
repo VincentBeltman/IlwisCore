@@ -21,16 +21,15 @@ Rectangle {
 
     function addToOperationList(operationIndex) {
         if(operationList.indexOf(operationIndex) == -1) {
-            operationList.push(operationIndex);
+            operationList.push(operationIndex)
         }
     }
 
     function removeFromOperationList(operationIndex) {
-        if(operationList.indexOf(operationIndex) > -1) {
-            operationList.pop(operationIndex);
+        if(operationList.indexOf(operationIndex) != -1) {
+            operationList.splice(operationList.indexOf(operationIndex), 1)
         }
     }
-
 
     ListModel {
         id: testModel
