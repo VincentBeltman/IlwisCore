@@ -390,7 +390,9 @@ Modeller.ModellerWorkArea {
 
        function finishCreatingCondition(x,y) {
            if (component.status == Component.Ready) {
+               console.log(1)
                currentItem = component.createObject(wfCanvas, {"x": x, "y": y});
+               console.log(2)
                if (currentItem == null) {
                    // Error Handling
                    console.log("Error creating object");
@@ -665,8 +667,8 @@ Modeller.ModellerWorkArea {
                 wfCanvas.dragStart = null
 
                 if (wfCanvas.currentConditionContainer != -1) {
-                    wfCanvas.addCurrentOperationToCondition(
-                                wfCanvas.currentItem)
+                    wfCanvas.conditionBoxList[wfCanvas.currentConditionContainer].resizeOneTime()
+                    wfCanvas.addCurrentOperationToCondition(wfCanvas.currentItem)
                 } else {
 
                     //Uit conditiebox slepen of helemaal niet in conditiebox geweest.
