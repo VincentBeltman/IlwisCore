@@ -140,7 +140,14 @@ public:
       * \brief connects and operation to the container it is dragged on.
       * \param the index of the operation
       */
-    Q_INVOKABLE void addOperationToContainer(quint16 containerIndex, quint16 operationId){_workflow->addOperationToContainer(containerIndex,operationId);}
+    Q_INVOKABLE void addOperationToContainer(quint16 containerIndex, quint16 operationId);
+
+    /*!
+      * \brief removes an operation from the container it's in
+      * \param index of the container
+      * \param index of the operation
+      */
+    Q_INVOKABLE void removeOperationFromContainer(quint16 containerIndex, quint16 operationId);
 
     /*!
      * \brief saves the workflow and the coordinates of all vertexes

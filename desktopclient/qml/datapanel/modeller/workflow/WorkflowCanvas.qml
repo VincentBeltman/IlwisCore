@@ -6,6 +6,7 @@ import WorkflowModel 1.0
 import QtQuick.Dialogs 1.1
 import ".." as Modeller
 import "../../../matrix.js" as Matrix
+import "../../../Global.js" as Global
 
 Modeller.ModellerWorkArea {
    property WorkflowModel workflow;
@@ -46,7 +47,7 @@ Modeller.ModellerWorkArea {
 
    function deleteSelectedEdge(){
        var flow = getSelectedEdge()
-       if(flow != 0)
+       if(flow !== 0)
        {
            messageDialogEdge.open()
        }
@@ -54,7 +55,7 @@ Modeller.ModellerWorkArea {
 
    function alterSelectedEdge(){
        var flow = getSelectedEdge()
-       if(flow != 0)
+       if(flow !== 0)
        {
            //Retrieve target and rectangle before deleting the edge
            var target = flow.target;
@@ -390,9 +391,7 @@ Modeller.ModellerWorkArea {
 
        function finishCreatingCondition(x,y) {
            if (component.status == Component.Ready) {
-               console.log(1)
                currentItem = component.createObject(wfCanvas, {"x": x, "y": y});
-               console.log(2)
                if (currentItem == null) {
                    // Error Handling
                    console.log("Error creating object");
@@ -405,26 +404,41 @@ Modeller.ModellerWorkArea {
            }
        }
 
-       function isInsideCondition(centreX, centreY) {
+       function isInsideCondition(centreX, centreY, containerIndex) {
+
            for (var i = 0; i < wfCanvas.conditionBoxList.length; i++) {
                var box = wfCanvas.conditionBoxList[i]
                if (centreX > box.x && centreY > box.y && centreX < (box.x + box.width) && centreY < (box.y + box.height)) {
-                   box.setCanvasColor("grey")
+                   if(containerIndex !== i ) {
+                       box.setCanvasColor(Global.edgecolor)
+                   }
+                   wfCanvas.parent.color = Global.mainbackgroundcolor
                    currentConditionContainer = i
                    return
+               } else {
+                   box.setCanvasColor(Global.mainbackgroundcolor)
                }
-               box.setCanvasColor("white")
+           }
+           if (containerIndex !== -1) {
+               wfCanvas.parent.color = Global.edgecolor
+
            }
            currentConditionContainer = -1
        }
 
        function addCurrentOperationToCondition(item) {
            var box = conditionBoxList[currentConditionContainer]
+           item.containerIndex = currentConditionContainer
            box.addToOperationList(item.itemid)
-           workflow.addOperationToContainer(currentConditionContainer,
-                                            item.itemid)
-           box.setCanvasColor("white")
+           workflow.addOperationToContainer(currentConditionContainer, item.itemid)
            currentConditionContainer = -1
+       }
+
+       function removeCurrentOperationFromCondition(item) {
+           var box = conditionBoxList[item.containerIndex]
+           box.removeFromOperationList(item.itemid)
+           workflow.removeOperationFromContainer(item.containerIndex, item.itemid)
+           item.containerIndex = -1
        }
 
        /*
@@ -489,7 +503,7 @@ Modeller.ModellerWorkArea {
                    var paramterIndexes = workflow.addOperation(drag.source.ilwisobjectid)
 
                    var item = wfCanvas.currentItem
-                   wfCanvas.isInsideCondition(item.x + (item.width / 2), item.y + (item.height / 2))
+                   wfCanvas.isInsideCondition(item.x + (item.width / 2), item.y + (item.height / 2), item.containerIndex)
                    if (wfCanvas.currentConditionContainer != -1) {
                        wfCanvas.addCurrentOperationToCondition(item)
                    }
@@ -656,26 +670,38 @@ Modeller.ModellerWorkArea {
                            wfCanvas.oldx = mouseX
                            wfCanvas.oldy = mouseY
 
-                           wfCanvas.isInsideCondition((item.x + (item.width / 2)), (item.y + (item.height / 2)))
+                           wfCanvas.isInsideCondition((item.x + (item.width / 2)), (item.y + (item.height / 2)), item.containerIndex)
                        }
                    }
                }
            }
 
            onReleased: {
-                wfCanvas.stopWorkingLine()
-                wfCanvas.dragStart = null
+               wfCanvas.stopWorkingLine()
+               wfCanvas.dragStart = null;
 
-                if (wfCanvas.currentConditionContainer != -1) {
-                    wfCanvas.conditionBoxList[wfCanvas.currentConditionContainer].resizeOneTime()
-                    wfCanvas.addCurrentOperationToCondition(wfCanvas.currentItem)
+               var item = wfCanvas.currentItem
+               var containerIndex = wfCanvas.currentConditionContainer
+
+               if (containerIndex !== -1) {
+                   if(item.containerIndex === -1) {
+                       wfCanvas.addCurrentOperationToCondition(item)
+                   } else if (item.containerIndex !== containerIndex) {
+                       wfCanvas.removeCurrentOperationFromCondition(item)
+                       wfCanvas.addCurrentOperationToCondition(item)
+                   }
+                   wfCanvas.conditionBoxList[containerIndex].resizeOneTime()
+                   wfCanvas.conditionBoxList[containerIndex].setCanvasColor(Global.mainbackgroundcolor)
                 } else {
-
-                    //Uit conditiebox slepen of helemaal niet in conditiebox geweest.
-                }
-            }
-        }
-    }
+                   if(item.containerIndex !== -1)
+                   {
+                       wfCanvas.removeCurrentOperationFromCondition(item)
+                   }
+                   wfCanvas.parent.color = Global.mainbackgroundcolor
+               }
+           }
+       }
+   }
 
     Component.onDestruction: {
         var coordinates = [], node

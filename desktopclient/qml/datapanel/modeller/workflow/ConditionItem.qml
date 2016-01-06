@@ -34,7 +34,7 @@ Rectangle {
 
     function removeFromOperationList(operationIndex) {
         if(operationsList.indexOf(operationIndex) > -1) {
-            operationsList.pop(operationIndex);
+            operationsList.splice(operationsList.indexOf(operationIndex), 1)
             resizeOneTime()
         }
     }
@@ -63,10 +63,11 @@ Rectangle {
     }
 
     function resize() {
-        var minX = 1000000, maxX = -1000000, minY = 1000000, maxY = -1000000, operation, xChanged = false, yChanged = false;
+        var minX = 1000000, maxX = -1000000, minY = 1000000, maxY = -1000000, operation, operationIndex, xChanged = false, yChanged = false;
 
         // Search for min and max, x and y
-        for (var operationIndex in operationsList) {
+        for (var i in operationsList) {
+            operationIndex = operationsList[i]
             operation = wfCanvas.operationsList[operationIndex]
 
             if (operation.x < minX) {
@@ -99,7 +100,6 @@ Rectangle {
         resize()
         enableCanvas()
     }
-
 
     ListModel {
         id: testModel

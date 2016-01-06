@@ -9,6 +9,7 @@ import ErrorModel 1.0
 
 Rectangle {
     id : operationItem
+    property int containerIndex : -1
     width: 200
     height: 120
     transformOrigin: Item.TopLeft;

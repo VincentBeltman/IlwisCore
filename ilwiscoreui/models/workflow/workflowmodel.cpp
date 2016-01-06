@@ -285,6 +285,18 @@ QQmlListProperty<EdgePropObject> WorkflowModel::getEdges()
     return  QQmlListProperty<EdgePropObject>(this, _edgeProps);
 }
 
+void WorkflowModel::addOperationToContainer(quint16 containerIndex, quint16 operationId)
+{
+    OVertex v = operationId;
+   _workflow->addOperationToContainer(containerIndex,v);
+}
+
+void WorkflowModel::removeOperationFromContainer(quint16 containerIndex, quint16 operationId)
+{
+    OVertex v = operationId;
+    _workflow->removeOperationFromContainer(containerIndex,v);
+}
+
 QStringList WorkflowModel::getAsignedValuesByItemID(int itemId)
 {
     QStringList* results = new QStringList();
