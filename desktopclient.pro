@@ -112,7 +112,8 @@ OTHER_FILES += \
     desktopclient/qml/datapanel/workflow/AbstractBasicWorkflowDrawObjectqml \
     desktopclient/qml/datapanel/workflow/OperationWorkflowDrawObject.qml \
     desktopclient/qml/datapanel/modeller/FormsTab.qml \
-    desktopclient/qml/datapanel/modeller/MetaDataTab.qml
+    desktopclient/qml/datapanel/modeller/MetaDataTab.qml \
+    desktopclient/qml/workbench/preferences/Locations.qml
 
 
 # Installation path

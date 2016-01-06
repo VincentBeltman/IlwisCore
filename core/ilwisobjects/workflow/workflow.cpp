@@ -380,14 +380,22 @@ OEdge Workflow::addOperationFlow(const OVertex &from, const OVertex &to, const E
     return (boost::add_edge(from, to, properties, _wfGraph)).first;
 }
 
-void Workflow::addOperationToContainer(quint16 containerId, quint16 operationVertexId) {
+void Workflow::addOperationToContainer(quint16 containerId, OVertex operationVertex) {
     ConditionContainer* container = &_conditionContainers[containerId];
 
-    if(!container->operationVertexIds.contains(operationVertexId)) {
-        qDebug() << "added" ;
-        container->operationVertexIds.push_back(operationVertexId);
+
+
+    if(!container->operationVertexes.contains(operationVertex)) {
+        container->operationVertexes.push_back(operationVertex);
     }
 
+}
+void Workflow::removeOperationFromContainer(quint16 containerId, OVertex operationVertex) {
+    ConditionContainer* container = &_conditionContainers[containerId];
+
+    if(container->operationVertexes.contains(operationVertex)) {
+        container->operationVertexes.removeOne(operationVertex);
+    }
 }
 
 void Workflow::removeOperationFlow(OEdge edge) {

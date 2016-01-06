@@ -35,10 +35,7 @@ struct AssignedOutputData {
     QString outputName;
 };
 
-struct ConditionContainer {
-    ConditionContainer() {}
-    QList<quint16> operationVertexIds;
-};
+
 
 typedef std::shared_ptr<AssignedInputData> SPAssignedInputData;
 typedef std::shared_ptr<AssignedOutputData> SPAssignedOutputData;
@@ -104,6 +101,11 @@ typedef boost::graph_traits<WorkflowGraph>::out_edge_iterator OutEdgeIterator;
 typedef boost::graph_traits<WorkflowGraph>::vertex_iterator WorkflowVertexIterator;
 
 typedef std::pair<OVertex, int> InputAssignment;
+
+struct ConditionContainer {
+    ConditionContainer() {}
+    QList<OVertex> operationVertexes;
+};
 
 /*!
  * \brief The Workflow class
@@ -225,10 +227,16 @@ public:
     /*!
      * \brief adds an operation to a container
      * \param id of the container the condition gets added to
-     * \param id of the operation added to the container
+     * \param vertex of the operation that has to be added
      */
-    void addOperationToContainer(quint16 containerId, quint16 operationVertexId);
+    void addOperationToContainer(quint16 containerId, OVertex operationVertex);
 
+    /*!
+     * \brief removes an operation from the ConditionContainer
+     * \param id of the container the condition is currently in
+     * \param vertex of the operation that has to be removed
+     */
+    void removeOperationFromContainer(quint16 containerId, OVertex operationVertex);
     /*!
      * \brief Removes the operation on the given index
      * \param vertex The index of the vertex thats need to be deleted
