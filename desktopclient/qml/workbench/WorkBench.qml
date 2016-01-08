@@ -72,7 +72,6 @@ Rectangle {
     ObjectProperties{ id : objectproperties}
     Preferences{id : userpreferences}
 
-
     states: [
         State { name: "visible"
 

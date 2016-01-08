@@ -17,9 +17,51 @@ Rectangle {
     color: "#80bfff"
     border.width: 1
     border.color: "black"
+    transformOrigin: Item.TopLeft;
+    z: 0
+    transform: Translate { id: transformTl }
     property var operationsList : []
     property var conditionContainerCanvas
     property var canvasComponent
+
+    function panOperation(x, y)
+    {
+        transformTl.x += x;
+        transformTl.y += y;
+    }
+
+    function getXYcoordsCanvas()
+    {
+        var pt = {x: 0, y: 0};
+        pt.x = conditionItem.x + transformTl.x;
+        pt.y = conditionItem.y + transformTl.y;
+        return pt;
+    }
+
+    function replacePanOperation(x, y)
+    {
+        transformTl.x = x - conditionItem.x ;
+        transformTl.y = y - conditionItem.y ;
+    }
+
+    function scaleOperation(scaleFactor)
+    {
+        conditionItem.scale *= scaleFactor;
+    }
+
+    function transformedPoint(matrix, x, y)
+    {
+        return {
+            x: matrix.inverse().a * x + matrix.inverse().c * y + matrix.inverse().e,
+            y: matrix.inverse().b * x + matrix.inverse().d * y + matrix.inverse().f
+        }
+    }
+
+    function getScreenCoords(matrix, x, y) {
+        var xn = matrix.e + x * matrix.a;
+        var yn = matrix.f + y * matrix.d;
+        return { x: xn, y: yn };
+    }
 
     function setCanvasColor(color){
         conditionRectangle.color = color;

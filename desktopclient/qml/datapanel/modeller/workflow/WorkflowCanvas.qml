@@ -402,7 +402,7 @@ Modeller.ModellerWorkArea {
 
        function finishCreatingCondition(x,y) {
            if (component.status == Component.Ready) {
-               currentItem = component.createObject(wfCanvas, {"x": x, "y": y});
+               currentItem = component.createObject(wfCanvas, {"x": x, "y": y, "scale": wfCanvas.scale});
                if (currentItem == null) {
                    // Error Handling
                    console.log("Error creating object");
@@ -766,11 +766,19 @@ Modeller.ModellerWorkArea {
         for (var i = 0; i < wfCanvas.operationsList.length; i++) {
             wfCanvas.operationsList[i].panOperation(x, y)
         }
+
+        for (var i=0; i < wfCanvas.conditionBoxList.length; i++) {
+            wfCanvas.conditionBoxList[i].panOperation(x, y);
+        }
     }
 
     function panZoomOperation(x, y) {
         for (var i = 0; i < wfCanvas.operationsList.length; i++) {
             wfCanvas.operationsList[i].panZoomOperation(x, y)
+        }
+
+        for (var i=0; i < wfCanvas.conditionBoxList.length; i++) {
+            wfCanvas.conditionBoxList[i].panZoomOperation(x, y)
         }
     }
 
@@ -781,11 +789,22 @@ Modeller.ModellerWorkArea {
                                        wfCanvas.operationsList[i].y)
             wfCanvas.operationsList[i].replacePanOperation(ptOp.x, ptOp.y)
         }
+
+        for (var i=0; i < wfCanvas.conditionBoxList.length; i++) {
+            //var xy = wfCanvas.operationsList[i].getXYcoords();
+            var ptOp = getScreenCoords(wfCanvas.conditionBoxList[i].x,
+                                       wfCanvas.conditionBoxList[i].y)
+            wfCanvas.conditionBoxList[i].replacePanOperation(ptOp.x, ptOp.y)
+        }
     }
 
     function scaleOperation(scaleFactor) {
         for (var i = 0; i < wfCanvas.operationsList.length; i++) {
             wfCanvas.operationsList[i].scaleOperation(scaleFactor)
+        }
+
+        for (var i=0; i < wfCanvas.conditionBoxList.length; i++) {
+            wfCanvas.conditionBoxList[i].scaleOperation(scaleFactor)
         }
     }
 
