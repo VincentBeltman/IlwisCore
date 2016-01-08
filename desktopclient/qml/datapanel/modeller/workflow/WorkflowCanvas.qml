@@ -121,6 +121,13 @@ Modeller.ModellerWorkArea {
           // First delete the operation at C++. THIS NEEDS TO BE DONE FIRST
           var parameterIndexes = workflow.deleteOperation(deleteItemIndex)
 
+          // If the operation is inside a container, remove it from the container
+          if(item.containerIndex !== -1) {
+              var containerIndex = item.containerIndex;
+              wfCanvas.removeCurrentOperationFromCondition(item)
+              wfCanvas.conditionBoxList[containerIndex].resizeOneTime()
+          }
+
           // This removes 1 from the operation list beginning from deleteItemIndex
           wfCanvas.operationsList.splice(deleteItemIndex, 1)
 
@@ -438,6 +445,7 @@ Modeller.ModellerWorkArea {
        }
 
        function addCurrentOperationToCondition(item) {
+           console.log("adding: " + item.itemid)
            var box = conditionBoxList[currentConditionContainer]
            item.containerIndex = currentConditionContainer
            box.addToOperationList(item.itemid)
@@ -446,6 +454,7 @@ Modeller.ModellerWorkArea {
        }
 
        function removeCurrentOperationFromCondition(item) {
+           console.log("removing: " + item.itemid)
            var box = conditionBoxList[item.containerIndex]
            box.removeFromOperationList(item.itemid)
            workflow.removeOperationFromContainer(item.containerIndex, item.itemid)
@@ -516,6 +525,7 @@ Modeller.ModellerWorkArea {
                    var item = wfCanvas.currentItem
                    wfCanvas.isInsideCondition(item.x + (item.width / 2), item.y + (item.height / 2), item.containerIndex)
                    if (wfCanvas.currentConditionContainer != -1) {
+                       wfCanvas.conditionBoxList[wfCanvas.currentConditionContainer].setCanvasColor(Global.mainbackgroundcolor)
                        wfCanvas.addCurrentOperationToCondition(item)
                    }
 
@@ -534,6 +544,7 @@ Modeller.ModellerWorkArea {
            anchors.fill: parent
            acceptedButtons: Qt.LeftButton | Qt.RightButton
            hoverEnabled: true
+           property bool positionChanged: false
 
            onWheel: {
                handleScroll(wheel);
@@ -677,6 +688,7 @@ Modeller.ModellerWorkArea {
 
                        var item = wfCanvas.operationsList[wfCanvas.currentIndex]
                        if (item) {
+                           area.positionChanged = true
                            item.x += (mouseX - wfCanvas.oldx)
                            item.y += (mouseY - wfCanvas.oldy)
                            wfCanvas.oldx = mouseX
@@ -691,25 +703,27 @@ Modeller.ModellerWorkArea {
            onReleased: {
                wfCanvas.stopWorkingLine()
                wfCanvas.dragStart = null;
+               if(area.positionChanged) {
+                   var item = wfCanvas.currentItem
+                   var containerIndex = wfCanvas.currentConditionContainer
 
-               var item = wfCanvas.currentItem
-               var containerIndex = wfCanvas.currentConditionContainer
-
-               if (containerIndex !== -1) {
-                   if(item.containerIndex === -1) {
-                       wfCanvas.addCurrentOperationToCondition(item)
-                   } else if (item.containerIndex !== containerIndex) {
-                       wfCanvas.removeCurrentOperationFromCondition(item)
-                       wfCanvas.addCurrentOperationToCondition(item)
+                   if (containerIndex !== -1) {
+                       if(item.containerIndex === -1) {
+                           wfCanvas.addCurrentOperationToCondition(item)
+                       } else if (item.containerIndex !== containerIndex) {
+                           wfCanvas.removeCurrentOperationFromCondition(item)
+                           wfCanvas.addCurrentOperationToCondition(item)
+                       }
+                       wfCanvas.conditionBoxList[containerIndex].resizeOneTime()
+                       wfCanvas.conditionBoxList[containerIndex].setCanvasColor(Global.mainbackgroundcolor)
+                    } else {
+                       if(item.containerIndex !== -1)
+                       {
+                           wfCanvas.removeCurrentOperationFromCondition(item)
+                       }
+                       wfCanvas.parent.color = Global.mainbackgroundcolor
                    }
-                   wfCanvas.conditionBoxList[containerIndex].resizeOneTime()
-                   wfCanvas.conditionBoxList[containerIndex].setCanvasColor(Global.mainbackgroundcolor)
-                } else {
-                   if(item.containerIndex !== -1)
-                   {
-                       wfCanvas.removeCurrentOperationFromCondition(item)
-                   }
-                   wfCanvas.parent.color = Global.mainbackgroundcolor
+                   area.positionChanged = false
                }
            }
        }
