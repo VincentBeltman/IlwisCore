@@ -467,7 +467,7 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
 
         for(int i = 0; i < outparameters.size(); ++i){
             results += QString(";property string outputfield_%1").arg(i);
-            if ( hasType(outparameters[i]._dataType, itCOVERAGE | itTABLE)){
+            if ( hasType(outparameters[i]._dataType, itCOVERAGE | itTABLE | itCOLUMN)){
                 results += QString(";property alias format_%1 :  pout_format_%1").arg(i);
             }
         }
@@ -525,7 +525,7 @@ QString ApplicationFormExpressionParser::formats(const QString& query, quint64 i
     }
     if ( formatList != "")
        formatList = "'Memory'," + formatList;
-    if ( hasType(ilwtype, itTABLE)){
+    if ( hasType(ilwtype, itCOLUMN)){
         formatList = "'Keep original'," + formatList;
     }
     if ( formatList != "")
