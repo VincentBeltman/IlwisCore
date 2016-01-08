@@ -53,13 +53,13 @@ Rectangle {
         Tab {
             id : operationMetaData
             active : true
-            title: qsTr("Operation form")
+            title: qsTr("Operation metadata")
             MetaData{}
         }
 
         Tab {
             id : workflowMetaData
-            title: qsTr("Workflow form")
+            title: qsTr("Workflow metadata")
             active: true
             MetaData{}
         }
