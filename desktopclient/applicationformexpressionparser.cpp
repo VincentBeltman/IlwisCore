@@ -281,7 +281,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
                 parameterCount = map.value("outParameterCount").toInt();
             }
 
-            while(parameterCount==0){
+            while(parameterCount<=0){
                 ++operationIndex;
 
                 values = operationIndex.value();
