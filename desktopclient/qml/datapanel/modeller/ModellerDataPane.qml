@@ -98,11 +98,14 @@ Item {
     Sets the canvas' zoom back to 100%
     */
     function defaultZoom(){
-        tform.xScale = 1
-        tform.yScale = 1
 
-        canvas.height = canvas.parent.height
-        canvas.width = canvas.parent.width
+        canvas.scalee(1, 1);
+
+//        tform.xScale = 1
+//        tform.yScale = 1
+
+//        canvas.height = canvas.parent.height
+//        canvas.width = canvas.parent.width
 
         setPercentage()
     }
@@ -120,7 +123,8 @@ Item {
     Sets the zoom percentage based on the tform's xScale
     */
     function setPercentage(){
-        modellertools.zoomLevel.text = Math.round((tform.xScale *100)) + "%"
+        var scl = canvas.getScale();
+        modellertools.zoomLevel.text = Math.round((scl * 100)) + "%"
     }
 
     function asignConstantInputData(inputData, operationid) {
