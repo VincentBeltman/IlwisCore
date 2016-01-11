@@ -162,6 +162,19 @@ public:
      * \brief creates the metadata of the workflow
      */
     Q_INVOKABLE void createMetadata();
+    /*!
+     * \brief adds a condition with the given type to the the given container
+     * \param containerId the id of the container
+     * \param type the type of the condition
+      */
+    Q_INVOKABLE int addCondition(int containerId, int operationId);
+
+    /*!
+     * \brief returns conditions of the given container
+     * \param containerId the id of the container
+     * \return A list of qvariantmaps for the condition list view
+      */
+    Q_INVOKABLE QVariantList getConditions(int containerId);
 
 private:
     Ilwis::IWorkflow _workflow;

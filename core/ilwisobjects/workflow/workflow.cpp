@@ -423,6 +423,14 @@ quint64 Workflow::createMetadata()
     return id;
 }
 
+int Workflow::addCondition(int containerId, int operationId)
+{
+    ConditionContainer *container = &(_conditionContainers[containerId]);
+    int conditionId = container->conditions.length();
+    container->conditions.push_back(Condition(mastercatalog()->id2Resource(operationId)));
+    return conditionId;
+}
+
 NodePropertyMap Workflow::nodeIndex()
 {
     return get(boost::vertex_index1, _wfGraph);

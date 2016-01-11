@@ -9,7 +9,7 @@
 #include "featurecoverage.h"
 #include "../workflowerrormodel.h"
 #include "ilwiscontext.h"
-//#include "../../IlwisCore/core/ilwiscontext.h"
+#include "ilwistypes.h"
 
 using namespace Ilwis;
 using namespace boost;
@@ -353,4 +353,32 @@ void WorkflowModel::load()
 void WorkflowModel::createMetadata()
 {
     _workflow->createMetadata();
+}
+
+int WorkflowModel::addCondition(int containerId, int operationId)
+{
+    return _workflow->addCondition(containerId, operationId);
+}
+
+QVariantList WorkflowModel::getConditions(int containerId)
+{
+    ConditionContainer container = _workflow->getContainer(containerId);
+    QVariantList results;
+    int i = 0;
+
+    for (Condition condition : container.conditions) {
+        QVariantMap map;
+
+        // TODO: Works for integers but propably not for other conditions. NEEDS SOME WORK (switch case?)
+        map.insert("first", !condition._inputAssignments[0].value.isEmpty());
+        map.insert("condition", condition._inputAssignments[1].value);
+        map.insert("second", !condition._inputAssignments[2].value.isEmpty());
+        map.insert("xId", i);
+
+        results.push_back(map);
+
+        ++i;
+    }
+
+    return results;
 }
