@@ -381,20 +381,18 @@ OEdge Workflow::addOperationFlow(const OVertex &from, const OVertex &to, const E
 }
 
 void Workflow::addOperationToContainer(quint16 containerId, OVertex operationVertex) {
-    ConditionContainer* container = &_conditionContainers[containerId];
+    ConditionContainer container = _conditionContainers[containerId];
 
-
-
-    if(!container->operationVertexes.contains(operationVertex)) {
-        container->operationVertexes.push_back(operationVertex);
+    if(!container.operationVertexes.contains(operationVertex)) {
+        container.operationVertexes.push_back(operationVertex);
     }
 
 }
 void Workflow::removeOperationFromContainer(quint16 containerId, OVertex operationVertex) {
-    ConditionContainer* container = &_conditionContainers[containerId];
+    ConditionContainer container = _conditionContainers[containerId];
 
-    if(container->operationVertexes.contains(operationVertex)) {
-        container->operationVertexes.removeOne(operationVertex);
+    if(container.operationVertexes.contains(operationVertex)) {
+        container.operationVertexes.removeOne(operationVertex);
     }
 }
 
