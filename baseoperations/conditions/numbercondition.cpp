@@ -54,8 +54,6 @@ bool NumberCondition::execute(ExecutionContext *ctx, SymbolTable& symTable)
         break;
     }
 
-    ctx->setOutput(symTable, _firstValue, sUNDEF, itINT32, Resource());
-    ctx->addOutput(symTable, _secondValue, sUNDEF, itINT32, Resource());
     ctx->addOutput(symTable, conditionIsTrue, sUNDEF, itBOOL, Resource());
 
     return true;
@@ -109,15 +107,14 @@ quint64 NumberCondition::createMetadata()
 {
     OperationResource operation({"ilwis://operations/numbercondition"});
     operation.setLongName("conditions to compare/check integers");
-    operation.setSyntax("numbercondition(FirstValue, SecondValue, Condition");
+    operation.setSyntax("numbercondition(FirstValue, SecondValue, Condition)");
     operation.setDescription(TR("generates a rastercoverage where the atmospheric errors are corrected"));
     operation.setInParameterCount({3});
     operation.addInParameter(0,itNUMBER, TR("first number value"),TR("the first value used in the condition"));
     operation.addInParameter(1,itNUMBER, TR("second number value"),TR("the first value used in the condition"));
     operation.addInParameter(2,itSTRING, TR("the condition"),TR("the condition which has to be checked. 'greater than', 'equals', 'not equals'"));
-    operation.setOutParameterCount({2});
-    operation.addOutParameter(0,itNUMBER, TR("first inputvalue"), TR("the first inputparameter"));
-    operation.addOutParameter(1,itNUMBER, TR("second inputvalue"), TR("the second inputparameter"));
+    operation.setOutParameterCount({1});
+    operation.addOutParameter(0,itBOOL, TR("valid"), TR("true if condition is met"));
     operation.setKeywords("condition, number");
 
     mastercatalog()->addItems({operation});
