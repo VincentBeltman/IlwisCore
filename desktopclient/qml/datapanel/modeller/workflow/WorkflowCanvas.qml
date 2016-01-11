@@ -707,6 +707,8 @@ Modeller.ModellerWorkArea {
                    var item = wfCanvas.currentItem
                    var containerIndex = wfCanvas.currentConditionContainer
 
+                   //item.resetPanOperation();
+
                    if (containerIndex !== -1) {
                        if(item.containerIndex === -1) {
                            wfCanvas.addCurrentOperationToCondition(item)

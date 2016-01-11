@@ -51,6 +51,12 @@ Rectangle {
         transformTl.y = y - operationItem.y ;
     }
 
+    function resetPanOperation()
+    {
+        transformTl.x = 0;
+        transformTl.y = 0;
+    }
+
     function scaleOperation(scaleFactor)
     {
         operationItem.scale *= scaleFactor;
