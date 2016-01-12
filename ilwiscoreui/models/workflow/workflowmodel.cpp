@@ -331,7 +331,13 @@ void WorkflowModel::store(const QStringList &coordinates)
 
         _workflow->name(_workflow->name());
         QString workingcatalog = context()->workingCatalog()->source().url().toString();
-        _workflow->connectTo(QUrl(workingcatalog +"/"+ _workflow->name() + ".ilwis"), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmOUTPUT);
+
+        if( _workflow->name().endsWith(".ilwis")){
+            _workflow->connectTo(QUrl(workingcatalog +"/"+ _workflow->name()), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmOUTPUT);
+        }else{
+            _workflow->connectTo(QUrl(workingcatalog +"/"+ _workflow->name() + ".ilwis"), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmOUTPUT);
+        }
+
         _workflow->createTime(Ilwis::Time::now());
         _workflow->store();
     } catch(const ErrorObject&){
