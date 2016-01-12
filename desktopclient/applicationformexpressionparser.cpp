@@ -233,7 +233,7 @@ QString ApplicationFormExpressionParser::setInputIcons(const QString& iconField1
     return imagePart;
 }
 
-QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vector<FormParameter>& parameters, bool input, QString& results, bool showEmptyOptionInList, QString invisibleFieldIndexes, QVariantMap operationNames, QStringList constantValues) const{
+QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vector<FormParameter>& parameters, bool input, QString& results, bool showEmptyOptionInList, QString invisibleFieldIndexes, QVariantList operationNames, QStringList constantValues) const{
     QStringList invisibleFieldList;
     if(!invisibleFieldIndexes.isEmpty()){
         invisibleFieldList = invisibleFieldIndexes.split("|");
@@ -261,7 +261,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     int xshift = 0;
 
     //Variables for workflow form
-    QVariantMap::iterator operationIndex = operationNames.begin();
+    QVariantList::iterator operationIndex = operationNames.begin();
     int operationParameterCount = 1;
 
     for(int i = 0; i < parameters.size(); ++i){
@@ -271,7 +271,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
         QString operationRowEnd;
 
         if(!operationNames.empty()){
-            QVariant values = operationIndex.value();
+            QVariant values = (* operationIndex);
             QVariantMap map = values.toMap();
 
             int parameterCount;
@@ -284,7 +284,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
             while(parameterCount<=0){
                 ++operationIndex;
 
-                values = operationIndex.value();
+                values = (* operationIndex);
                 map = values.toMap();
 
                 if(input){
@@ -434,7 +434,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     return formRows;
 }
 
-QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showoutputformat, bool showEmptyOptionInList, QString invisibleFieldIndexes, QVariantMap operationNames, QStringList constantValues) const {
+QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showoutputformat, bool showEmptyOptionInList, QString invisibleFieldIndexes, QVariantList operationNames, QStringList constantValues) const {
     Resource resource = mastercatalog()->id2Resource(metaid);
     std::vector<FormParameter> parameters = getParameters(resource);
 

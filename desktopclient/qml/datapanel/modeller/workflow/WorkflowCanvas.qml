@@ -209,10 +209,10 @@ Modeller.ModellerWorkArea {
         if (workflow) {
             workflow.createMetadata()
 
-            var operationNames = {}
+            var operationNames = []
             for( var i=0; i < wfCanvas.operationsList.length; i++){
                 var operationItem = wfCanvas.operationsList[i];
-                operationNames[i + ". " + operationItem.operation.name] = {
+                operationNames[i] = {
                     inParameterCount: workflow.operationInputParameterCount(i),
                     outParameterCount: workflow.operationOutputParameterCount(i)
                 };
