@@ -196,9 +196,8 @@ QStringList WorkflowModel::deleteOperation(int index)
                 _workflow->removeOperationFlow(*iter);
             }
 
-
             for (int parameterIndex: *_workflow->getWorkflowParameterIndex(operationVertex)) {
-                parameterEntrySet->push_back(QString::number(parameterIndex) + "|remove");
+                parameterEntrySet->push_front(QString::number(parameterIndex) + "|remove");
                 --_inputParameterCount;
             }
 
@@ -347,6 +346,7 @@ void WorkflowModel::store(const QStringList &coordinates)
 
 void WorkflowModel::load()
 {
+
 //    _workflow->connectTo(QUrl("ilwis://internalcatalog/" + _workflow->name() + "_workflow"), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmINPUT);
 }
 
