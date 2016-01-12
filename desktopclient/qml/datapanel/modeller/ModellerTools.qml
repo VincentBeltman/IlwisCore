@@ -43,7 +43,7 @@ ToolBar{
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.horizontalCenter: parent.horizontalCenter
 
-                    source : iconsource("deleteoperation20.png")
+                    source : iconsource("trash20.png")
                 }
                 onClicked: {
                     modellerDataPane.deleteSelectedOperation()
