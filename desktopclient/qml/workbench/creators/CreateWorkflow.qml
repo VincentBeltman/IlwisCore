@@ -32,6 +32,12 @@ Controls.DropableItem{
                 labelWidth: 100
                 width : parent.width
             }
+            Controls.TextEditLabelPair{
+                id : saveedit
+                labelText: qsTr("Save path")
+                labelWidth: 100
+                width : parent.width
+            }
             Controls.TextAreaLabelPair{
                 id : descedit
                 labelText: qsTr("Description")
@@ -153,6 +159,7 @@ Controls.DropableItem{
                         var createInfo = {type : "workflow", name : nameedit.content, keywords : keywords, description : descedit.content}
                         var ilwisid = objectcreator.createObject(createInfo)
                         var resource = mastercatalog.id2Resource(ilwisid)
+                        resource.setUrls(saveedit.content)
                         if (resource){
                             var filter = "itemid=" + resource.id
                             operations.refresh()

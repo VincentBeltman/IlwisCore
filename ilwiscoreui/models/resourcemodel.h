@@ -77,6 +77,7 @@ public:
     Q_INVOKABLE QString virtual getProperty(const QString& propertyname) const;
     Q_INVOKABLE void makeParent(QObject *item);
     Q_INVOKABLE bool hasExtendedType(const QString& tp) const;
+    Q_INVOKABLE void setUrls(const QString &url);
 
     static QString iconPath(IlwisTypes tp) ;
 protected:

@@ -353,7 +353,13 @@ bool Workflow::hasValueDefined(const OVertex &operationVertex, int parameterInde
                    return true;
                 }
             }
-            return _inputAssignments.value({operationVertex, parameterIndex})->value.size() > 0;
+
+            SPAssignedInputData inputAssignment = _inputAssignments.value({operationVertex, parameterIndex});
+
+            if(inputAssignment){
+                return inputAssignment->value.size() > 0;
+            }
+            return false;
         }
     }
     return false;
@@ -421,6 +427,14 @@ quint64 Workflow::createMetadata()
     //mastercatalog()->addItems({source()});
     commandhandler()->addOperation(id, WorkflowOperationImplementation::create);
     return id;
+}
+
+int Workflow::addCondition(int containerId, int operationId)
+{
+    ConditionContainer *container = &(_conditionContainers[containerId]);
+    int conditionId = container->conditions.length();
+    container->conditions.push_back(Condition(mastercatalog()->id2Resource(operationId)));
+    return conditionId;
 }
 
 NodePropertyMap Workflow::nodeIndex()

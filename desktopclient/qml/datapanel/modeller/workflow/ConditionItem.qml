@@ -17,9 +17,52 @@ Rectangle {
     color: "#80bfff"
     border.width: 1
     border.color: "black"
+    transformOrigin: Item.TopLeft;
+    z: 0
+    transform: Translate { id: transformTl }
     property var operationsList : []
     property var conditionContainerCanvas
     property var canvasComponent
+    property var containerId
+
+    function panOperation(x, y)
+    {
+        transformTl.x += x;
+        transformTl.y += y;
+    }
+
+    function getXYcoordsCanvas()
+    {
+        var pt = {x: 0, y: 0};
+        pt.x = conditionItem.x + transformTl.x;
+        pt.y = conditionItem.y + transformTl.y;
+        return pt;
+    }
+
+    function replacePanOperation(x, y)
+    {
+        transformTl.x = x - conditionItem.x ;
+        transformTl.y = y - conditionItem.y ;
+    }
+
+    function scaleOperation(scaleFactor)
+    {
+        conditionItem.scale *= scaleFactor;
+    }
+
+    function transformedPoint(matrix, x, y)
+    {
+        return {
+            x: matrix.inverse().a * x + matrix.inverse().c * y + matrix.inverse().e,
+            y: matrix.inverse().b * x + matrix.inverse().d * y + matrix.inverse().f
+        }
+    }
+
+    function getScreenCoords(matrix, x, y) {
+        var xn = matrix.e + x * matrix.a;
+        var yn = matrix.f + y * matrix.d;
+        return { x: xn, y: yn };
+    }
 
     function setCanvasColor(color){
         conditionRectangle.color = color;
@@ -101,20 +144,31 @@ Rectangle {
         enableCanvas()
     }
 
+    function openNewConditionDialogButtonFunction() {
+        wfCanvas.showConditionTypeForm(containerId)
+    }
+
+    function addCondition(conditionId) {
+
+        testModel.append({
+            'first': false,
+            'condition': '',
+            'second': false,
+            'xId': conditionId
+        })
+    }
+
+    function refresh() {
+        var conditions = wfCanvas.getConditions(containerId)
+        testModel.clear()
+
+        for (var i = 0; i < conditions.length; i++){
+            testModel.append(conditions[i])
+        }
+    }
+
     ListModel {
         id: testModel
-        ListElement {
-            testCondition: "a > b"
-        }
-        ListElement {
-            testCondition: "c > d"
-        }
-        ListElement {
-            testCondition: "e > f"
-        }
-        ListElement {
-            testCondition: "g > h"
-        }
     }
 
     Rectangle {
@@ -123,7 +177,7 @@ Rectangle {
         border.width: 1
         border.color: "black"
         color: "#cce5ff"
-        height : 40
+        height : 65
         width : parent.width - 8
         x : 4
         y: 4
@@ -132,16 +186,79 @@ Rectangle {
             id : conditionList
 
             clip : true
-            height : parent.height
+            height : parent.height - 25
             width : parent.width
             x: 0
             y: 0
 
             model : testModel
-            delegate: Text {
-                text: testCondition
-                width: conditionList.width
-                horizontalAlignment: Text.AlignHCenter
+            delegate:Row {
+                Column {
+                    Text {
+                        text: String.fromCharCode(xId * 2 + 65)
+                        width: (conditionList.width - 50) / 3
+                        horizontalAlignment: Text.AlignHCenter
+                        color: first ? 'green' : 'red'
+                    }
+                }
+                Column {
+                    Text {
+                        text: condition === '' ? '[operator]' : condition
+                        width: (conditionList.width - 50) / 3
+                        horizontalAlignment: Text.AlignHCenter
+                        color: condition !== '' ? 'green' : 'red'
+                    }
+                }
+                Column {
+                    Text {
+                        text: String.fromCharCode(xId * 2 + 65 + 1)
+                        width: (conditionList.width - 50) / 3
+                        horizontalAlignment: Text.AlignHCenter
+                        color: second ? 'green' : 'red'
+                    }
+                }
+                Column {
+                    Button {
+                        height : 15
+                        width : 15
+                        Image {
+                            anchors.fill: parent
+                            source : "../../../images/refresh20.png"
+                        }
+                        onClicked: {
+                            console.log('alter')
+                            refresh()
+                        }
+                    }
+                }
+
+                Column {
+                    Button {
+                        height : 15
+                        width : 15
+                        Image {
+                            anchors.fill: parent
+                            source : "../../../images/close20.png"
+                        }
+                        onClicked: {
+                            console.log('remove')
+                            refresh()
+                        }
+                    }
+                }
+            }
+        }
+        Button {
+            height : 25
+            width : 25
+            anchors.top : conditionList.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            Image {
+                anchors.fill: parent
+                source : "../../../images/createCS1.png"
+            }
+            onClicked: {
+                openNewConditionDialogButtonFunction()
             }
         }
     }

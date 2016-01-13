@@ -224,25 +224,6 @@ bool OperationModel::needChoice(OperationModel *other) const
     return check("outparameters",this);
 }
 
-bool OperationModel::isLegalFlow(OperationModel *from, OperationModel *to) const
-{
-
-    if ( !to || !from)
-        return false;
-
-    int outParamCount = from->outParamNames().size();
-
-    for(int i = 0; i < outParamCount; i++)
-    {
-        if(to->parameterIndexes(from->outputparameterType(i), true).size() != 0)
-        {
-            return true;
-        }
-    }
-    //TODO: Error gooien
-    return false;
-}
-
 QStringList OperationModel::parameterIndexes(const QString &typefilter, bool fromOperation)
 {
     QStringList indexes;

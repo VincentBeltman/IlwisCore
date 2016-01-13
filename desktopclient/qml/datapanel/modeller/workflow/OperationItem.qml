@@ -51,6 +51,12 @@ Rectangle {
         transformTl.y = y - operationItem.y ;
     }
 
+    function resetPanOperation()
+    {
+        transformTl.x = 0;
+        transformTl.y = 0;
+    }
+
     function scaleOperation(scaleFactor)
     {
         operationItem.scale *= scaleFactor;
@@ -287,13 +293,6 @@ Rectangle {
     }
 
     function setFlow(target, attachRect, flowPoints){
-        if(workflow.hasValueDefined(target.itemid, flowPoints.toParameterIndex))
-        {
-            modellerDataPane.addError(1, "This parameter already has a value");
-            wfCanvas.stopWorkingLine()
-            return;
-        }
-
         flowConnections.push({
             "target" : target,
             "source" :operationItem,
@@ -319,14 +318,10 @@ Rectangle {
         //If not connected to itself
         if ( wfCanvas.operationsList[wfCanvas.currentIndex] !== target){
 
-            if (operation.isLegalFlow(wfCanvas.operationsList[wfCanvas.currentIndex].operation, target.operation)) {
-                if (operation.needChoice(target.operation)) {
-                    wfCanvas.showAttachmentForm(target, attachRect)
-                } else {
-                    wfCanvas.operationsList[wfCanvas.currentIndex].setFlow(target, attachRect, null)
-                }
+            if (operation.needChoice(target.operation)) {
+                wfCanvas.showAttachmentForm(target, attachRect)
             } else {
-                wfCanvas.stopWorkingLine()
+                wfCanvas.operationsList[wfCanvas.currentIndex].setFlow(target, attachRect, null)
             }
 
             wfCanvas.canvasValid = false

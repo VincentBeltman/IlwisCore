@@ -43,24 +43,10 @@ ToolBar{
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.horizontalCenter: parent.horizontalCenter
 
-                    source : iconsource("deleteoperation20.png")
+                    source : iconsource("trash20.png")
                 }
                 onClicked: {
                     modellerDataPane.deleteSelectedOperation()
-
-                }
-            }
-            Button {
-                id : conbut
-                height : 25
-                width : 25
-                Image {
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    source : iconsource("deleteconnection20.png")
-                }
-                onClicked: {
                     modellerDataPane.deleteSelectedEdge()
 
                 }
@@ -77,6 +63,27 @@ ToolBar{
                 }
                 onClicked: {
                     modellerDataPane.alterSelectedEdge()
+                }
+            }
+
+            Button {
+                height : 25
+                width : 25
+                Image {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    source : iconsource("error_sign.png")
+                }
+                onClicked: {
+
+                    if(errorview.state == "smaller")
+                    {
+                        errorview.state = "bigger"
+                    } else {
+                        errorview.state = "smaller"
+                    }
+
                 }
             }
         }
@@ -139,26 +146,6 @@ ToolBar{
                     anchors.horizontalCenter: parent.horizontalCenter
 
                     source : iconsource("stop20.png")
-                }
-            }
-            Button {
-                height : 25
-                width : 25
-                Image {
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    source : iconsource("error_sign.png")
-                }
-                onClicked: {
-
-                    if(errorview.state == "smaller")
-                    {
-                        errorview.state = "bigger"
-                    } else {
-                        errorview.state = "smaller"
-                    }
-
                 }
             }
         }

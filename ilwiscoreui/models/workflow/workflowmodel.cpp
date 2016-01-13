@@ -9,7 +9,7 @@
 #include "featurecoverage.h"
 #include "../workflowerrormodel.h"
 #include "ilwiscontext.h"
-//#include "../../IlwisCore/core/ilwiscontext.h"
+#include "ilwistypes.h"
 
 using namespace Ilwis;
 using namespace boost;
@@ -76,12 +76,12 @@ QStringList WorkflowModel::addOperation(const QString &id)
         IOperationMetaData meta = _workflow->getOperationMetadata(v);
         std::vector<SPOperationParameter> inputs = meta->getInputParameters();
         for (int i = 0 ; i < inputs.size() ; i++) {
-            if ( !inputs.at(i)->isOptional()) {
+//            if ( !inputs.at(i)->isOptional()) {
                 _workflow->assignInputData(v, i);
                 ++_inputParameterCount;
                 int parameterIndex = _workflow->getWorkflowParameterIndex(v, i);
                 parameterEntrySet->push_back(QString::number(parameterIndex) + "|insert");
-            }
+//            }
         }
     }else {
        kernel()->issues()->log(QString(TR("Invalid operation id used in workflow %1")).arg(name()));
@@ -196,9 +196,8 @@ QStringList WorkflowModel::deleteOperation(int index)
                 _workflow->removeOperationFlow(*iter);
             }
 
-
             for (int parameterIndex: *_workflow->getWorkflowParameterIndex(operationVertex)) {
-                parameterEntrySet->push_back(QString::number(parameterIndex) + "|remove");
+                parameterEntrySet->push_front(QString::number(parameterIndex) + "|remove");
                 --_inputParameterCount;
             }
 
@@ -331,7 +330,13 @@ void WorkflowModel::store(const QStringList &coordinates)
 
         _workflow->name(_workflow->name());
         QString workingcatalog = context()->workingCatalog()->source().url().toString();
-        _workflow->connectTo(QUrl(workingcatalog +"/"+ _workflow->name() + ".ilwis"), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmOUTPUT);
+
+        if( _workflow->name().endsWith(".ilwis")){
+            _workflow->connectTo(QUrl(workingcatalog +"/"+ _workflow->name()), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmOUTPUT);
+        }else{
+            _workflow->connectTo(QUrl(workingcatalog +"/"+ _workflow->name() + ".ilwis"), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmOUTPUT);
+        }
+
         _workflow->createTime(Ilwis::Time::now());
         _workflow->store();
     } catch(const ErrorObject&){
@@ -341,10 +346,39 @@ void WorkflowModel::store(const QStringList &coordinates)
 
 void WorkflowModel::load()
 {
+
 //    _workflow->connectTo(QUrl("ilwis://internalcatalog/" + _workflow->name() + "_workflow"), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmINPUT);
 }
 
 void WorkflowModel::createMetadata()
 {
     _workflow->createMetadata();
+}
+
+int WorkflowModel::addCondition(int containerId, int operationId)
+{
+    return _workflow->addCondition(containerId, operationId);
+}
+
+QVariantList WorkflowModel::getConditions(int containerId)
+{
+    ConditionContainer container = _workflow->getContainer(containerId);
+    QVariantList results;
+    int i = 0;
+
+    for (Condition condition : container.conditions) {
+        QVariantMap map;
+
+        // TODO: Works for integers but propably not for other conditions. NEEDS SOME WORK (switch case?)
+        map.insert("first", !condition._inputAssignments[0].value.isEmpty());
+        map.insert("condition", condition._inputAssignments[1].value);
+        map.insert("second", !condition._inputAssignments[2].value.isEmpty());
+        map.insert("xId", i);
+
+        results.push_back(map);
+
+        ++i;
+    }
+
+    return results;
 }

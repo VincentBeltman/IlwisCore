@@ -5,6 +5,7 @@ import OperationModel 1.0
 import WorkflowModel 1.0
 import QtQuick.Dialogs 1.1
 import ".." as Modeller
+import "forms" as Forms
 import "../../../matrix.js" as Matrix
 import "../../../Global.js" as Global
 
@@ -15,6 +16,17 @@ Modeller.ModellerWorkArea {
    property var deleteItemIndex;
    property var deleteEdgeIndex;
    property int highestZIndex : 1;
+
+   function scalee(x,y)
+   {
+       wfCanvas.scale(x,y);
+       wfCanvas.replacePanOperation(x, y);
+   }
+
+   function getScale()
+   {
+       return wfCanvas.scale;
+   }
 
    function panOperations(x, y)
    {
@@ -99,7 +111,7 @@ Modeller.ModellerWorkArea {
    }
 
    MessageDialog {
-       id: deleteOperationDialog
+      id: deleteOperationDialog
       title: "Deleting operation"
       text: "Are you sure you want to delete this operation?"
       standardButtons: StandardButton.Yes | StandardButton.No
@@ -196,12 +208,11 @@ Modeller.ModellerWorkArea {
                 */
     function generateForm(parameterIndexes) {
         if (workflow) {
-
             var operationNames = {}
 
             for( var i=0; i < wfCanvas.operationsList.length; i++){
                 var operationItem = wfCanvas.operationsList[i];
-                operationNames[i + ". " + operationItem.operation.name] = {
+                operationNames[i] = {
                     inParameterCount: workflow.operationInputParameterCount(i),
                     outParameterCount: workflow.operationOutputParameterCount(i)
                 };
@@ -312,6 +323,8 @@ Modeller.ModellerWorkArea {
        property bool dragged;
        property var matrix: new Matrix.Matrix();
        property double scale: 1
+       property int dropSquareRadius: 50;
+       property var bigDropArea: canvasDropArea
 
        Timer {
            interval: 30;
@@ -322,10 +335,10 @@ Modeller.ModellerWorkArea {
            }
        }
 
+       function getConditions(containerId) {
+            return canvas.workflow.getConditions(containerId)
+       }
 
-       /*
-    * Get the resource by id from MasterCatalog
-    */
        function getOperation(id) {
            var oper = operations.operation(id);
            return oper;
@@ -396,7 +409,7 @@ Modeller.ModellerWorkArea {
 
        function finishCreatingCondition(x,y) {
            if (component.status == Component.Ready) {
-               currentItem = component.createObject(wfCanvas, {"x": x, "y": y});
+               currentItem = component.createObject(wfCanvas, {"x": x, "y": y, "scale": wfCanvas.scale, "containerId": conditionBoxList.length});
                if (currentItem == null) {
                    // Error Handling
                    console.log("Error creating object");
@@ -413,7 +426,10 @@ Modeller.ModellerWorkArea {
 
            for (var i = 0; i < wfCanvas.conditionBoxList.length; i++) {
                var box = wfCanvas.conditionBoxList[i]
-               if (centreX > box.x && centreY > box.y && centreX < (box.x + box.width) && centreY < (box.y + box.height)) {
+               if (    centreX + dropSquareRadius > box.x &&
+                       centreY + dropSquareRadius/2 > box.y &&
+                       centreX - dropSquareRadius < (box.x + box.width) &&
+                       centreY - dropSquareRadius/2 < (box.y + box.height)) {
                    if(containerIndex !== i ) {
                        box.setCanvasColor(Global.edgecolor)
                    }
@@ -468,19 +484,25 @@ Modeller.ModellerWorkArea {
            wfCanvas.canvasValid = true
        }
 
+       function showConditionTypeForm(id){
+           canvasActive = false;
+           conditionTypeForm.state = "visible"
+           conditionTypeForm.containerId = id
+       }
+
        function showAttachmentForm(target, attachRect){
            canvasActive = false;
-           var fromOperation = operationsList[wfCanvas.currentIndex].operation
-           attachementForm.operationFrom = fromOperation
-           attachementForm.operationTo = target.operation
+           attachementForm.operationOut = operationsList[wfCanvas.currentIndex]
+           attachementForm.operationIn = target
            attachementForm.attachRect = attachRect
            attachementForm.target = target
            attachementForm.state = "visible"
        }
+
        function showAttachmentFormFromFlow(flow) {
            canvasActive = false;
-           attachementForm.operationFrom = flow.source.operation
-           attachementForm.operationTo = flow.target.operation
+           attachementForm.operationOut = flow.source
+           attachementForm.operationIn = flow.target
            attachementForm.attachRect = flow.attachtarget
            attachementForm.target = flow.target
            attachementForm.source = flow.source
@@ -500,6 +522,7 @@ Modeller.ModellerWorkArea {
        DropArea {
            id: canvasDropArea
            anchors.fill: wfCanvas
+           enabled: true
            onDropped: {
                if (drag.source.type === "singleoperation" || drag.source.type === "workflow") {
                    if (drag.source.type === "workflow") {
@@ -523,8 +546,11 @@ Modeller.ModellerWorkArea {
                }
            }
        }
-       FlowParametersChoiceForm{
+       Forms.FlowParametersChoiceForm{
            id : attachementForm
+       }
+       Forms.ConditionTypeChoiceForm{
+           id : conditionTypeForm
        }
 
        MouseArea {
@@ -536,6 +562,7 @@ Modeller.ModellerWorkArea {
 
            onWheel: {
                handleScroll(wheel);
+               modellerDataPane.setPercentage();
            }
 
            onPressed: {
@@ -698,6 +725,8 @@ Modeller.ModellerWorkArea {
                    var item = wfCanvas.currentItem
                    var containerIndex = wfCanvas.currentConditionContainer
 
+                   //item.resetPanOperation();
+
                    if (containerIndex !== -1) {
                        if(item.containerIndex === -1) {
                            wfCanvas.addCurrentOperationToCondition(item)
@@ -771,11 +800,19 @@ Modeller.ModellerWorkArea {
         for (var i = 0; i < wfCanvas.operationsList.length; i++) {
             wfCanvas.operationsList[i].panOperation(x, y)
         }
+
+        for (var i=0; i < wfCanvas.conditionBoxList.length; i++) {
+            wfCanvas.conditionBoxList[i].panOperation(x, y);
+        }
     }
 
     function panZoomOperation(x, y) {
         for (var i = 0; i < wfCanvas.operationsList.length; i++) {
             wfCanvas.operationsList[i].panZoomOperation(x, y)
+        }
+
+        for (var i=0; i < wfCanvas.conditionBoxList.length; i++) {
+            wfCanvas.conditionBoxList[i].panZoomOperation(x, y)
         }
     }
 
@@ -786,11 +823,22 @@ Modeller.ModellerWorkArea {
                                        wfCanvas.operationsList[i].y)
             wfCanvas.operationsList[i].replacePanOperation(ptOp.x, ptOp.y)
         }
+
+        for (var i=0; i < wfCanvas.conditionBoxList.length; i++) {
+            //var xy = wfCanvas.operationsList[i].getXYcoords();
+            var ptOp = getScreenCoords(wfCanvas.conditionBoxList[i].x,
+                                       wfCanvas.conditionBoxList[i].y)
+            wfCanvas.conditionBoxList[i].replacePanOperation(ptOp.x, ptOp.y)
+        }
     }
 
     function scaleOperation(scaleFactor) {
         for (var i = 0; i < wfCanvas.operationsList.length; i++) {
             wfCanvas.operationsList[i].scaleOperation(scaleFactor)
+        }
+
+        for (var i=0; i < wfCanvas.conditionBoxList.length; i++) {
+            wfCanvas.conditionBoxList[i].scaleOperation(scaleFactor)
         }
     }
 

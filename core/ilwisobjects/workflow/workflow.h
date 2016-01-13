@@ -12,6 +12,8 @@
 #include "kernel_global.h"
 #include "ilwistypes.h"
 #include "operationmetadata.h"
+#include "resource.h"
+#include "ilwisobject.h"
 
 #include "iooptions.h"
 
@@ -35,8 +37,24 @@ struct AssignedOutputData {
     QString outputName;
 };
 
+struct Condition {
+    Condition(){}
+    Condition(const Resource res) {
+        _operation.prepare(res);
+        for (auto parameter : _operation->getInputParameters()) {
+            _inputAssignments.push_back(AssignedInputData());
+        }
+    }
 
+    IOperationMetaData _operation;
+    QList<AssignedInputData> _inputAssignments;
+};
 
+struct ConditionContainer {
+    ConditionContainer() {}
+    QList<quint16> operationVertexes;
+    QList<Condition> conditions;
+};
 typedef std::shared_ptr<AssignedInputData> SPAssignedInputData;
 typedef std::shared_ptr<AssignedOutputData> SPAssignedOutputData;
 
@@ -101,11 +119,6 @@ typedef boost::graph_traits<WorkflowGraph>::out_edge_iterator OutEdgeIterator;
 typedef boost::graph_traits<WorkflowGraph>::vertex_iterator WorkflowVertexIterator;
 
 typedef std::pair<OVertex, int> InputAssignment;
-
-struct ConditionContainer {
-    ConditionContainer() {}
-    QList<OVertex> operationVertexes;
-};
 
 /*!
  * \brief The Workflow class
@@ -392,6 +405,20 @@ public:
      * \return node iterators
      */
     std::pair<WorkflowVertexIterator, WorkflowVertexIterator> getNodeIterators() { return boost::vertices(_wfGraph); }
+    /*!
+     * \brief adds a condition with the given type to the the given container
+     * \param containerId the id of the container
+     * \param type the type of the condition
+     * \return the operation
+      */
+    int addCondition(int containerId, int operationId);
+
+    /*!
+     * \brief Returns container with the given id
+     * \param containerId the id of the container
+     * \return the container
+     */
+    ConditionContainer getContainer(const int containerId) { return _conditionContainers[containerId]; }
 
     /*!
      * \brief Call this to print the graph
