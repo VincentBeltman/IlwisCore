@@ -48,6 +48,7 @@ WorkflowChoiceForm {
     }
 
     function refresh() {
+        wfCanvas.stopWorkingLine()
         flowParameterForm.state = "invisible"
         wfCanvas.canvasValid = false
         canvasActive = true
@@ -168,9 +169,7 @@ WorkflowChoiceForm {
             if (!source) {
                 source = wfCanvas.operationsList[wfCanvas.currentIndex]
             }
-            if (source.operation.isLegalFlow(operationOut.operation, operationIn.operation)){
-                source.setFlow(target, attachRect, flowPoints)
-            }
+            source.setFlow(target, attachRect, flowPoints)
             refresh()
         }
     }
