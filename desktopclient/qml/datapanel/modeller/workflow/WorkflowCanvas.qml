@@ -208,7 +208,7 @@ Modeller.ModellerWorkArea {
                 */
     function generateForm(parameterIndexes) {
         if (workflow) {
-            var operationNames = {}
+            var operationNames = []
 
             for( var i=0; i < wfCanvas.operationsList.length; i++){
                 var operationItem = wfCanvas.operationsList[i];
