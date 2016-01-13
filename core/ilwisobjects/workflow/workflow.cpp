@@ -353,7 +353,13 @@ bool Workflow::hasValueDefined(const OVertex &operationVertex, int parameterInde
                    return true;
                 }
             }
-            return _inputAssignments.value({operationVertex, parameterIndex})->value.size() > 0;
+
+            SPAssignedInputData inputAssignment = _inputAssignments.value({operationVertex, parameterIndex});
+
+            if(inputAssignment){
+                return inputAssignment->value.size() > 0;
+            }
+            return false;
         }
     }
     return false;

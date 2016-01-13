@@ -76,12 +76,12 @@ QStringList WorkflowModel::addOperation(const QString &id)
         IOperationMetaData meta = _workflow->getOperationMetadata(v);
         std::vector<SPOperationParameter> inputs = meta->getInputParameters();
         for (int i = 0 ; i < inputs.size() ; i++) {
-            if ( !inputs.at(i)->isOptional()) {
+//            if ( !inputs.at(i)->isOptional()) {
                 _workflow->assignInputData(v, i);
                 ++_inputParameterCount;
                 int parameterIndex = _workflow->getWorkflowParameterIndex(v, i);
                 parameterEntrySet->push_back(QString::number(parameterIndex) + "|insert");
-            }
+//            }
         }
     }else {
        kernel()->issues()->log(QString(TR("Invalid operation id used in workflow %1")).arg(name()));

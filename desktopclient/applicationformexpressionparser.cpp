@@ -260,177 +260,181 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     int oldOptionGroup = -1;
     int xshift = 0;
 
-    //Variables for workflow form
-    QVariantList::iterator operationIndex = operationNames.begin();
-    int operationParameterCount = 1;
+    try{
+        //Variables for workflow form
+        QVariantList::iterator operationIndex = operationNames.begin();
+        int operationParameterCount = 1;
 
-    for(int i = 0; i < parameters.size(); ++i){
-        QString constantValue = constantValues.value(i, "");
-        bool validConstant = constantValues.value(i, "").size() != 0;
-        QString operationRowStart;
-        QString operationRowEnd;
+        for(int i = 0; i < parameters.size(); ++i){
+            QString constantValue = constantValues.value(i, "");
+            bool validConstant = constantValues.value(i, "").size() != 0;
+            QString operationRowStart;
+            QString operationRowEnd;
 
-        if(!operationNames.empty()){
-            QVariant values = (* operationIndex);
-            QVariantMap map = values.toMap();
+            if(!operationNames.empty()){
+                QVariant values = (* operationIndex);
+                QVariantMap map = values.toMap();
 
-            int parameterCount;
-            if(input){
-                parameterCount = map.value("inParameterCount").toInt();
-            }else{
-                parameterCount = map.value("outParameterCount").toInt();
-            }
-
-            while(parameterCount<=0){
-                ++operationIndex;
-
-                values = (* operationIndex);
-                map = values.toMap();
-
+                int parameterCount;
                 if(input){
                     parameterCount = map.value("inParameterCount").toInt();
                 }else{
                     parameterCount = map.value("outParameterCount").toInt();
                 }
+
+                while(parameterCount<=0){
+                    ++operationIndex;
+
+                    values = (* operationIndex);
+                    map = values.toMap();
+
+                    if(input){
+                        parameterCount = map.value("inParameterCount").toInt();
+                    }else{
+                        parameterCount = map.value("outParameterCount").toInt();
+                    }
+                }
+
+                int number = std::distance( operationNames.begin(), operationIndex );
+
+                if(operationParameterCount==1){
+                    operationRowStart = QString("Row{width:parent.width;");
+                    operationRowStart += QString("Column{height:parent.height; width:25;Rectangle{Text{anchors.fill:parent; text:\"%1.\";font.pixelSize:15}").arg(number);
+                    if(operationIndex != operationNames.end()-1) operationRowStart += QString("Rectangle{anchors.bottom:parent.bottom;width : parent.width; height:1;color : \"black\"}");
+                    operationRowStart += QString("width:parent.width;height:parent.height;}}");
+                    operationRowStart += QString("Column{spacing:10;width:parent.width-25; ");
+                }
+
+                if(operationParameterCount==parameterCount){
+                    ++operationIndex;
+
+                    if(operationIndex != operationNames.end()) operationRowEnd = "Rectangle{width : parent.width; height:1;color : \"black\"}";
+
+                    operationRowEnd += "}}";
+
+                    operationParameterCount = 0;
+                }
+
+                ++operationParameterCount;
+
+                formRows += operationRowStart;
             }
 
-            int number = std::distance( operationNames.begin(), operationIndex );
-
-            if(operationParameterCount==1){
-                operationRowStart = QString("Row{width:parent.width;");
-                operationRowStart += QString("Column{height:parent.height; width:25;Rectangle{Text{anchors.fill:parent; text:\"%1.\";font.pixelSize:15}").arg(number);
-                if(operationIndex != operationNames.end()-1) operationRowStart += QString("Rectangle{anchors.bottom:parent.bottom;width : parent.width; height:1;color : \"black\"}");
-                operationRowStart += QString("width:parent.width;height:parent.height;}}");
-                operationRowStart += QString("Column{spacing:10;width:parent.width-25; ");
-            }
-
-            if(operationParameterCount==parameterCount){
-                ++operationIndex;
-
-                if(operationIndex != operationNames.end()) operationRowEnd = "Rectangle{width : parent.width; height:1;color : \"black\"}";
-
-                operationRowEnd += "}}";
-
-                operationParameterCount = 0;
-            }
-
-            ++operationParameterCount;
-
-            formRows += operationRowStart;
-        }
-
-        QString visibile = "true";
-        for(int j=0;j<invisibleFieldList.size();++j){
-            if(i==invisibleFieldList[j].toInt()){
-                visibile = "false";
-            }
-        }
-
-        QString check;
-        if ( parameters[i]._isOptional){
-            if ( oldOptionGroup != parameters[i]._optionGroup){
-                check = QString("CheckBox{id:check_pin_%1; checked:%2;width:20}").arg(i).arg(parameters[i]._defValue == "" ? "false" : "true");
-                oldOptionGroup = parameters[i]._optionGroup;
-            } else
-               xshift = 22;
-
-        }else{
-            xshift = 0;
-        }
-        int checkWidth = check == "" ? 0 : 20;
-        int imagewidth = 0;
-        if ( (hasType(parameters[i]._fieldType,ftTEXTEDIT | ftTEXTAREA)) || (parameters[i]._fieldType == (ftTEXTEDIT | ftRADIOBUTTON))){
-            QString imagePart = setInputIcons(iconField1, iconField2, parameters, i,imagewidth);
-            QString checkEffects;
-            if ( check != ""){
-                checkEffects=QString(";enabled: check_pin_%1.checked;opacity:check_pin_%1.checked?1 :0.25").arg(i);
-            }
-
-            QString textFieldPart = QString(hasType(parameters[i]._fieldType,ftTEXTEDIT) ? textField : textArea).arg(i).
-                    arg(width).
-                    arg(checkWidth).
-                    arg(imagewidth).
-                    arg(xshift).
-                    arg(input ? keys(parameters[i]._dataType) : "\"?\"").
-                    arg(constantValue).
-                    arg(checkEffects);
-
-            QString parameterRow = QString(rowBodyText + textFieldPart + imagePart + "}").arg(check).arg(parameters[i]._label).arg(width).arg(i).arg(checkWidth).arg(xshift).arg(visibile);
-            formRows += parameterRow;
-            if ( results != "")
-                results += "+ \"|\" +";
-            results += QString(input ? "pin_%1.text" : "pout_%1.text").arg(i);
-            if ( !input){
-                QString query = QString("(datatype & %1)!=0 and (readwrite='rc' or readwrite='rcu')").arg(parameters[i]._dataType);
-                QString formatList = formats(query, parameters[i]._dataType);
-                if ( formatList != ""){
-                    QString formatLabel = QString("Row{height:20;width:parent.width;Text { x:5;text: qsTr(\"Output format\"); id:label_pout_format_%2; width :%1;}").arg(width).arg(i);
-                    QString formatCombo = QString("ComboBox{id : pout_format_%1; height:20; width : parent.width - label_pout_format_%1.width - 5;model : %2}").arg(i).arg(formatList);
-                    results += "+\"@@\"+"  + QString("pout_format_%1.currentText").arg(i);
-                    formRows +=formatLabel + formatCombo + "}";
+            QString visibile = "true";
+            for(int j=0;j<invisibleFieldList.size();++j){
+                if(i==invisibleFieldList[j].toInt()){
+                    visibile = "false";
                 }
             }
 
+            QString check;
+            if ( parameters[i]._isOptional){
+                if ( oldOptionGroup != parameters[i]._optionGroup){
+                    check = QString("CheckBox{id:check_pin_%1; checked:%2;width:20}").arg(i).arg(parameters[i]._defValue == "" ? "false" : "true");
+                    oldOptionGroup = parameters[i]._optionGroup;
+                } else
+                   xshift = 22;
+
+            }else{
+                xshift = 0;
+            }
+            int checkWidth = check == "" ? 0 : 20;
+            int imagewidth = 0;
+            if ( (hasType(parameters[i]._fieldType,ftTEXTEDIT | ftTEXTAREA)) || (parameters[i]._fieldType == (ftTEXTEDIT | ftRADIOBUTTON))){
+                QString imagePart = setInputIcons(iconField1, iconField2, parameters, i,imagewidth);
+                QString checkEffects;
+                if ( check != ""){
+                    checkEffects=QString(";enabled: check_pin_%1.checked;opacity:check_pin_%1.checked?1 :0.25").arg(i);
+                }
+
+                QString textFieldPart = QString(hasType(parameters[i]._fieldType,ftTEXTEDIT) ? textField : textArea).arg(i).
+                        arg(width).
+                        arg(checkWidth).
+                        arg(imagewidth).
+                        arg(xshift).
+                        arg(input ? keys(parameters[i]._dataType) : "\"?\"").
+                        arg(constantValue).
+                        arg(checkEffects);
+
+                QString parameterRow = QString(rowBodyText + textFieldPart + imagePart + "}").arg(check).arg(parameters[i]._label).arg(width).arg(i).arg(checkWidth).arg(xshift).arg(visibile);
+                formRows += parameterRow;
+                if ( results != "")
+                    results += "+ \"|\" +";
+                results += QString(input ? "pin_%1.text" : "pout_%1.text").arg(i);
+                if ( !input){
+                    QString query = QString("(datatype & %1)!=0 and (readwrite='rc' or readwrite='rcu')").arg(parameters[i]._dataType);
+                    QString formatList = formats(query, parameters[i]._dataType);
+                    if ( formatList != ""){
+                        QString formatLabel = QString("Row{height:20;width:parent.width;Text { x:5;text: qsTr(\"Output format\"); id:label_pout_format_%2; width :%1;}").arg(width).arg(i);
+                        QString formatCombo = QString("ComboBox{id : pout_format_%1; height:20; width : parent.width - label_pout_format_%1.width - 5;model : %2}").arg(i).arg(formatList);
+                        results += "+\"@@\"+"  + QString("pout_format_%1.currentText").arg(i);
+                        formRows +=formatLabel + formatCombo + "}";
+                    }
+                }
+
+            }
+            if ( parameters[i]._fieldType == ftRADIOBUTTON){
+                QString buttons;
+                if (showEmptyOptionInList) {
+                    buttons += QString(rowChoiceOption).arg(QString::number(i) + "empty_value").arg("- (empty)").arg(validConstant ? "false" : "true").arg(i).arg(" ");
+                }
+                for(auto choiceString : parameters[i]._choiceList){
+                    QString choice = choiceString, state="false";
+                    if (choice[0] == '!') {
+                        choice = choice.mid(1);
+                        if (!validConstant && buttons.isEmpty()) state = "true";
+                    }
+                    if (validConstant && constantValue == choice) {
+                        state = "true";
+                    }
+                    buttons += QString(rowChoiceOption).arg(QString::number(i) + choice).arg(choice).arg(state).arg(i).arg(choice);
+                }
+                formRows += QString(rowBodyChoiceHeader).arg(parameters[i]._label).arg(width).arg(i).arg(buttons);
+                if ( results != "")
+                    results +=  "+ \"|\" +";
+                QString field = QString("exclusivegroup_pin_%1.current.value").arg(i);
+                results += field;
+            }
+            if ( parameters[i]._fieldType == ftCOMBOBOX){
+                QString choices = "[";
+                int j = showEmptyOptionInList ? 1 : 0;
+                int inputIndex = 0;
+                for(QString choiceString : parameters[i]._choiceList){
+                    if ( choiceString[0] == '!'){
+                        choiceString = choiceString.mid(1);
+                    }
+                    if (validConstant && constantValue == choiceString) {
+                        inputIndex = j;
+                    }
+                    if ( choices.size() > 1)
+                        choices += ",";
+                    else if ( showEmptyOptionInList )
+                        choices += "\" \",";
+                    choices += "\"" + choiceString + "\"";
+                    ++j;
+                }
+                choices += "]";
+                QString comboPart = QString(comboField).arg(i).arg(width).arg(checkWidth).arg(choices).arg(inputIndex) + "}";
+                QString parameterRow = QString(rowBodyText + comboPart + "}").arg(check).arg(parameters[i]._label).arg(width).arg(i).arg(checkWidth).arg(xshift).arg(visibile);
+                formRows += parameterRow;
+                if ( results != "")
+                    results += "+ \"|\" +";
+                results += QString("pin_%1.currentText").arg(i);
+            }
+
+            formRows += operationRowEnd;
         }
-        if ( parameters[i]._fieldType == ftRADIOBUTTON){
-            QString buttons;
-            if (showEmptyOptionInList) {
-                buttons += QString(rowChoiceOption).arg(QString::number(i) + "empty_value").arg("- (empty)").arg(validConstant ? "false" : "true").arg(i).arg(" ");
-            }
-            for(auto choiceString : parameters[i]._choiceList){
-                QString choice = choiceString, state="false";
-                if (choice[0] == '!') {
-                    choice = choice.mid(1);
-                    if (!validConstant && buttons.isEmpty()) state = "true";
-                }
-                if (validConstant && constantValue == choice) {
-                    state = "true";
-                }
-                buttons += QString(rowChoiceOption).arg(QString::number(i) + choice).arg(choice).arg(state).arg(i).arg(choice);
-            }
-            formRows += QString(rowBodyChoiceHeader).arg(parameters[i]._label).arg(width).arg(i).arg(buttons);
-            if ( results != "")
-                results +=  "+ \"|\" +";
-            QString field = QString("exclusivegroup_pin_%1.current.value").arg(i);
-            results += field;
-        }
-        if ( parameters[i]._fieldType == ftCOMBOBOX){
-            QString choices = "[";
-            int j = showEmptyOptionInList ? 1 : 0;
-            int inputIndex = 0;
-            for(QString choiceString : parameters[i]._choiceList){
-                if ( choiceString[0] == '!'){
-                    choiceString = choiceString.mid(1);
-                }
-                if (validConstant && constantValue == choiceString) {
-                    inputIndex = j;
-                }
-                if ( choices.size() > 1)
-                    choices += ",";
-                else if ( showEmptyOptionInList )
-                    choices += "\" \",";
-                choices += "\"" + choiceString + "\"";
-                ++j;
-            }
-            choices += "]";
-            QString comboPart = QString(comboField).arg(i).arg(width).arg(checkWidth).arg(choices).arg(inputIndex) + "}";
-            QString parameterRow = QString(rowBodyText + comboPart + "}").arg(check).arg(parameters[i]._label).arg(width).arg(i).arg(checkWidth).arg(xshift).arg(visibile);
-            formRows += parameterRow;
-            if ( results != "")
-                results += "+ \"|\" +";
-            results += QString("pin_%1.currentText").arg(i);
+        if ( !input){
+            formRows.replace("pin_","pout_");
+            formRows.replace("optionalOutputMarker",";");
+    //        formRows.replace("optionalOutputMarker",";text : outputfield_0;onTextChanged:{ if( text !== outputfield_0){ outputfield_0=text}}");
+        }else {
+            formRows.replace("optionalOutputMarker","");
         }
 
-        formRows += operationRowEnd;
+    }catch(...){
+        qDebug() << "Probably optional parameters";
     }
-    if ( !input){
-        formRows.replace("pin_","pout_");
-        formRows.replace("optionalOutputMarker",";");
-//        formRows.replace("optionalOutputMarker",";text : outputfield_0;onTextChanged:{ if( text !== outputfield_0){ outputfield_0=text}}");
-    }else {
-        formRows.replace("optionalOutputMarker","");
-    }
-
     return formRows;
 }
 
