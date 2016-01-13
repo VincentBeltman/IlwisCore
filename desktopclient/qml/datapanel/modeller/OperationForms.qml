@@ -78,7 +78,8 @@ Rectangle {
     }
     ScrollView{
         id: operationFormScrollView
-        anchors.fill: parent
+        width: parent.width
+        height: itemId > -1 ? parent.height - 30 : parent.height
 
         Bench.ApplicationForm{
             id : appFrame
@@ -87,9 +88,33 @@ Rectangle {
             opacity : 0
         }
     }
-    Component.onCompleted: {
-        appFrame.formResultChanged.connect(asignConstantInputData)
+    Button {
+        id : saveConstantInputButton
+        height : itemId > -1 ? 25 : 0
+        width : 70
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: operationFormScrollView.bottom
+
+        Image {
+            height : parent.height
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: saveConstantInputText.left
+
+            source : iconsource("save20.png")
+        }
+        Text {
+            height : parent.height
+            id : saveConstantInputText
+            text: 'Save'
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+        onClicked: {
+            asignConstantInputData()
+        }
     }
+
     function asignConstantInputData() {
         if (itemId > -1){
             modellerDataPane.asignConstantInputData(appFrame.currentAppForm.formresult, itemId)
