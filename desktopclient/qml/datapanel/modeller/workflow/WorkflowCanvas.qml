@@ -196,9 +196,9 @@ Modeller.ModellerWorkArea {
                 */
     function generateForm(parameterIndexes) {
         if (workflow) {
-            workflow.createMetadata()
 
             var operationNames = {}
+
             for( var i=0; i < wfCanvas.operationsList.length; i++){
                 var operationItem = wfCanvas.operationsList[i];
                 operationNames[i + ". " + operationItem.operation.name] = {
@@ -206,7 +206,6 @@ Modeller.ModellerWorkArea {
                     outParameterCount: workflow.operationOutputParameterCount(i)
                 };
             }
-
             workflow.createMetadata()
             manager.showRunForm(workflow.id, operationNames, parameterIndexes)
         }
@@ -337,7 +336,6 @@ Modeller.ModellerWorkArea {
        }
 
        function draw(force){
-
            var p1 = transformedPoint(0,0);
            var p2 = transformedPoint(width, height);
            ctx.clearRect(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);
@@ -509,6 +507,7 @@ Modeller.ModellerWorkArea {
                    }
                    var oper = wfCanvas.getOperation(drag.source.ilwisobjectid)
                    wfCanvas.createItem(drag.x - 50, drag.y - 30,oper)
+
                    var paramterIndexes = workflow.addOperation(drag.source.ilwisobjectid)
 
                    var item = wfCanvas.currentItem
@@ -657,6 +656,8 @@ Modeller.ModellerWorkArea {
                wfCanvas.lastY = mouseY
                wfCanvas.dragged = true
                if (wfCanvas.dragStart) {
+                   cursorShape = Qt.SizeAllCursor
+
                    var pt = transformedPoint(wfCanvas.lastX, wfCanvas.lastY)
                    translate(pt.x - wfCanvas.dragStart.x,
                              pt.y - wfCanvas.dragStart.y)
@@ -676,6 +677,7 @@ Modeller.ModellerWorkArea {
 
                        var item = wfCanvas.operationsList[wfCanvas.currentIndex]
                        if (item) {
+                           cursorShape = Qt.ClosedHandCursor
                            area.positionChanged = true
                            item.x += (mouseX - wfCanvas.oldx)
                            item.y += (mouseY - wfCanvas.oldy)
@@ -689,6 +691,7 @@ Modeller.ModellerWorkArea {
            }
 
            onReleased: {
+               cursorShape = Qt.ArrowCursor
                wfCanvas.stopWorkingLine()
                wfCanvas.dragStart = null;
                if(area.positionChanged) {

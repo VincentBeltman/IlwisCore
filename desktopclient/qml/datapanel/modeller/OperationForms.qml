@@ -38,12 +38,12 @@ Rectangle {
             }
             validValues = validValues.slice(0, canvas.workflow.getInputParameterCount())
         }
-
         var form = formbuilder.index2Form(metaid, true, false, "", operationNames, validValues)
         operationid = metaid
         appFrame.formQML = form
         appFrame.formTitle = qsTr("Set run values for workflow")
         appFrame.opacity = 1
+
         //canvas.workflow.resetParameterEntrySet()
     }
 
