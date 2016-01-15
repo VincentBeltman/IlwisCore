@@ -6,7 +6,7 @@ import QtQuick.Controls.Styles 1.0
 ToolBar{
     id : modellertools
     width : parent.width
-    height : 35
+    height : 31
 
     property alias zoomLevel: zoomLabel
 

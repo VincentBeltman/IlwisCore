@@ -135,6 +135,7 @@ Rectangle {
         clip : true
         x : 15
         model : operation ? operation.inParamNames : null
+        interactive: false
         delegate:
             Item {
             width : box.width
@@ -179,7 +180,7 @@ Rectangle {
         anchors.bottomMargin: 2
         width : box.width
         clip : true
-
+        interactive: false
         x : 15
         model : operation ? operation.outParamNames : null
         delegate:

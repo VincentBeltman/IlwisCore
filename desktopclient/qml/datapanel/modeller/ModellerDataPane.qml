@@ -94,14 +94,7 @@ Item {
     Sets the canvas' zoom back to 100%
     */
     function defaultZoom(){
-
-        canvas.scalee(1, 1);
-
-//        tform.xScale = 1
-//        tform.yScale = 1
-
-//        canvas.height = canvas.parent.height
-//        canvas.width = canvas.parent.width
+        canvas.defaultZoom(1, 1);
 
         setPercentage()
     }

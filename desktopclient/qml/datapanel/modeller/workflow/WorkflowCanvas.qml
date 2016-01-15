@@ -17,10 +17,10 @@ Modeller.ModellerWorkArea {
    property var deleteEdgeIndex;
    property int highestZIndex : 1;
 
-   function scalee(x,y)
+   function defaultZoom(x,y)
    {
-       wfCanvas.scale(x,y);
-       wfCanvas.replacePanOperation(x, y);
+        scale(x,y);
+        replacePanOperation(x, y);
    }
 
    function getScale()
