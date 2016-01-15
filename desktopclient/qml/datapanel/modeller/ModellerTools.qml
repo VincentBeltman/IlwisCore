@@ -176,7 +176,7 @@ ToolBar{
                     source : iconsource("zoomout20.png")
                 }
                 onClicked: {
-                    modellerDataPane.canvasZoomOut()
+                    modellerDataPane.canvasZoom(-3)
                 }
             }
 
@@ -200,7 +200,7 @@ ToolBar{
                     source : iconsource("zoomin20.png")
                 }
                 onClicked: {
-                    modellerDataPane.canvasZoomIn()
+                    modellerDataPane.canvasZoom(3)
                 }
             }
 

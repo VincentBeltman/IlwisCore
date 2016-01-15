@@ -562,7 +562,6 @@ Modeller.ModellerWorkArea {
 
            onWheel: {
                handleScroll(wheel);
-               modellerDataPane.setPercentage();
            }
 
            onPressed: {
@@ -760,8 +759,12 @@ Modeller.ModellerWorkArea {
     }
 
     function zoom(clicks) {
-
-        var pt = transformedPoint(wfCanvas.lastX, wfCanvas.lastY)
+        var pt;
+        if(area.containsMouse){
+            pt = transformedPoint(wfCanvas.lastX, wfCanvas.lastY)
+        }else{
+            pt = transformedPoint(wfCanvas.width/2, wfCanvas.height/2)
+        }
 
         translate(pt.x, pt.y)
 
@@ -774,6 +777,8 @@ Modeller.ModellerWorkArea {
         translate(-pt.x, -pt.y)
 
         replacePanOperation()
+
+        modellerDataPane.setPercentage();
     }
 
     function handleScroll(wheel) {

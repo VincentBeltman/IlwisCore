@@ -86,12 +86,8 @@ Item {
         canvas.alterSelectedEdge()
     }
 
-    function canvasZoomOut(){
-        scaleCanvas(1/factor);
-    }
-
-    function canvasZoomIn(){
-        scaleCanvas(factor);
+    function canvasZoom(clicks){
+        canvas.zoom(clicks)
     }
 
     /**
@@ -106,15 +102,6 @@ Item {
 
 //        canvas.height = canvas.parent.height
 //        canvas.width = canvas.parent.width
-
-        setPercentage()
-    }
-
-    function scaleCanvas(scaleFactor){
-        canvas.height /= scaleFactor;
-        canvas.width /= scaleFactor;
-        tform.xScale *=scaleFactor;
-        tform.yScale *=scaleFactor;
 
         setPercentage()
     }
