@@ -16,7 +16,6 @@ Rectangle {
     visible : height > 0
     property var operationid
     property int itemId: -1
-    property string formTitle
 
     /**
     Create a form for the workflow
@@ -42,8 +41,7 @@ Rectangle {
         var form = formbuilder.index2Form(metaid, true, false, "", operationNames, validValues)
         operationid = metaid
         appFrame.formQML = form
-        operationForm.formTitle = qsTr("Set run values for workflow")
-//        appFrame.formTitle = qsTr("Set run values for workflow")
+        appFrame.formTitle = qsTr("Set run values for workflow")
         appFrame.opacity = 1
 
         //canvas.workflow.resetParameterEntrySet()
@@ -67,7 +65,7 @@ Rectangle {
         operationid = metaid
         appFrame.formQML = ""
         appFrame.formQML = form
-        operationForm.formTitle = title
+        appFrame.formTitle = title
         appFrame.opacity = 1
     }
 
@@ -82,14 +80,14 @@ Rectangle {
     BorderImage {
         id : title
         width: parent.width
-        height : operationForm.formTitle != "" ? 25 : 0
-        opacity : operationForm.formTitle != "" ? 1 : 0
-//        anchors.bottomMargin: operationForm.formTitle != "" ? 20 : 0
+        height : appFrame.formTitle != "" ? 25 : 0
+        opacity : appFrame.formTitle != "" ? 1 : 0
+        anchors.bottomMargin: operationForm.formTitle != "" ? 20 : 0
         source : "../../images/headerblue2CS1.png"
         border { left: 15; top: 0; right: 15; bottom: 0 }
         smooth : true
         Text {
-            text : operationForm.formTitle
+            text : appFrame.formTitle
             font.pointSize: 11
             x : 5
         }
