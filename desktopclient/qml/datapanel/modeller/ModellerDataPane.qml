@@ -94,9 +94,7 @@ Item {
     Sets the canvas' zoom back to 100%
     */
     function defaultZoom(){
-        canvas.defaultZoom(1, 1);
-
-        setPercentage()
+        canvas.defaultZoom();
     }
 
     /**

@@ -17,10 +17,23 @@ Modeller.ModellerWorkArea {
    property var deleteEdgeIndex;
    property int highestZIndex : 1;
 
-   function defaultZoom(x,y)
+   function defaultZoom()
    {
-        scale(x,y);
-        replacePanOperation(x, y);
+       for (var i = 0; i < wfCanvas.operationsList.length; i++) {
+           wfCanvas.operationsList[i].scale = 1
+       }
+
+       for (var i=0; i < wfCanvas.conditionBoxList.length; i++) {
+           wfCanvas.conditionBoxList[i].scale = 1
+       }
+
+       wfCanvas.matrix = new Matrix.Matrix()
+
+       wfCanvas.ctx.save()
+       wfCanvas.ctx.restore()
+
+       wfCanvas.scale = 1
+       modellerDataPane.setPercentage();
    }
 
    function getScale()
