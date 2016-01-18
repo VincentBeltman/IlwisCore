@@ -19,6 +19,9 @@ Modeller.ModellerWorkArea {
 
    function defaultZoom()
    {
+       var pt = transformedPoint(wfCanvas.width/2, wfCanvas.height/2)
+       translate(pt.x, pt.y)
+
        for (var i = 0; i < wfCanvas.operationsList.length; i++) {
            wfCanvas.operationsList[i].scale = 1
        }
@@ -27,10 +30,9 @@ Modeller.ModellerWorkArea {
            wfCanvas.conditionBoxList[i].scale = 1
        }
 
-       wfCanvas.matrix = new Matrix.Matrix()
+       translate(-pt.x, -pt.y)
 
-       wfCanvas.ctx.save()
-       wfCanvas.ctx.restore()
+       replacePanOperation()
 
        wfCanvas.scale = 1
        modellerDataPane.setPercentage();
