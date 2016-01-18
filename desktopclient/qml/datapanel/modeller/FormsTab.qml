@@ -37,6 +37,13 @@ Rectangle {
     }
 
     /**
+      * Empties the operation form
+      */
+    function clearOperationForm() {
+        operationForm.item.clearOperationForm()
+    }
+
+    /**
       * Calls the execute form methods of the OperationForms class, which returns the data the user put into the form.
       */
     function retrieveRunFormValues(){

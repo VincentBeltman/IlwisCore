@@ -2,6 +2,7 @@ import QtQuick 2.2
 import QtQuick.Controls 1.1
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.1
+import QtQuick.Dialogs 1.0
 import MasterCatalogModel 1.0
 import OperationCatalogModel 1.0
 import IlwisObjectCreatorModel 1.0
@@ -32,11 +33,46 @@ Controls.DropableItem{
                 labelWidth: 100
                 width : parent.width
             }
-            Controls.TextEditLabelPair{
-                id : saveedit
-                labelText: qsTr("Save path")
-                labelWidth: 100
+            Item {
+                id: urledit
                 width : parent.width
+                height : 20
+                Text {
+                    id : urlLabel
+                    text : qsTr("Path")
+                    height : parent.height
+                    width : 100
+                    font.bold: true
+                }
+                TextField{
+                    id : textid
+                    anchors.left : urlLabel.right
+                    anchors.right : urlButton.left
+                    height : parent.height
+
+                    style: TextFieldStyle {
+                        background: Rectangle {
+                            radius: 3
+                            width : parent.width
+                            height: parent.height
+                            border.color: Global.edgecolor
+                            border.width: 1
+                            color : "white"
+                        }
+                    }
+                }
+                Button {
+                    id: urlButton
+                    height : parent.height
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    onClicked: fileDialog.open()
+                    Text {
+                        text: qsTr("Browse")
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
             }
             Controls.TextAreaLabelPair{
                 id : descedit
@@ -134,13 +170,14 @@ Controls.DropableItem{
             Row{
                 anchors.right: parent.right
                 height : 22
-                width : 200
+                width : 110
                 spacing : 5
 
                 Button {
                     text : qsTr("Create & Open")
-                    width : 110
+                    width : parent.width
                     height : 18
+                    enabled: nameedit.content.length > 0 && textid.text.length > 0
                     onClicked: {
                         var keywords = ""
                         for( var i=0; i < keyitems.model.length; ++i){
@@ -156,10 +193,19 @@ Controls.DropableItem{
                             keywords += ", workflow"
                         }
 
-                        var createInfo = {type : "workflow", name : nameedit.content, keywords : keywords, description : descedit.content}
+                        var name = nameedit.content
+                        var url = textid.text + '/' + name + '.ilwis'
+                        var createInfo = {
+                            type : "workflow",
+                            name : name,
+                            keywords : keywords,
+                            description : descedit.content,
+                            url : url
+                        }
                         var ilwisid = objectcreator.createObject(createInfo)
                         var resource = mastercatalog.id2Resource(ilwisid)
-                        resource.setUrls(saveedit.content)
+                        resource.setUrls(url)
+
                         if (resource){
                             var filter = "itemid=" + resource.id
                             operations.refresh()
@@ -167,16 +213,21 @@ Controls.DropableItem{
                         }
                     }
                 }
-                Button{
-                    id : createBut
-                    text : qsTr("Create")
-                    width : 84
-                    height : 18
-
-                }
             }
-
         }
+    }
+
+    FileDialog {
+        id: fileDialog
+        title: "Choose a file to save the workflow"
+        selectFolder: true
+        onAccepted: {
+            textid.text = fileDialog.fileUrl
+        }
+        onRejected: {
+        }
+
+        Component.onCompleted: visible = false
     }
 }
 

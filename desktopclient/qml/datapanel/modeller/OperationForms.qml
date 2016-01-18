@@ -77,6 +77,12 @@ Rectangle {
         return appFrame.currentAppForm.formresult
     }
 
+    function clearOperationForm() {
+        appFrame.formTitle = "Nothing selected"
+        appFrame.formQML = ""
+        itemId = -1
+    }
+
     BorderImage {
         id : title
         width: parent.width

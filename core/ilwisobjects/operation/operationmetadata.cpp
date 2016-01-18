@@ -285,7 +285,7 @@ OperationResource::OperationResource(const QUrl &inurl, const IlwisTypes &type, 
 {
     prepare();
     QString urls = url().toString() + "=" + QString::number(id());
-    setUrl(urls);
+   //setUrl(urls);
     addProperty("namespace",nmspace);
 }
 

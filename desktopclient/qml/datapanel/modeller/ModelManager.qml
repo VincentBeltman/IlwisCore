@@ -43,6 +43,10 @@ Rectangle {
         metadata.item.showWorkflowMetaData(workflow)
     }
 
+    function clearOperationForm() {
+        forms.item.clearOperationForm()
+    }
+
     TabView{
         id : modellerProperties
         anchors.fill: parent
