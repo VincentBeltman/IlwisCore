@@ -8,6 +8,10 @@
 #include <QSqlQuery>
 #include <QQuickItem>
 #include <QApplication>
+#ifdef Q_OS_LINUX
+#include <QProcess>
+#include <QString>
+#endif
 #include <qtconcurrentmap.h>
 #include "kernel.h"
 #include "ilwisdata.h"
@@ -409,17 +413,21 @@ IlwisObjectModel *MasterCatalogModel::id2object(const QString &objectid, QQuickI
 void MasterCatalogModel::setSelectedObjects(const QString &objects)
 {
     try {
-        if ( objects == ""){
+        auto clearList = [&](){
             for(IlwisObjectModel *model : _selectedObjects){
                 model->setParent(0);
-                delete model;
+                model->deleteLater();
             }
             _selectedObjects.clear();
+        };
+
+        if ( objects == ""){
+            clearList();
             emit selectionChanged();
             return;
         }
         QStringList parts = objects.split("|");
-        _selectedObjects.clear();
+        clearList();
         kernel()->issues()->silent(true);
         for(auto objectid : parts){
             bool ok;
@@ -495,25 +503,43 @@ CatalogModel *MasterCatalogModel::newCatalog(const QString &inpath, const QStrin
     return 0;
 }
 
+// TODO insure that the drive "index" is coherent
 QString MasterCatalogModel::getDrive(quint32 index){
-    QFileInfoList drives = QDir::drives();
+    QStringList drives = MasterCatalogModel::driveList();
+
     if ( index < drives.size()){
-        return drives[index].filePath();
+        return drives[index];
     }
     return "";
 }
 
 QStringList MasterCatalogModel::driveList() const{
+    QStringList drivenames;
 #ifdef Q_OS_WIN
      QFileInfoList drives = QDir::drives();
-     QStringList drivenames;
      for(auto item : drives){
         drivenames.append(item.filePath());
      }
-     return drivenames;
-#else
-    return QStringList();
 #endif
+#ifdef Q_OS_LINUX
+     QProcess process;
+     process.start("lsblk", QStringList() << "-o" << "MOUNTPOINT");
+
+     if (process.waitForFinished()) {
+         QByteArray result = process.readAll();
+         if (result.length() > 0) {
+             QStringList mountpoints = QString(result).split('\n', QString::SplitBehavior::SkipEmptyParts);
+             QStringList unwantedStrings("MOUNTPOINT");
+             unwantedStrings.append("[SWAP]");
+
+             for (QString mountp: mountpoints) {
+                 if (!unwantedStrings.contains(mountp))
+                     drivenames.append(mountp);
+             }
+         }
+     }
+#endif
+     return drivenames;
 }
 
 void MasterCatalogModel::addBookmark(const QString& path){
@@ -615,8 +641,10 @@ QStringList MasterCatalogModel::select(const QString &filter, const QString& pro
     QStringList resourceList;
     for (const auto& resource : resources){
         if (resource.isValid()){
+            QString result = QString::number(resource.id());
             if ( property == "name")
-                resourceList.append(QString::number(resource.id()) + "|" + resource.name());
+                result += "|" + resource.name();
+            resourceList.append(result);
         }
     }
     return resourceList;

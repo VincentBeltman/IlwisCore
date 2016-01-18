@@ -24,7 +24,15 @@ include(deployment.pri)
 
 # Add more folders to ship with the application, here
 folder_01.source = desktopclient/qml
-folder_01.target = ../output/$$PLATFORM$$CONF/bin
+
+win32{
+    folder_01.target = ../../../output/$$PLATFORM$$CONF/bin
+}
+
+linux{
+    folder_01.target = ../output/$$PLATFORM$$CONF/bin
+}
+
 DEPLOYMENTFOLDERS = folder_01
 
 
@@ -123,14 +131,16 @@ HEADERS += \
     desktopclient/applicationformexpressionparser.h \
     desktopclient/ilwistype.h \
     desktopclient/keyfilter.h \
-    desktopclient/workflowmetadataformbuilder.h
+    desktopclient/workflowmetadataformbuilder.h \
+    desktopclient/startilwis.h
 
 SOURCES += \
     desktopclient/applicationformexpressionparser.cpp \
     desktopclient/ilwistype.cpp \
     desktopclient/main.cpp \
     desktopclient/keyfilter.cpp \
-    desktopclient/workflowmetadataformbuilder.cpp
+    desktopclient/workflowmetadataformbuilder.cpp \
+    desktopclient/startilwis.cpp
 
 DISTFILES += \
     desktopclient/qml/datapanel/visualization/Layers.qml \
@@ -148,7 +158,8 @@ DISTFILES += \
     desktopclient/qml/datapanel/workflow/AttachmentRectangle.qml \
     desktopclient/qml/workbench/creators/PaletteColorList.qml \
     desktopclient/qml/workbench/creators/CreateGeorefCorners.qml \
-    desktopclient/qml/workbench/preferences/Locations.qml
+    desktopclient/qml/workbench/preferences/Locations.qml \
+    desktopclient/qml/datapanel/catalog/CatalogActions.qml
 
 unix{
     QMAKE_CXXFLAGS = -mmacosx-version-min=10.7 -std=c++11 -stdlib=libc++
