@@ -66,7 +66,8 @@ std::vector<ApplicationFormExpressionParser::FormParameter> ApplicationFormExpre
     if ( outparms == "0")
         return parameters;
 
-    for ( int order = 0; order < outparms.toInt(); ++order){
+    QStringList parts = outparms.split("|");
+    for ( int order = 0; order < parts.last().toInt(); ++order){
         QString prefix = "pout_" + QString::number(order + 1) + "_";
        FormParameter parm;
        parm._fieldType = isService ? ftTEXTAREA :  ftTEXTEDIT;
@@ -466,7 +467,7 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
 
         for(int i = 0; i < outparameters.size(); ++i){
             results += QString(";property string outputfield_%1").arg(i);
-            if ( hasType(outparameters[i]._dataType, itCOVERAGE | itTABLE)){
+            if ( hasType(outparameters[i]._dataType, itCOVERAGE | itTABLE | itCOLUMN)){
                 results += QString(";property alias format_%1 :  pout_format_%1").arg(i);
             }
         }
@@ -524,7 +525,7 @@ QString ApplicationFormExpressionParser::formats(const QString& query, quint64 i
     }
     if ( formatList != "")
        formatList = "'Memory'," + formatList;
-    if ( hasType(ilwtype, itTABLE)){
+    if ( hasType(ilwtype, itCOLUMN)){
         formatList = "'Keep original'," + formatList;
     }
     if ( formatList != "")

@@ -292,8 +292,7 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             if (operationresource[QString("pout_%1_optional").arg(parm)] == "false" && i < operationresource["outparameters"].toInt()) {
                 QString value = parms[i + operationresource["inparameters"].toInt()];
 
-                QString output = value.split("@@")[0];
-                if (output.size() == 0) {
+                if (value.split("@@")[0].size() == 0) {
                     em->addError(1, "Output parameter " + QString::number(i) + " is undefined with name " +  operationresource[QString("pout_%1_name").arg(parm)].toString());
                     hasInvalidParameters = true;
                 } else {
@@ -305,7 +304,6 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
                         }
                     }
                 }
-
             }
             if (operationresource[QString("pin_%1_optional").arg(parm)] == "false" && i < operationresource["inparameters"].toInt() && parms[i].size() == 0) {
                 em->addError(1, "Input parameter " + QString::number(i) + " is undefined with name " +  operationresource[QString("pin_%1_name").arg(parm)].toString());
@@ -325,21 +323,26 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
 
     bool duplicateFileNames = false;
 
-    for(int i=(parms.size() - operationresource["outparameters"].toInt()); i<parms.size(); ++i){
+    QStringList parts = operationresource["outparameters"].toString().split("|");
+    int maxparms = parts.last().toInt();
+    int count = 1;
+    for(int i=(parms.size() - maxparms); i<parms.size(); ++i){
         QString output = parms[i];
 
 
-        QString pout = QString("pout_%1_type").arg((i-operationresource["inparameters"].toInt() + 1));
+        QString pout = QString("pout_%1_type").arg(count++);
 
         IlwisTypes outputtype = operationresource[pout].toULongLong();
         if ( output.indexOf("@@") != -1 ){
             QString format;
             QStringList parts = output.split("@@");
             output = parts[0];
+            if ( output == "")
+                continue;
 
             //Check if user didnt put the same output name in another output field
             int occurences = 0;
-            for(int j=(parms.size() - operationresource["outparameters"].toInt()); j<parms.size(); ++j){
+            for(int j=(parms.size() - maxparms); j<parms.size(); ++j){
                 QString compareString = parms[j].split("@@")[0];
                 if(output == compareString){
                     occurences++;
@@ -354,70 +357,72 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
 
             QString formatName = parts[1];
 
-            QStringList existingFileNames;
+            if ( operationresource.ilwisType() & itWORKFLOW) {
+                QStringList existingFileNames;
 
-            DIR *directory;
+                DIR *directory;
 
-            //If not memory
-            QString fileName;
+                //If not memory
+                QString fileName;
 
-            if(formatName == "Memory" && operationresource.ilwisType() & itWORKFLOW){
-                //Get all files in the internal catalog
-                QString dataLocation = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/internalcatalog";
-                directory = opendir(dataLocation.toStdString().c_str());
-            }else if(operationresource.ilwisType() & itWORKFLOW){
-                //Get all files in the directory
-                QString dataLocation = output;
-                dataLocation.remove("file:///");
+                if(formatName == "Memory" ){
+                    //Get all files in the internal catalog
+                    QString dataLocation = QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/internalcatalog";
+                    directory = opendir(dataLocation.toStdString().c_str());
+                }else {
+                    //Get all files in the directory
+                    QString dataLocation = output;
+                    dataLocation.remove("file:///");
 
-                QStringList splitUrl = dataLocation.split("/");
+                    QStringList splitUrl = dataLocation.split("/");
 
-                fileName = splitUrl.last();
+                    fileName = splitUrl.last();
 
-                QString query = "name='" + formatName + "'";
-                std::multimap<QString, Ilwis::DataFormat>  formats = Ilwis::DataFormat::getSelectedBy(Ilwis::DataFormat::fpNAME, query);
-                if ( formats.size() == 1){
-                     QString connector = (*formats.begin()).second.property(DataFormat::fpCONNECTOR).toString();
-                     QString code = (*formats.begin()).second.property(DataFormat::fpCODE).toString();
+                    QString query = "name='" + formatName + "'";
+                    std::multimap<QString, Ilwis::DataFormat>  formats = Ilwis::DataFormat::getSelectedBy(Ilwis::DataFormat::fpNAME, query);
+                    if ( formats.size() == 1){
+                        QString connector = (*formats.begin()).second.property(DataFormat::fpCONNECTOR).toString();
+                        QString code = (*formats.begin()).second.property(DataFormat::fpCODE).toString();
 
-                     QVariantList extensions = Ilwis::DataFormat::getFormatProperties(DataFormat::fpEXTENSION,outputtype, connector, code);
+                        QVariantList extensions = Ilwis::DataFormat::getFormatProperties(DataFormat::fpEXTENSION,outputtype, connector, code);
 
-                     fileName += ".";
-                     fileName += extensions[0].toString();
+                        fileName += ".";
+                        fileName += extensions[0].toString();
+                    }
+
+                    splitUrl.removeLast();
+
+                    dataLocation = splitUrl.join("/");
+
+                    directory = opendir(dataLocation.toStdString().c_str());
                 }
 
-                splitUrl.removeLast();
+                struct dirent *file;
 
-                dataLocation = splitUrl.join("/");
+                //Put the existing file names in a list for later use
+                while ((file = readdir (directory)) != NULL) {
+                    existingFileNames.push_back(file->d_name);
+                }
 
-                directory = opendir(dataLocation.toStdString().c_str());
-            }
+                closedir(directory);
 
-            struct dirent *file;
-
-            //Put the existing file names in a list for later use
-            while ((file = readdir (directory)) != NULL) {
-                existingFileNames.push_back(file->d_name);
-            }
-
-            closedir(directory);
-
-            //Check if a file with the same name already exist
-            for(int j=0;j<existingFileNames.size();++j){
-                if(formatName == "Memory"){
-                    if(existingFileNames[j] == output) {
-                        duplicateFileNames = true;
-                        em->addError(1, "Workflow did not execute duplicate name: " + output + ". Please change this name.");
-                    }
-                }else{
-                    if(existingFileNames[j] == fileName){
-                        duplicateFileNames = true;
-                        em->addError(1, "Workflow did not execute duplicate name: " + fileName + ". Please change this name.");
+                //Check if a file with the same name already exist
+                for(int j=0;j<existingFileNames.size();++j){
+                    if(formatName == "Memory"){
+                        if(existingFileNames[j] == output) {
+                            duplicateFileNames = true;
+                            em->addError(1, "Workflow did not execute duplicate name: " + output + ". Please change this name.");
+                        }
+                    }else{
+                        if(existingFileNames[j] == fileName){
+                            duplicateFileNames = true;
+                            em->addError(1, "Workflow did not execute duplicate name: " + fileName + ". Please change this name.");
+                        }
                     }
                 }
             }
 
-            if ( hasType(outputtype, itTABLE)){
+            if ( hasType(outputtype, itCOLUMN)){
                 if ( formatName == "Memory"){
                     output = modifyTableOutputUrl(output, parms);
                 }else
@@ -426,8 +431,16 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             if ( formatName == "Keep original"){
                 IIlwisObject obj;
                 obj.prepare(parms[0], operationresource["pin_1_type"].toULongLong());
-                if ( obj.isValid())
-                    format = "{format(" + obj->provider() + ",\"" + obj->formatCode() + "\")}";
+                if ( obj.isValid()){
+                    IlwisTypes type = operationresource[pout].toULongLong();
+                    QVariantList values = DataFormat::getFormatProperties(DataFormat::fpCODE,type,obj->provider());
+                    if ( values.size() != 0){
+                        format = "{format(" + obj->provider() + ",\"" + values[0].toString() + "\")}";
+                    }else{
+                        kernel()->issues()->log(QString("No valid conversion found for provider %1 and format %2").arg(obj->provider()).arg(IlwisObject::type2Name(type)));
+                        return sUNDEF;
+                    }
+                }
             }
             if ( formatName != "Memory"){ // special case
                 if ( format == "") {
@@ -438,7 +451,8 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
                                 (*formats.begin()).second.property(DataFormat::fpCODE).toString() + "\")}";
                     }
                 }
-                if ( output.indexOf("://") == -1)
+                // if there is no path we extend it with a path unless the output is a new column, output is than the "old" table so no new output object
+                if ( output.indexOf("://") == -1 )
                     output = context()->workingCatalog()->source().url().toString() + "/" + output + format;
                 else
                     output = output + format;
@@ -447,7 +461,7 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
                     format = "{format(stream,\"rastercoverage\")}";
                 }else if (hasType(outputtype, itFEATURE)){
                     format = "{format(stream,\"featurecoverage\")}";
-                }else if (hasType(outputtype, itTABLE)){
+                }else if (hasType(outputtype, itTABLE | itCOLUMN)){
                     format = "{format(stream,\"table\")}";
                 }else if (hasType(outputtype, itCATALOG)){
                     format = "{format(stream,\"catalog\")}";
@@ -516,20 +530,20 @@ WorkflowModel *OperationCatalogModel::createWorkFlow(const QString &filter)
 void OperationCatalogModel::keyFilter(const QString &keyf)
 {
     QStringList parts= keyf.split(" ",QString::SkipEmptyParts);
-   QString result;
-   for(QString part : parts){
-       if ( part.toLower() == "or")
-           result += " or ";
-       else if ( part.toLower() == "and")
-           result += " and ";
-       else {
-           result += "keyword='" + part + "'";
-       }
+    QString result;
+    for(QString part : parts){
+        if ( part.toLower() == "or")
+            result += " or ";
+        else if ( part.toLower() == "and")
+            result += " and ";
+        else {
+            result += "keyword='" + part + "'";
+        }
 
-   }
-   _currentOperations.clear();
-   _operationsByKey.clear();
-   _refresh = true;
-   CatalogModel::filter(result);
-   emit operationsChanged();
+    }
+    _currentOperations.clear();
+    _operationsByKey.clear();
+    _refresh = true;
+    CatalogModel::filter(result);
+    emit operationsChanged();
 }
