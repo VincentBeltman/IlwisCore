@@ -292,7 +292,8 @@ QString OperationCatalogModel::executeoperation(quint64 operationid, const QStri
             if (operationresource[QString("pout_%1_optional").arg(parm)] == "false" && i < operationresource["outparameters"].toInt()) {
                 QString value = parms[i + operationresource["inparameters"].toInt()];
 
-                if (value.split("@@")[0].size() == 0) {
+                QString output = value.split("@@")[0];
+                if (output.size() == 0) {
                     em->addError(1, "Output parameter " + QString::number(i) + " is undefined with name " +  operationresource[QString("pout_%1_name").arg(parm)].toString());
                     hasInvalidParameters = true;
                 } else {
