@@ -135,6 +135,9 @@ Modeller.ModellerWorkArea {
           // First delete the operation at C++. THIS NEEDS TO BE DONE FIRST
           var parameterIndexes = workflow.deleteOperation(deleteItemIndex)
 
+          // Clean operation form
+          manager.clearOperationForm()
+
           // If the operation is inside a container, remove it from the container
           if(item.containerIndex !== -1) {
               var containerIndex = item.containerIndex;
@@ -490,11 +493,14 @@ Modeller.ModellerWorkArea {
        }
 
        function stopWorkingLine(){
-           wfCanvas.oldx = -1.0
-           wfCanvas.oldy = -1.0
-           wfCanvas.workingLineBegin = Qt.point(-1,-1)
-           wfCanvas.workingLineEnd = Qt.point(-1,-1)
-           wfCanvas.canvasValid = true
+            wfCanvas.oldx = -1.0
+            wfCanvas.oldy = -1.0
+            wfCanvas.workingLineBegin = Qt.point(-1,-1)
+            wfCanvas.workingLineEnd = Qt.point(-1,-1)
+            wfCanvas.canvasValid = true
+            for (var i = 0; i < wfCanvas.operationsList.length; i++) {
+                wfCanvas.operationsList[i].deselectAll()
+            }
        }
 
        function showConditionTypeForm(id){
