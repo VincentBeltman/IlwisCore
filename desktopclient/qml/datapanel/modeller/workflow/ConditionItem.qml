@@ -71,27 +71,15 @@ Rectangle {
     function addToOperationList(operationIndex) {
         if(operationsList.indexOf(operationIndex) == -1) {
             operationsList.push(operationIndex);
-            resizeOneTime()
+            resize()
         }
     }
 
     function removeFromOperationList(operationIndex) {
         if(operationsList.indexOf(operationIndex) > -1) {
             operationsList.splice(operationsList.indexOf(operationIndex), 1)
-            resizeOneTime()
+            resize()
         }
-    }
-
-    function disableCanvas() {
-        conditionContainerCanvas.destroy();
-    }
-
-    function enableCanvas() {
-        canvasComponent = Qt.createComponent("ConditionCanvas.qml");
-        if (canvasComponent.status == Component.Ready)
-            finishCreation(canvasComponent);
-        else
-            canvasComponent.statusChanged.connect(finishCreation);
     }
 
     function finishCreation(component) {
@@ -136,12 +124,6 @@ Rectangle {
         conditionItem.height = yChanged ? maxY - minY + listRectangle.height + (padding * 2) : standardHeight
         if (xChanged) conditionItem.x = minX - padding
         if (yChanged) conditionItem.y = minY - listRectangle.height - padding
-    }
-
-    function resizeOneTime() {
-        disableCanvas()
-        resize()
-        enableCanvas()
     }
 
     function openNewConditionDialogButtonFunction() {
@@ -275,8 +257,5 @@ Rectangle {
         height: parent.height - listRectangle.height - 12
         width : parent.width - 8
         x : 4
-
-        ConditionCanvas {
-        }
     }
 }

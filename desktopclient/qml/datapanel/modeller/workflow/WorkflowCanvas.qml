@@ -17,7 +17,7 @@ Modeller.ModellerWorkArea {
    property var deleteEdgeIndex;
    property int highestZIndex : 1;
     color: "transparent"
-    id: canvasWrapper
+    id: canvas
 
     MouseArea {
         id: area
@@ -601,7 +601,7 @@ Modeller.ModellerWorkArea {
 
        function finishCreation(x,y,resource) {
            if (component.status == Component.Ready) {
-               currentItem = component.createObject(canvasWrapper, {"x": x, "y": y, "operation" : resource, "itemid" : operationsList.length, "scale": wfCanvas.scale});
+               currentItem = component.createObject(canvas, {"x": x, "y": y, "operation" : resource, "itemid" : operationsList.length, "scale": wfCanvas.scale});
                if (currentItem == null) {
                    // Error Handling
                    console.log("Error creating object");
@@ -624,7 +624,7 @@ Modeller.ModellerWorkArea {
 
        function finishCreatingCondition(x,y) {
            if (component.status == Component.Ready) {
-               currentItem = component.createObject(canvasWrapper, {"x": x, "y": y, "scale": wfCanvas.scale, "containerId": conditionBoxList.length});
+               currentItem = component.createObject(canvas, {"x": x, "y": y, "scale": wfCanvas.scale, "containerId": conditionBoxList.length});
                if (currentItem == null) {
                    // Error Handling
                    console.log("Error creating object");
