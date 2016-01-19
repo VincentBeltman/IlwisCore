@@ -573,7 +573,7 @@ Modeller.ModellerWorkArea {
                canvasValid = true
                if ( workingLineBegin.x !== -1 && workingLineEnd.x !== -1){
                    ctx.beginPath();
-                   ctx.lineWidth = 2;
+                   ctx.lineWidth = 3;
                    var pt1 = transformedPoint(workingLineBegin.x, workingLineBegin.y);
                    var pt2 = transformedPoint(workingLineEnd.x, workingLineEnd.y);
                    ctx.moveTo(pt1.x, pt1.y);

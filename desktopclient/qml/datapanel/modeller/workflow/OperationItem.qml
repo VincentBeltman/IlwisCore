@@ -271,10 +271,10 @@ Rectangle {
                 if(item.isSelected)
                 {
                     ctx.strokeStyle = "red"
-                    ctx.lineWidth = 3
+                    ctx.lineWidth = 5
                 }else {
                     ctx.strokeStyle = "blue"
-                    ctx.lineWidth = 1
+                    ctx.lineWidth = 3
                 }
 
                 ctx.stroke()
