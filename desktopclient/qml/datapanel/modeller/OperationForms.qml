@@ -43,8 +43,8 @@ Rectangle {
         appFrame.formQML = form
         appFrame.formTitle = qsTr("Set run values for workflow")
         appFrame.opacity = 1
-
         //canvas.workflow.resetParameterEntrySet()
+
     }
 
     function showForm(item, title, newItemId, constantValues){
@@ -61,7 +61,7 @@ Rectangle {
     }
 
     function fillAppFrame(metaid, title, output, showEmpty, hiddenFields, constantValues) {
-        var form= formbuilder.index2Form(metaid, output, showEmpty, hiddenFields, {}, constantValues)
+        var form = formbuilder.index2Form(metaid, output, showEmpty, hiddenFields, {}, constantValues)
         operationid = metaid
         appFrame.formQML = ""
         appFrame.formQML = form

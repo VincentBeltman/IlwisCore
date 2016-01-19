@@ -153,10 +153,11 @@ Rectangle {
 
                 Text {
                     text : modelData
+                    font.bold: !workflow.hasValueDefined(itemid, index) ? true : false
+                    font.strikeout: workflow.hasValueDefined(itemid, index) ? true : false
                     width : parent.width - 30
                     height : 10
                     font.pixelSize: 9
-                    color: workflow.hasValueDefined(itemid, index) ? "green" : "red"
                     elide: Text.ElideMiddle
                 }
             }
