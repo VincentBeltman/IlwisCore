@@ -199,7 +199,7 @@ Modeller.ModellerWorkArea {
                         wfCanvas.removeCurrentOperationFromCondition(item)
                         wfCanvas.addCurrentOperationToCondition(item)
                     }
-                    wfCanvas.conditionBoxList[containerIndex].resizeOneTime()
+                    wfCanvas.conditionBoxList[containerIndex].resize()
                     wfCanvas.conditionBoxList[containerIndex].setCanvasColor(Global.mainbackgroundcolor)
                  } else {
                     if(item.containerIndex !== -1)
@@ -340,7 +340,7 @@ Modeller.ModellerWorkArea {
           if(item.containerIndex !== -1) {
               var containerIndex = item.containerIndex;
               wfCanvas.removeCurrentOperationFromCondition(item)
-              wfCanvas.conditionBoxList[containerIndex].resizeOneTime()
+              wfCanvas.conditionBoxList[containerIndex].resize()
           }
 
           // This removes 1 from the operation list beginning from deleteItemIndex
