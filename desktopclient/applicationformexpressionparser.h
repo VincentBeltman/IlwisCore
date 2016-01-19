@@ -16,8 +16,8 @@ public:
     enum FieldType{ ftTEXTEDIT=1, ftTEXTAREA=2, ftCOMBOBOX=4, ftCHECKBOX=8, ftRADIOBUTTON=16};
     ApplicationFormExpressionParser();
 
-    Q_INVOKABLE QString index2Form(quint64 metaid, bool showoutputformat = true, bool showEmptyOptionInList  = false, QString invisibleFieldIndexes = "", QVariantList operationNames = QVariantList(), QStringList constantValues = QStringList()) const;
-//    Q_INVOKABLE QString index2WorkflowForm(quint64 metaid, QVariantMap operationNames = QVariantMap()) const;
+    Q_INVOKABLE QString index2Form(quint64 metaid, bool showoutputformat = true, bool showEmptyOptionInList  = false, QString invisibleFieldIndexes = "", QVariantList operationNames = QVariantList(), QStringList constantValues = QStringList());
+    //    Q_INVOKABLE QString index2WorkflowForm(quint64 metaid, QVariantMap operationNames = QVariantMap()) const;
 //    Q_INVOKABLE QString createWorkflowForm(quint64) const;
 private:
     struct FormParameter {
@@ -28,7 +28,6 @@ private:
         quint32 _isOptional;
         int _optionGroup;
         QString _defValue;
-
     };
 
 

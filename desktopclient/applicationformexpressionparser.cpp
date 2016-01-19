@@ -439,7 +439,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     return formRows;
 }
 
-QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showoutputformat, bool showEmptyOptionInList, QString invisibleFieldIndexes, QVariantList operationNames, QStringList constantValues) const {
+QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showoutputformat, bool showEmptyOptionInList, QString invisibleFieldIndexes, QVariantList operationNames, QStringList constantValues)  {
     Resource resource = mastercatalog()->id2Resource(metaid);
     std::vector<FormParameter> parameters = getParameters(resource);
 
@@ -483,11 +483,11 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
     columnStart = QString(columnStart).arg(results);
     QString component = columnStart + inputpart + seperator + outputPart + "}";
 
+
     // for debugging, check if the qml is ok; can be retrieved from teh log file
 //    kernel()->issues()->log(component);
 
     return component;
-
 }
 
 std::vector<ApplicationFormExpressionParser::FormParameter> ApplicationFormExpressionParser::createWorkflowMetadata(quint64 metaid) const
