@@ -20,6 +20,7 @@ Rectangle {
     MouseArea{
         anchors.fill: parent
         hoverEnabled: true
+
         onPressed: {
             operationItem.deselectAll()
             isSelected = true;
