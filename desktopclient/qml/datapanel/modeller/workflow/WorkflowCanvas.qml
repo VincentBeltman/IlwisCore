@@ -16,6 +16,202 @@ Modeller.ModellerWorkArea {
    property var deleteItemIndex;
    property var deleteEdgeIndex;
    property int highestZIndex : 1;
+    color: "transparent"
+    id: canvasWrapper
+
+    MouseArea {
+        id: area
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        hoverEnabled: true
+        property bool positionChanged: false
+
+        onWheel: {
+            handleScroll(wheel);
+        }
+
+        onPressed: {
+            if (canvasActive) {
+
+                wfCanvas.canvasValid = false;
+
+                var operationSelected = -1, highestZ = -1, smallestDistance = 100000,
+                        selectedFlow = false, implicitIndexes, constantValues;
+
+                for(var i=0; i < wfCanvas.operationsList.length; ++i){
+
+                    var item = wfCanvas.operationsList[i]
+                    var startCoords = item.getXYcoordsCanvas();
+
+                    var endX = (startCoords.x + (item.width * item.scale));
+                    var endY = (startCoords.y + (item.height * item.scale));
+
+                    var EndCoords = transformedPoint(endX, endY);
+
+                    var isContained = mouseX >= (startCoords.x) && mouseY >= (startCoords.y) && mouseX <= endX && mouseY <= endY;
+
+                    for(var j=0; j < item.flowConnections.length; j++)
+                    {
+                        var flow = item.flowConnections[j];
+
+                        // Retrieve basic X and Y positions of the line
+                        var startPoint = flow.attachsource.center();
+                        var endPoint = flow.attachtarget.center();
+                        var ax = startPoint.x;
+                        var ay = startPoint.y;
+                        var bx = endPoint.x;
+                        var by = endPoint.y;
+
+                        // Calculate distance to check mouse hits a line
+                        var distanceAC = Math.sqrt(Math.pow((ax-mouseX), 2) + Math.pow((ay-mouseY), 2));
+                        var distanceBC = Math.sqrt(Math.pow((bx-mouseX), 2) + Math.pow((by-mouseY), 2));
+                        var distanceAB = Math.sqrt(Math.pow((ax-bx), 2) + Math.pow((ay-by), 2));
+                        var distanceLine = distanceAC + distanceBC;
+
+
+                        // Check if mouse intersects the line with offset of 10
+                        if(distanceLine >= distanceAB &&
+                           distanceLine < (distanceAB + wfCanvas.scale) &&
+                           distanceLine - distanceAB < smallestDistance)
+                        {
+                            smallestDistance = distanceLine - distanceAB;
+                            selectedFlow = flow;
+                        }
+                        flow.isSelected = false;
+                    }
+
+                    if ( isContained && item.z > highestZ ) {
+                        operationSelected = i
+                        highestZ = item.z
+                    }
+                    item.isSelected = false
+                }
+                wfCanvas.oldx = mouseX
+                wfCanvas.oldy = mouseY
+                wfCanvas.currentIndex = operationSelected
+
+                if(!selectedFlow && operationSelected == -1)
+                {
+                    wfCanvas.lastX = mouseX;
+                    wfCanvas.lastY = mouseY;
+                    wfCanvas.lastOpX = mouseX;
+                    wfCanvas.lastOpY = mouseY;
+                    wfCanvas.dragStart = transformedPoint(wfCanvas.lastX,wfCanvas.lastY);
+                    wfCanvas.dragged = false;
+                }
+
+                if (selectedFlow && operationSelected == -1) {
+                    selectedFlow.isSelected = true
+                } else if (operationSelected > -1) {
+                    item = wfCanvas.operationsList[operationSelected]
+                    item.isSelected = true
+                    wfCanvas.currentItem = item
+
+                    implicitIndexes = workflow.implicitIndexes(operationSelected)
+                    constantValues = workflow.getAsignedValuesByItemID(operationSelected)
+
+                    if(implicitIndexes){
+                        manager.showOperationFormWithHiddenFields(item, operationSelected, constantValues, implicitIndexes)
+                    }else{
+                        manager.showOperationForm(item, operationSelected, constantValues)
+                    }
+
+                    manager.showMetaData(item.operation)
+                } else {
+                    manager.resetMetaData();
+                }
+            }
+
+        }
+
+        onDoubleClicked: {
+            var operationSelected = -1, item = 0, highestZ = 0;
+            for(var i=0; i < wfCanvas.operationsList.length; ++i){
+
+                item = wfCanvas.operationsList[i]
+                var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
+
+                if ( isContained && item.z > highestZ ) {
+                    operationSelected = i
+                    highestZ = item.z
+                }
+            }
+            if (operationSelected > -1) {
+                var resource = mastercatalog.id2Resource(item.operation.id)
+                var filter = "itemid=" + resource.id
+                bigthing.newCatalog(filter, "workflow",resource.url,"other")
+            }
+        }
+
+        onPositionChanged: {
+            wfCanvas.lastX = mouseX
+            wfCanvas.lastY = mouseY
+            wfCanvas.dragged = true
+            if (wfCanvas.dragStart) {
+                cursorShape = Qt.SizeAllCursor
+
+                var pt = transformedPoint(wfCanvas.lastX, wfCanvas.lastY)
+                translate(pt.x - wfCanvas.dragStart.x,
+                          pt.y - wfCanvas.dragStart.y)
+                panOperation((wfCanvas.lastX - wfCanvas.lastOpX),
+                             (wfCanvas.lastY - wfCanvas.lastOpY))
+                wfCanvas.lastOpX = mouseX
+                wfCanvas.lastOpY = mouseY
+            }
+
+            if (attachementForm.state == "invisible") {
+                if (wfCanvas.workingLineBegin.x !== -1) {
+                    wfCanvas.workingLineEnd = Qt.point(mouseX, mouseY)
+                    wfCanvas.canvasValid = false
+                }
+                if (wfCanvas.oldx >= 0 && wfCanvas.oldy >= 0
+                        && wfCanvas.currentIndex >= 0) {
+
+                    var item = wfCanvas.operationsList[wfCanvas.currentIndex]
+                    if (item) {
+                        cursorShape = Qt.ClosedHandCursor
+                        area.positionChanged = true
+                        item.x += (mouseX - wfCanvas.oldx)
+                        item.y += (mouseY - wfCanvas.oldy)
+                        wfCanvas.oldx = mouseX
+                        wfCanvas.oldy = mouseY
+
+                        wfCanvas.isInsideCondition((item.x + (item.width / 2)), (item.y + (item.height / 2)), item.containerIndex)
+                    }
+                }
+            }
+        }
+
+        onReleased: {
+            cursorShape = Qt.ArrowCursor
+            wfCanvas.stopWorkingLine()
+            wfCanvas.dragStart = null;
+            if(area.positionChanged) {
+                var item = wfCanvas.currentItem
+                var containerIndex = wfCanvas.currentConditionContainer
+
+                //item.resetPanOperation();
+
+                if (containerIndex !== -1) {
+                    if(item.containerIndex === -1) {
+                        wfCanvas.addCurrentOperationToCondition(item)
+                    } else if (item.containerIndex !== containerIndex) {
+                        wfCanvas.removeCurrentOperationFromCondition(item)
+                        wfCanvas.addCurrentOperationToCondition(item)
+                    }
+                    wfCanvas.conditionBoxList[containerIndex].resizeOneTime()
+                    wfCanvas.conditionBoxList[containerIndex].setCanvasColor(Global.mainbackgroundcolor)
+                 } else {
+                    if(item.containerIndex !== -1)
+                    {
+                        wfCanvas.removeCurrentOperationFromCondition(item)
+                    }
+                    wfCanvas.parent.color = Global.mainbackgroundcolor
+                }
+                area.positionChanged = false
+            }
+        }
+    }
 
    function defaultZoom()
    {
@@ -317,6 +513,7 @@ Modeller.ModellerWorkArea {
 
        id : wfCanvas
        anchors.fill: parent
+       z: Number.MAX_VALUE
 
        property var ctx: getContext('2d')
        property bool canvasValid: true
@@ -404,7 +601,7 @@ Modeller.ModellerWorkArea {
 
        function finishCreation(x,y,resource) {
            if (component.status == Component.Ready) {
-               currentItem = component.createObject(wfCanvas, {"x": x, "y": y, "operation" : resource, "itemid" : operationsList.length, "scale": wfCanvas.scale});
+               currentItem = component.createObject(canvasWrapper, {"x": x, "y": y, "operation" : resource, "itemid" : operationsList.length, "scale": wfCanvas.scale});
                if (currentItem == null) {
                    // Error Handling
                    console.log("Error creating object");
@@ -427,7 +624,7 @@ Modeller.ModellerWorkArea {
 
        function finishCreatingCondition(x,y) {
            if (component.status == Component.Ready) {
-               currentItem = component.createObject(wfCanvas, {"x": x, "y": y, "scale": wfCanvas.scale, "containerId": conditionBoxList.length});
+               currentItem = component.createObject(canvasWrapper, {"x": x, "y": y, "scale": wfCanvas.scale, "containerId": conditionBoxList.length});
                if (currentItem == null) {
                    // Error Handling
                    console.log("Error creating object");
@@ -572,200 +769,6 @@ Modeller.ModellerWorkArea {
        }
        Forms.ConditionTypeChoiceForm{
            id : conditionTypeForm
-       }
-
-       MouseArea {
-           id: area
-           anchors.fill: parent
-           acceptedButtons: Qt.LeftButton | Qt.RightButton
-           hoverEnabled: true
-           property bool positionChanged: false
-
-           onWheel: {
-               handleScroll(wheel);
-           }
-
-           onPressed: {
-               if (canvasActive) {
-
-                   wfCanvas.canvasValid = false;
-
-                   var operationSelected = -1, highestZ = -1, smallestDistance = 100000,
-                           selectedFlow = false, implicitIndexes, constantValues;
-
-                   for(var i=0; i < wfCanvas.operationsList.length; ++i){
-
-                       var item = wfCanvas.operationsList[i]
-                       var startCoords = item.getXYcoordsCanvas();
-
-                       var endX = (startCoords.x + (item.width * item.scale));
-                       var endY = (startCoords.y + (item.height * item.scale));
-
-                       var EndCoords = transformedPoint(endX, endY);
-
-                       var isContained = mouseX >= (startCoords.x) && mouseY >= (startCoords.y) && mouseX <= endX && mouseY <= endY;
-
-                       for(var j=0; j < item.flowConnections.length; j++)
-                       {
-                           var flow = item.flowConnections[j];
-
-                           // Retrieve basic X and Y positions of the line
-                           var startPoint = flow.attachsource.center();
-                           var endPoint = flow.attachtarget.center();
-                           var ax = startPoint.x;
-                           var ay = startPoint.y;
-                           var bx = endPoint.x;
-                           var by = endPoint.y;
-
-                           // Calculate distance to check mouse hits a line
-                           var distanceAC = Math.sqrt(Math.pow((ax-mouseX), 2) + Math.pow((ay-mouseY), 2));
-                           var distanceBC = Math.sqrt(Math.pow((bx-mouseX), 2) + Math.pow((by-mouseY), 2));
-                           var distanceAB = Math.sqrt(Math.pow((ax-bx), 2) + Math.pow((ay-by), 2));
-                           var distanceLine = distanceAC + distanceBC;
-
-
-                           // Check if mouse intersects the line with offset of 10
-                           if(distanceLine >= distanceAB &&
-                              distanceLine < (distanceAB + wfCanvas.scale) &&
-                              distanceLine - distanceAB < smallestDistance)
-                           {
-                               smallestDistance = distanceLine - distanceAB;
-                               selectedFlow = flow;
-                           }
-                           flow.isSelected = false;
-                       }
-
-                       if ( isContained && item.z > highestZ ) {
-                           operationSelected = i
-                           highestZ = item.z
-                       }
-                       item.isSelected = false
-                   }
-                   wfCanvas.oldx = mouseX
-                   wfCanvas.oldy = mouseY
-                   wfCanvas.currentIndex = operationSelected
-
-                   if(!selectedFlow && operationSelected == -1)
-                   {
-                       wfCanvas.lastX = mouseX;
-                       wfCanvas.lastY = mouseY;
-                       wfCanvas.lastOpX = mouseX;
-                       wfCanvas.lastOpY = mouseY;
-                       wfCanvas.dragStart = transformedPoint(wfCanvas.lastX,wfCanvas.lastY);
-                       wfCanvas.dragged = false;
-                   }
-
-                   if (selectedFlow && operationSelected == -1) {
-                       selectedFlow.isSelected = true
-                   } else if (operationSelected > -1) {
-                       item = wfCanvas.operationsList[operationSelected]
-                       item.isSelected = true
-                       wfCanvas.currentItem = item
-
-                       implicitIndexes = workflow.implicitIndexes(operationSelected)
-                       constantValues = workflow.getAsignedValuesByItemID(operationSelected)
-
-                       if(implicitIndexes){
-                           manager.showOperationFormWithHiddenFields(item, operationSelected, constantValues, implicitIndexes)
-                       }else{
-                           manager.showOperationForm(item, operationSelected, constantValues)
-                       }
-
-                       manager.showMetaData(item.operation)
-                   } else {
-                       manager.resetMetaData();
-                   }
-               }
-
-           }
-
-           onDoubleClicked: {
-               var operationSelected = -1, item = 0, highestZ = 0;
-               for(var i=0; i < wfCanvas.operationsList.length; ++i){
-
-                   item = wfCanvas.operationsList[i]
-                   var isContained = mouseX >= item.x && mouseY >= item.y && mouseX <= (item.x + item.width) && mouseY <= (item.y + item.height)
-
-                   if ( isContained && item.z > highestZ ) {
-                       operationSelected = i
-                       highestZ = item.z
-                   }
-               }
-               if (operationSelected > -1) {
-                   var resource = mastercatalog.id2Resource(item.operation.id)
-                   var filter = "itemid=" + resource.id
-                   bigthing.newCatalog(filter, "workflow",resource.url,"other")
-               }
-           }
-
-           onPositionChanged: {
-               wfCanvas.lastX = mouseX
-               wfCanvas.lastY = mouseY
-               wfCanvas.dragged = true
-               if (wfCanvas.dragStart) {
-                   cursorShape = Qt.SizeAllCursor
-
-                   var pt = transformedPoint(wfCanvas.lastX, wfCanvas.lastY)
-                   translate(pt.x - wfCanvas.dragStart.x,
-                             pt.y - wfCanvas.dragStart.y)
-                   panOperation((wfCanvas.lastX - wfCanvas.lastOpX),
-                                (wfCanvas.lastY - wfCanvas.lastOpY))
-                   wfCanvas.lastOpX = mouseX
-                   wfCanvas.lastOpY = mouseY
-               }
-
-               if (attachementForm.state == "invisible") {
-                   if (wfCanvas.workingLineBegin.x !== -1) {
-                       wfCanvas.workingLineEnd = Qt.point(mouseX, mouseY)
-                       wfCanvas.canvasValid = false
-                   }
-                   if (wfCanvas.oldx >= 0 && wfCanvas.oldy >= 0
-                           && wfCanvas.currentIndex >= 0) {
-
-                       var item = wfCanvas.operationsList[wfCanvas.currentIndex]
-                       if (item) {
-                           cursorShape = Qt.ClosedHandCursor
-                           area.positionChanged = true
-                           item.x += (mouseX - wfCanvas.oldx)
-                           item.y += (mouseY - wfCanvas.oldy)
-                           wfCanvas.oldx = mouseX
-                           wfCanvas.oldy = mouseY
-
-                           wfCanvas.isInsideCondition((item.x + (item.width / 2)), (item.y + (item.height / 2)), item.containerIndex)
-                       }
-                   }
-               }
-           }
-
-           onReleased: {
-               cursorShape = Qt.ArrowCursor
-               wfCanvas.stopWorkingLine()
-               wfCanvas.dragStart = null;
-               if(area.positionChanged) {
-                   var item = wfCanvas.currentItem
-                   var containerIndex = wfCanvas.currentConditionContainer
-
-                   //item.resetPanOperation();
-
-                   if (containerIndex !== -1) {
-                       if(item.containerIndex === -1) {
-                           wfCanvas.addCurrentOperationToCondition(item)
-                       } else if (item.containerIndex !== containerIndex) {
-                           wfCanvas.removeCurrentOperationFromCondition(item)
-                           wfCanvas.addCurrentOperationToCondition(item)
-                       }
-                       wfCanvas.conditionBoxList[containerIndex].resizeOneTime()
-                       wfCanvas.conditionBoxList[containerIndex].setCanvasColor(Global.mainbackgroundcolor)
-                    } else {
-                       if(item.containerIndex !== -1)
-                       {
-                           wfCanvas.removeCurrentOperationFromCondition(item)
-                       }
-                       wfCanvas.parent.color = Global.mainbackgroundcolor
-                   }
-                   area.positionChanged = false
-               }
-           }
        }
    }
 
