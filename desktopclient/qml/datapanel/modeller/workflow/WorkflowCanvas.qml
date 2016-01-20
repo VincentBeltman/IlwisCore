@@ -579,7 +579,21 @@ Modeller.ModellerWorkArea {
                    ctx.moveTo(pt1.x, pt1.y);
                    ctx.strokeStyle = "red"
                    ctx.lineTo(pt2.x, pt2.y);
-                   ctx.stroke();
+
+                   var fromx = pt1.x
+                   var fromy = pt1.y
+                   var tox = pt2.x
+                   var toy = pt2.y
+                   var headlen = 15;   // length of head in pixels
+                   var angle = Math.atan2(toy-fromy,tox-fromx);
+
+                   ctx.moveTo(fromx, fromy);
+                   ctx.lineTo(tox, toy);
+                   ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
+                   ctx.moveTo(tox, toy);
+                   ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
+
+                   ctx.stroke()
                }
 
                for( var i=0; i < operationsList.length; i++){
