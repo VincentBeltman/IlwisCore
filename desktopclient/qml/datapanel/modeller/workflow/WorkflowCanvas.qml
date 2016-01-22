@@ -240,13 +240,6 @@ Modeller.ModellerWorkArea {
        return wfCanvas.scale;
    }
 
-   function panOperations(x, y)
-   {
-       for( var i=0; i < wfCanvas.operationsList.length; i++){
-           wfCanvas.operationsList[i].panOperation(x,y);
-       }
-   }
-
    function asignConstantInputData(inputData, itemId) {
        var parameterIndexes = workflow.asignConstantInputData(inputData, itemId)
        wfCanvas.operationsList[itemId].resetInputModel()
