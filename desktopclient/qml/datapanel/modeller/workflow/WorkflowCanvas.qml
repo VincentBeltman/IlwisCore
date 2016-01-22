@@ -850,17 +850,7 @@ Modeller.ModellerWorkArea {
         }
     }
 
-    function panZoomOperation(x, y) {
-        for (var i = 0; i < wfCanvas.operationsList.length; i++) {
-            wfCanvas.operationsList[i].panZoomOperation(x, y)
-        }
-
-        for (var i=0; i < wfCanvas.conditionBoxList.length; i++) {
-            wfCanvas.conditionBoxList[i].panZoomOperation(x, y)
-        }
-    }
-
-    function replacePanOperation(x, y) {
+    function replacePanOperation() {
         for (var i = 0; i < wfCanvas.operationsList.length; i++) {
             //var xy = wfCanvas.operationsList[i].getXYcoords();
             var ptOp = getScreenCoords(wfCanvas.operationsList[i].x,
@@ -888,10 +878,8 @@ Modeller.ModellerWorkArea {
 
     function transformedPoint(x, y) {
         return {
-            x: wfCanvas.matrix.inverse().a * x + wfCanvas.matrix.inverse(
-                   ).c * y + wfCanvas.matrix.inverse().e,
-            y: wfCanvas.matrix.inverse().b * x + wfCanvas.matrix.inverse(
-                   ).d * y + wfCanvas.matrix.inverse().f
+            x: wfCanvas.matrix.inverse().a * x + wfCanvas.matrix.inverse().c * y + wfCanvas.matrix.inverse().e,
+            y: wfCanvas.matrix.inverse().b * x + wfCanvas.matrix.inverse().d * y + wfCanvas.matrix.inverse().f
         }
     }
 
