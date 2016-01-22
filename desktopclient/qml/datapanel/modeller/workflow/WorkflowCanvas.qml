@@ -213,10 +213,13 @@ Modeller.ModellerWorkArea {
         }
     }
 
-   function defaultZoom()
-   {
+   function defaultZoom(){
        var pt = transformedPoint(wfCanvas.width/2, wfCanvas.height/2)
-       translate(pt.x, pt.y)
+
+       wfCanvas.matrix = new Matrix.Matrix()
+
+       wfCanvas.ctx.setTransform(1, 0, 0, 1, 0, 0);
+       wfCanvas.draw(true)
 
        for (var i = 0; i < wfCanvas.operationsList.length; i++) {
            wfCanvas.operationsList[i].scale = 1
@@ -225,8 +228,6 @@ Modeller.ModellerWorkArea {
        for (var i=0; i < wfCanvas.conditionBoxList.length; i++) {
            wfCanvas.conditionBoxList[i].scale = 1
        }
-
-       translate(-pt.x, -pt.y)
 
        replacePanOperation()
 
