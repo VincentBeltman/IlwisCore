@@ -148,7 +148,7 @@ Modeller.ModellerWorkArea {
             wfCanvas.lastY = mouseY
             wfCanvas.dragged = true
             if (wfCanvas.dragStart) {
-                cursorShape = Qt.SizeAllCursor
+                cursorShape = Qt.ClosedHandCursor
 
                 var pt = transformedPoint(wfCanvas.lastX, wfCanvas.lastY)
                 translate(pt.x - wfCanvas.dragStart.x,
@@ -169,7 +169,7 @@ Modeller.ModellerWorkArea {
 
                     var item = wfCanvas.operationsList[wfCanvas.currentIndex]
                     if (item) {
-                        cursorShape = Qt.ClosedHandCursor
+                        cursorShape = Qt.SizeAllCursor
                         area.positionChanged = true
                         item.x += (mouseX - wfCanvas.oldx)
                         item.y += (mouseY - wfCanvas.oldy)
