@@ -19,6 +19,34 @@ Modeller.ModellerWorkArea {
     color: "transparent"
     id: canvas
 
+    DropArea {
+        id: canvasDropArea
+        anchors.fill: canvas
+        enabled: true
+        onDropped: {
+            if (drag.source.type === "singleoperation" || drag.source.type === "workflow") {
+                if (drag.source.type === "workflow") {
+                    operations.refresh()
+                }
+                var oper = wfCanvas.getOperation(drag.source.ilwisobjectid)
+                wfCanvas.createItem(drag.x, drag.y,oper)
+
+                var paramterIndexes = workflow.addOperation(drag.source.ilwisobjectid)
+
+                var item = wfCanvas.currentItem
+                wfCanvas.isInsideCondition(item.x + (item.width / 2), item.y + (item.height / 2), item.containerIndex)
+                if (wfCanvas.currentConditionContainer != -1) {
+                    wfCanvas.conditionBoxList[wfCanvas.currentConditionContainer].setCanvasColor(Global.mainbackgroundcolor)
+                    wfCanvas.addCurrentOperationToCondition(item)
+                }
+
+                wfCanvas.canvasValid = false
+
+                generateForm(paramterIndexes)
+            }
+        }
+    }
+
     MouseArea {
         id: area
         anchors.fill: parent
@@ -169,14 +197,18 @@ Modeller.ModellerWorkArea {
 
                     var item = wfCanvas.operationsList[wfCanvas.currentIndex]
                     if (item) {
+
                         cursorShape = Qt.ClosedHandCursor
                         area.positionChanged = true
-                        item.x += (mouseX - wfCanvas.oldx)
-                        item.y += (mouseY - wfCanvas.oldy)
+                        item.x += ((mouseX - wfCanvas.oldx) / wfCanvas.scale)
+                        item.y += ((mouseY - wfCanvas.oldy) / wfCanvas.scale)
+
                         wfCanvas.oldx = mouseX
                         wfCanvas.oldy = mouseY
 
                         wfCanvas.isInsideCondition((item.x + (item.width / 2)), (item.y + (item.height / 2)), item.containerIndex)
+
+                        replacePanOperation()
                     }
                 }
             }
@@ -448,7 +480,7 @@ Modeller.ModellerWorkArea {
             node = nodes[i]
             resource = wfCanvas.getOperation(node.operationId)
 
-            wfCanvas.createItem(node.x, node.y, resource)
+            wfCanvas.createItem(node.x/wfCanvas.scale, node.y/wfCanvas.scale, resource)
         }
         for (var i = 0; i < nodes.length; i++) {
             node = nodes[i]
@@ -615,6 +647,7 @@ Modeller.ModellerWorkArea {
                    console.log("Error creating object");
                }
                operationsList.push(currentItem)
+               replacePanOperation()
 
            } else if (component.status == Component.Error) {
                // Error Handling
@@ -639,6 +672,7 @@ Modeller.ModellerWorkArea {
                }
                workflow.addConditionContainer()
                conditionBoxList.push(currentItem);
+               replacePanOperation()
            } else if (component.status == Component.Error) {
                // Error Handling
                console.log("Error loading component:", component.errorString());
@@ -745,33 +779,6 @@ Modeller.ModellerWorkArea {
            wfCanvas.draw(true);
        }
 
-       DropArea {
-           id: canvasDropArea
-           anchors.fill: wfCanvas
-           enabled: true
-           onDropped: {
-               if (drag.source.type === "singleoperation" || drag.source.type === "workflow") {
-                   if (drag.source.type === "workflow") {
-                       operations.refresh()
-                   }
-                   var oper = wfCanvas.getOperation(drag.source.ilwisobjectid)
-                   wfCanvas.createItem(drag.x - 50, drag.y - 30,oper)
-
-                   var paramterIndexes = workflow.addOperation(drag.source.ilwisobjectid)
-
-                   var item = wfCanvas.currentItem
-                   wfCanvas.isInsideCondition(item.x + (item.width / 2), item.y + (item.height / 2), item.containerIndex)
-                   if (wfCanvas.currentConditionContainer != -1) {
-                       wfCanvas.conditionBoxList[wfCanvas.currentConditionContainer].setCanvasColor(Global.mainbackgroundcolor)
-                       wfCanvas.addCurrentOperationToCondition(item)
-                   }
-
-                   wfCanvas.canvasValid = false
-
-                   generateForm(paramterIndexes)
-               }
-           }
-       }
        Forms.FlowParametersChoiceForm{
            id : attachementForm
        }
@@ -828,7 +835,6 @@ Modeller.ModellerWorkArea {
     }
 
     function translate(dx, dy) {
-        var translate = wfCanvas.ctx.translate
         wfCanvas.matrix = wfCanvas.matrix.translate(dx, dy)
         wfCanvas.ctx.translate(dx, dy)
     }
