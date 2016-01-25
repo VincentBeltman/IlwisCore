@@ -136,6 +136,19 @@ void Workflow::removeOperation(OVertex vertex)
 {
     boost::remove_vertex(vertex, _wfGraph);
     removeAllInputAssignments(vertex);
+    for (ConditionContainer container : _conditionContainers) {
+        for (Condition condition : container.conditions) {
+            QMutableListIterator<EdgeProperties> i(condition._edges);
+            while (i.hasNext()) {
+                EdgeProperties next = i.next();
+                if (next._outputOperationIndex == vertex) {
+                    i.remove();
+                } else if(next._outputOperationIndex > vertex) {
+                    next._outputOperationIndex--;
+                }
+            }
+        }
+    }
 }
 
 NodeProperties Workflow::nodeProperties(const OVertex &v)
@@ -365,14 +378,11 @@ bool Workflow::hasValueDefined(const OVertex &operationVertex, int parameterInde
     return false;
 }
 
-QString Workflow::implicitIndexes(const OVertex &operationVertex){
-    QString definedValues;
+QStringList Workflow::implicitIndexes(const OVertex &operationVertex){
+    QStringList definedValues;
 
     for (const InputAssignment& assignment : getImplicitInputAssignments(operationVertex)) {
-        if(definedValues.size() != 0){
-            definedValues += "|";
-        }
-        definedValues += QString::number(assignment.second);
+        definedValues.push_back(QString::number(assignment.second));
     }
 
     return definedValues;
@@ -429,12 +439,32 @@ quint64 Workflow::createMetadata()
     return id;
 }
 
-int Workflow::addCondition(int containerId, int operationId)
+QVariantMap Workflow::addCondition(int containerId, int operationId)
 {
     ConditionContainer *container = &(_conditionContainers[containerId]);
-    int conditionId = container->conditions.length();
-    container->conditions.push_back(Condition(mastercatalog()->id2Resource(operationId)));
-    return conditionId;
+    QVariantMap result;
+    result.insert("conditionId", container->conditions.length());
+
+    Resource res = mastercatalog()->id2Resource(operationId);
+
+    result.insert("name", res["keyword"].toString().contains("condition") ? "" : res.name());
+
+    container->conditions.push_back(Condition(res));
+    return result;
+}
+
+void Workflow::assignConditionInputData(const int containerId, const int conditionId, const QStringList inputData)
+{
+    ConditionContainer* container = &_conditionContainers[containerId];
+    Condition* condition = &container->conditions[conditionId];
+
+    condition->_inputAssignments.clear();
+
+    for (QString value : inputData) {
+        AssignedInputData* input = new AssignedInputData();
+        input->value = value.trimmed();
+        condition->_inputAssignments.push_back(*input);
+    }
 }
 
 NodePropertyMap Workflow::nodeIndex()

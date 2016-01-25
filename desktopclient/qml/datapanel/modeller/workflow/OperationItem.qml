@@ -284,7 +284,7 @@ Rectangle {
                     var p2 = item.flowPoints.toParameterIndex
                     var xcenter = (fromx + tox) / 2
                     var ycenter = (fromy + toy) / 2
-                    var label = p1 + " > "+  p2
+                    var label = p1 + " -> "+  p2
                     ctx.fillStyle="#D8F6CE";
                     ctx.fillRect(xcenter - 15 ,ycenter - 10,35,15);
                     ctx.fillStyle = "#000";

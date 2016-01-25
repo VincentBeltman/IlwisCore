@@ -51,7 +51,17 @@ public:
      * \param operationIndex The index of the operation
      * \return a list of changes
      */
-    Q_INVOKABLE QStringList asignConstantInputData(QString inputData, int operationIndex);
+    Q_INVOKABLE QStringList assignConstantInputData(QString inputData, int operationIndex);
+    /*!
+     * \brief Assigns constant input data to the operation
+     *
+     * Expects input for every parameter of the operation. Updates every parameter of the operation
+     *
+     * \param inputData the new input seperated by |
+     * \param operationIndex The index of the operation
+     * \return a list of changes
+     */
+    Q_INVOKABLE void assignConditionInputData(QString inputData, QStringList conditionIds);
     /*!
      * \brief Adds an operation to the workflow
      * \param id The resource id
@@ -107,7 +117,7 @@ public:
      * \param operationIndex The vertex
      * \return a string of fields which have been defined, seperated by |
      */
-    Q_INVOKABLE QString implicitIndexes(int operationIndex);
+    Q_INVOKABLE QStringList implicitIndexes(int operationIndex);
 
     /*!
      * \brief retrieves all information of all nodes
@@ -155,10 +165,6 @@ public:
      */
     Q_INVOKABLE void store(const QStringList &coordinates);
     /*!
-     * \brief loads the workflow model from an existing model
-     */
-    Q_INVOKABLE void load();
-    /*!
      * \brief creates the metadata of the workflow
      */
     Q_INVOKABLE void createMetadata();
@@ -167,8 +173,14 @@ public:
      * \param containerId the id of the container
      * \param type the type of the condition
       */
-    Q_INVOKABLE int addCondition(int containerId, int operationId);
-
+    Q_INVOKABLE QVariantMap addCondition(int containerId, int operationId);
+    /*!
+     * \brief Returns open inputs of the condition with the given ids
+     * \param containerId the id of the container
+     * \param conditionId the id of the condition
+     * \return the not yet assigned inputs
+     */
+    Q_INVOKABLE QVariantMap getOpenConditionParameters(const int containerId, const int conditionId);
     /*!
      * \brief returns conditions of the given container
      * \param containerId the id of the container

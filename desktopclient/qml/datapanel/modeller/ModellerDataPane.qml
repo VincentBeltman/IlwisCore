@@ -25,7 +25,6 @@ Item {
                 var resource = mastercatalog.id2Resource(filter.split('=')[1]);
                 canvas.workflow = scenario.addWorkflow(filter);
                 if (resource) {
-                    canvas.workflow.load()
                     canvas.drawFromWorkflow()
                 }
                 manager.showWorkflowMetadata(canvas.workflow)
@@ -105,10 +104,6 @@ Item {
         modellertools.zoomLevel.text = Math.round((scl * 100)) + "%"
     }
 
-    function asignConstantInputData(inputData, operationid) {
-        canvas.asignConstantInputData(inputData, operationid);
-    }
-
     /**
       Calls the WorkflowCanvas's run method
       */
@@ -172,7 +167,7 @@ Item {
         Item {
             id : datapane
             width : parent.width
-            height : parent.height - 170
+            height : parent.height - 300
 
             function asignConstantInputData(vertexIndex, parameterIndex, value){
                 canvas.asignConstantInputData(vertexIndex, parameterIndex, value)
@@ -232,7 +227,7 @@ Item {
 
         ModelManager{
             id : manager
-            height : 170
+            height : 300
             anchors.left: parent.left
             anchors.right: parent.right
         }

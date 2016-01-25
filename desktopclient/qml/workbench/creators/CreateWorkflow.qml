@@ -204,7 +204,8 @@ Controls.DropableItem{
                         }
                         var ilwisid = objectcreator.createObject(createInfo)
                         var resource = mastercatalog.id2Resource(ilwisid)
-                        resource.setUrls(url)
+                        url = 'Ilwis://operations/' + name + '=' + ilwisid
+                        resource.setUrl(url, false)
 
                         if (resource){
                             var filter = "itemid=" + resource.id

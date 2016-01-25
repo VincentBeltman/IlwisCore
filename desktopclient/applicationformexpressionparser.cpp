@@ -234,12 +234,7 @@ QString ApplicationFormExpressionParser::setInputIcons(const QString& iconField1
     return imagePart;
 }
 
-QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vector<FormParameter>& parameters, bool input, QString& results, bool showEmptyOptionInList, QString invisibleFieldIndexes, QVariantList operationNames, QStringList constantValues) const{
-    QStringList invisibleFieldList;
-    if(!invisibleFieldIndexes.isEmpty()){
-        invisibleFieldList = invisibleFieldIndexes.split("|");
-    }
-
+QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vector<FormParameter>& parameters, bool input, QString& results, bool showEmptyOptionInList, QStringList hiddenFields, QVariantList operationNames, QStringList constantValues) const{
     QString rowBodyText = "Rectangle{visible:%7;height : 30;width : parent.width;color : \"white\";%1Text { x:%5 + %6;maximumLineCount: 2;text: qsTr(\"%2\"); id:label_pin_%4; width : %3 - %5 - %6;wrapMode:Text.Wrap; }";
 
     QString textField = "DropArea{ x : %2; height : 20; width : parent.width - label_pin_%1.width - 5 - %3 - %4 - %5; keys: [%6];\
@@ -322,8 +317,8 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
             }
 
             QString visibile = "true";
-            for(int j=0;j<invisibleFieldList.size();++j){
-                if(i==invisibleFieldList[j].toInt()){
+            for (const QString index : hiddenFields) {
+                if(i == index.toInt()){
                     visibile = "false";
                 }
             }
@@ -439,7 +434,7 @@ QString ApplicationFormExpressionParser::makeFormPart(int width, const std::vect
     return formRows;
 }
 
-QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showoutputformat, bool showEmptyOptionInList, QString invisibleFieldIndexes, QVariantList operationNames, QStringList constantValues)  {
+QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showoutputformat, bool showEmptyOptionInList, QStringList hiddenFields, QVariantList operationNames, QStringList constantValues)  {
     Resource resource = mastercatalog()->id2Resource(metaid);
     std::vector<FormParameter> parameters = getParameters(resource);
 
@@ -455,12 +450,12 @@ QString ApplicationFormExpressionParser::index2Form(quint64 metaid, bool showout
     width *= 10;
     width = std::min(100, width);
 
-    QString inputpart = makeFormPart(width, parameters, true, results, showEmptyOptionInList, invisibleFieldIndexes, operationNames, constantValues);
+    QString inputpart = makeFormPart(width, parameters, true, results, showEmptyOptionInList, hiddenFields, operationNames, constantValues);
 
     QString outputPart;
     QString seperator;
     if ( showoutputformat){ //TODO change to showoutputformat
-        outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList,"", operationNames);
+        outputPart = makeFormPart(width, outparameters, false, results, showEmptyOptionInList,QStringList(), operationNames);
 
         if (results.size() > 0) results = ": " + results;
         results = "property var outputFormats;property string formresult" + results;

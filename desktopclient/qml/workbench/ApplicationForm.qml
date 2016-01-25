@@ -12,6 +12,7 @@ Rectangle {
     property string formTitle
     property string operationId : "id"
     property string operationUrl : "url"
+    property bool showTitle: true
 
     signal formResultChanged();
 
@@ -55,6 +56,20 @@ Rectangle {
     Column {
         anchors.fill: parent
         spacing : 3
+        BorderImage {
+            id : title
+            width: parent.width
+            height : formTitle != "" && showTitle ? 25 : 0
+            opacity : formTitle != "" && showTitle ? 1 : 0
+            source : "../images/headerblue2CS1.png"
+            border { left: 15; top: 0; right: 15; bottom: 0 }
+            smooth : true
+            Text  {
+                text : formTitle
+                font.pointSize: 11
+                x : 5
+            }
+        }
         Rectangle {
             id : applicationArea
             property string exprparameters

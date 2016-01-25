@@ -240,11 +240,17 @@ Modeller.ModellerWorkArea {
        return wfCanvas.scale;
    }
 
-   function asignConstantInputData(inputData, itemId) {
-       var parameterIndexes = workflow.asignConstantInputData(inputData, itemId)
+   function assignConstantInputData(inputData, itemId) {
+       var parameterIndexes = workflow.assignConstantInputData(inputData, itemId)
        wfCanvas.operationsList[itemId].resetInputModel()
 
        generateForm(parameterIndexes)
+   }
+
+   function assignConditionInputData(result, conditionIds) {
+       var parts = conditionIds.split('|')
+       workflow.assignConditionInputData(result, parts)
+       wfCanvas.conditionBoxList[parts[0]].refresh()
    }
 
    function newCondition(){

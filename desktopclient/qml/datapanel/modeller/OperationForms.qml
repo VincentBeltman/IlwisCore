@@ -16,6 +16,8 @@ Rectangle {
     visible : height > 0
     property var operationid
     property int itemId: -1
+    property bool saveButtonEnabled: itemId != -1 || conditionIds.length != 0
+    property string conditionIds: ''
 
     /**
     Create a form for the workflow
@@ -38,11 +40,13 @@ Rectangle {
             }
             validValues = validValues.slice(0, canvas.workflow.getInputParameterCount())
         }
-        var form = formbuilder.index2Form(metaid, true, false, "", operationNames, validValues)
+        var form = formbuilder.index2Form(metaid, true, false, [], operationNames, validValues)
         operationid = metaid
         appFrame.formQML = form
         appFrame.formTitle = qsTr("Set run values for workflow")
         appFrame.opacity = 1
+        saveButtonEnabled = false
+        conditionIds = ""
         //canvas.workflow.resetParameterEntrySet()
 
     }
@@ -50,6 +54,7 @@ Rectangle {
     function showForm(item, title, newItemId, constantValues){
         fillAppFrame(item.operation.id, title + "(" + item.getTitle() + ")", false, true, "", constantValues)
         itemId = newItemId
+        saveButtonEnabled = true
     }
 
     /**
@@ -58,6 +63,17 @@ Rectangle {
     function showOperationFormWithHiddenFields(item, title, newItemId, constantValues, hiddenFields){
         fillAppFrame(item.operation.id, title + "(" + item.getTitle() + ")", false, true, hiddenFields, constantValues)
         itemId = newItemId
+        saveButtonEnabled = true
+    }
+
+    /**
+      Shows the operation's form. Passes the hidden fields to the index2Form method.
+      */
+    function showConditionForm(operationId, hiddenFields, constantValues, ids){
+        fillAppFrame(operationId, "Condition form", false, true, hiddenFields, constantValues)
+        itemId = -1
+        saveButtonEnabled = true
+        conditionIds = ids
     }
 
     function fillAppFrame(metaid, title, output, showEmpty, hiddenFields, constantValues) {
@@ -81,6 +97,8 @@ Rectangle {
         appFrame.formTitle = "Nothing selected"
         appFrame.formQML = ""
         itemId = -1
+        saveButtonEnabled = false
+        conditionIds = ""
     }
 
     BorderImage {
@@ -102,7 +120,7 @@ Rectangle {
     ScrollView{
         id: operationFormScrollView
         width: parent.width
-        height: itemId > -1 ? parent.height - 60 : parent.height - 30
+        height: saveButtonEnabled ? parent.height - 60 : parent.height - 30
         anchors.top: title.bottom
 
         Bench.ApplicationForm{
@@ -110,11 +128,12 @@ Rectangle {
             width : operationForm.width - 20
             height : operationForm.height - 25 < 0 ?  0 : operationForm.height - 25
             opacity : 0
+            showTitle: false
         }
     }
     Button {
         id : saveConstantInputButton
-        height : itemId > -1 ? 25 : 0
+        height : saveButtonEnabled ? 25 : 0
         width : 70
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: operationFormScrollView.bottom
@@ -129,7 +148,7 @@ Rectangle {
         Text {
             height : parent.height
             id : saveConstantInputText
-            text: itemId > -1 ? 'Save' : ""
+            text: saveButtonEnabled ? 'Save' : ""
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
         }
@@ -141,7 +160,9 @@ Rectangle {
 
     function asignConstantInputData() {
         if (itemId > -1){
-            modellerDataPane.asignConstantInputData(appFrame.currentAppForm.formresult, itemId)
+            canvas.assignConstantInputData(appFrame.currentAppForm.formresult, itemId)
+        } else if (conditionIds.length > 0) {
+            canvas.assignConditionInputData(appFrame.currentAppForm.formresult, conditionIds);
         }
     }
 }
