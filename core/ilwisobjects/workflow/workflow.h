@@ -71,12 +71,12 @@ struct NodeProperties {
  * \brief This struct is used for storing data in edges within the graph.
  */
 struct EdgeProperties {
-    EdgeProperties(int outParm, int inParm, int inRect, int outRect) :
+    EdgeProperties(int outParm, int inParm, int outRect, int inRect) :
         _outputParameterIndex(outParm),
         _inputParameterIndex(inParm),
         _outputRectangleIndex(outRect),
         _inputRectangleIndex(inRect){}
-    EdgeProperties(int outParm, int inParm, int inRect, int outRect, int outOper) :
+    EdgeProperties(int outParm, int inParm, int outRect, int inRect, int outOper) :
         _outputParameterIndex(outParm),
         _inputParameterIndex(inParm),
         _outputRectangleIndex(outRect),
