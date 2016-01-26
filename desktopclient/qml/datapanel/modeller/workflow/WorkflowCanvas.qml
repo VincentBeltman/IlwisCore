@@ -607,9 +607,7 @@ Modeller.ModellerWorkArea {
                    ctx.lineWidth = 3;
                    var pt1 = transformedPoint(workingLineBegin.x, workingLineBegin.y);
                    var pt2 = transformedPoint(workingLineEnd.x, workingLineEnd.y);
-                   ctx.moveTo(pt1.x, pt1.y);
                    ctx.strokeStyle = "red"
-                   ctx.lineTo(pt2.x, pt2.y);
 
                    var fromx = pt1.x
                    var fromy = pt1.y
@@ -620,6 +618,7 @@ Modeller.ModellerWorkArea {
 
                    ctx.moveTo(fromx, fromy);
                    ctx.lineTo(tox, toy);
+                   ctx.moveTo(tox, toy);
                    ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
                    ctx.moveTo(tox, toy);
                    ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
@@ -803,26 +802,28 @@ Modeller.ModellerWorkArea {
     }
 
     function zoom(clicks) {
-        var pt;
-        if(area.containsMouse){
-            pt = transformedPoint(wfCanvas.lastX, wfCanvas.lastY)
-        }else{
-            pt = transformedPoint(wfCanvas.width/2, wfCanvas.height/2)
+        if (wfCanvas.workingLineBegin.x === -1 && wfCanvas.workingLineEnd.x === -1) {
+            var pt;
+            if(area.containsMouse){
+                pt = transformedPoint(wfCanvas.lastX, wfCanvas.lastY)
+            }else{
+                pt = transformedPoint(wfCanvas.width/2, wfCanvas.height/2)
+            }
+
+            translate(pt.x, pt.y)
+
+            var factor = Math.pow(wfCanvas.scaleFactor, clicks)
+            wfCanvas.scale *= factor
+
+            scale(factor, factor)
+            scaleOperation(factor)
+
+            translate(-pt.x, -pt.y)
+
+            replacePanOperation()
+
+            modellerDataPane.setPercentage();
         }
-
-        translate(pt.x, pt.y)
-
-        var factor = Math.pow(wfCanvas.scaleFactor, clicks)
-        wfCanvas.scale *= factor
-
-        scale(factor, factor)
-        scaleOperation(factor)
-
-        translate(-pt.x, -pt.y)
-
-        replacePanOperation()
-
-        modellerDataPane.setPercentage();
     }
 
     function handleScroll(wheel) {

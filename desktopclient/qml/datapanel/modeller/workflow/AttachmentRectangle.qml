@@ -14,7 +14,7 @@ Rectangle {
     z : 1
 
     function center(){
-        return mapToItem(wfCanvas, 4, 0);
+        return mapToItem(wfCanvas, 4, 4);
     }
 
     MouseArea{

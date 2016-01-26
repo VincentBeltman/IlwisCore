@@ -264,6 +264,7 @@ Rectangle {
                 ctx.beginPath();
                 ctx.moveTo(fromx, fromy);
                 ctx.lineTo(tox, toy);
+                ctx.moveTo(tox, toy);
                 ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
                 ctx.moveTo(tox, toy);
                 ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
@@ -344,7 +345,7 @@ Rectangle {
         id : att1
         index : 0
         anchors.top: operationItem.top
-        anchors.topMargin: -2
+        anchors.topMargin: -3
         anchors.left : operationItem.left
         anchors.leftMargin: operationItem.width/4 - 5
     }
@@ -352,7 +353,7 @@ Rectangle {
         id : att2
         index : 1
         anchors.top: operationItem.top
-        anchors.topMargin: -2
+        anchors.topMargin: -3
         anchors.left : operationItem.left
         anchors.leftMargin: 3 * operationItem.width/4
     }
@@ -360,7 +361,7 @@ Rectangle {
         id : att3
         index : 2
         anchors.top: operationItem.top
-        anchors.topMargin: -2
+        anchors.topMargin: -3
         anchors.left : operationItem.left
         anchors.leftMargin: operationItem.width/2 - 5
     }
@@ -369,7 +370,7 @@ Rectangle {
         id : att4
         index : 3
         anchors.bottom: operationItem.bottom
-        anchors.bottomMargin: -2
+        anchors.bottomMargin: -3
         anchors.left : operationItem.left
         anchors.leftMargin: operationItem.width/4 - 5
     }
@@ -377,7 +378,7 @@ Rectangle {
         id : att5
         index : 4
         anchors.bottom: operationItem.bottom
-        anchors.bottomMargin: -2
+        anchors.bottomMargin: -3
         anchors.left : operationItem.left
         anchors.leftMargin: 3 * operationItem.width/4
     }
@@ -386,7 +387,7 @@ Rectangle {
         id : att6
         index : 5
         anchors.bottom: operationItem.bottom
-        anchors.bottomMargin: -2
+        anchors.bottomMargin: -3
         anchors.left : operationItem.left
         anchors.leftMargin: operationItem.width/2 - 5
     }
@@ -395,7 +396,7 @@ Rectangle {
         id : att7
         index : 6
         anchors.left: operationItem.left
-        anchors.leftMargin: 2
+        anchors.leftMargin: -3
         anchors.top : operationItem.top
         anchors.topMargin: operationItem.height/2
     }
@@ -404,7 +405,7 @@ Rectangle {
         id : att8
         index : 7
         anchors.right: operationItem.right
-        anchors.rightMargin: 0
+        anchors.rightMargin: -3
         anchors.top : operationItem.top
         anchors.topMargin: operationItem.height/2
     }
