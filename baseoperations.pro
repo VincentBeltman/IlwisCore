@@ -56,7 +56,8 @@ HEADERS += \
     baseoperations/creators/createcornersgeoreference.h \
     baseoperations/creators/createprojectedcoordinatesystem.h \
     baseoperations/util/testoperation.h \
-    baseoperations/conditions/numbercondition.h
+    baseoperations/conditions/numbercondition.h \
+    baseoperations/conditions/junction.h
 
 SOURCES += \
     baseoperations/baseoperationsmodule.cpp \
@@ -99,7 +100,8 @@ SOURCES += \
     baseoperations/creators/createcornersgeoreference.cpp \
     baseoperations/creators/createprojectedcoordinatesystem.cpp \
     baseoperations/util/testoperation.cpp \
-    baseoperations/conditions/numbercondition.cpp
+    baseoperations/conditions/numbercondition.cpp \
+    baseoperations/conditions/junction.cpp
 
 OTHER_FILES += \
     baseoperations/baseoperations.json \
