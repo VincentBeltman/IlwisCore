@@ -646,7 +646,9 @@ Modeller.ModellerWorkArea {
 
        function finishCreation(x,y,resource) {
            if (component.status == Component.Ready) {
-               currentItem = component.createObject(canvas, {"x": x, "y": y, "operation" : resource, "itemid" : operationsList.length, "scale": wfCanvas.scale});
+               var ptOp = transformedPoint(x, y)
+
+               currentItem = component.createObject(canvas, {"x": ptOp.x, "y": ptOp.y, "operation" : resource, "itemid" : operationsList.length, "scale": wfCanvas.scale});
                if (currentItem == null) {
                    // Error Handling
                    console.log("Error creating object");
