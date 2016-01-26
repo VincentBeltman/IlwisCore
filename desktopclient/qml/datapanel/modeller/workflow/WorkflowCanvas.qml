@@ -176,7 +176,7 @@ Modeller.ModellerWorkArea {
             wfCanvas.lastY = mouseY
             wfCanvas.dragged = true
             if (wfCanvas.dragStart) {
-                cursorShape = Qt.SizeAllCursor
+                cursorShape = Qt.ClosedHandCursor
 
                 var pt = transformedPoint(wfCanvas.lastX, wfCanvas.lastY)
                 translate(pt.x - wfCanvas.dragStart.x,
@@ -197,8 +197,7 @@ Modeller.ModellerWorkArea {
 
                     var item = wfCanvas.operationsList[wfCanvas.currentIndex]
                     if (item) {
-
-                        cursorShape = Qt.ClosedHandCursor
+                        cursorShape = Qt.SizeAllCursor
                         area.positionChanged = true
                         item.x += ((mouseX - wfCanvas.oldx) / wfCanvas.scale)
                         item.y += ((mouseY - wfCanvas.oldy) / wfCanvas.scale)
@@ -272,11 +271,17 @@ Modeller.ModellerWorkArea {
        return wfCanvas.scale;
    }
 
-   function asignConstantInputData(inputData, itemId) {
-       var parameterIndexes = workflow.asignConstantInputData(inputData, itemId)
+   function assignConstantInputData(inputData, itemId) {
+       var parameterIndexes = workflow.assignConstantInputData(inputData, itemId)
        wfCanvas.operationsList[itemId].resetInputModel()
 
        generateForm(parameterIndexes)
+   }
+
+   function assignConditionInputData(result, conditionIds) {
+       var parts = conditionIds.split('|')
+       workflow.assignConditionInputData(result, parts)
+       wfCanvas.conditionBoxList[parts[0]].refresh()
    }
 
    function newCondition(){

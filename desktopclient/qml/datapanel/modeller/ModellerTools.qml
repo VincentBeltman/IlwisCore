@@ -173,10 +173,10 @@ ToolBar{
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.horizontalCenter: parent.horizontalCenter
 
-                    source : iconsource("zoomout20.png")
+                    source : iconsource("zoomin20.png")
                 }
                 onClicked: {
-                    modellerDataPane.canvasZoom(-3)
+                    modellerDataPane.canvasZoom(3)
                 }
             }
 
@@ -197,10 +197,10 @@ ToolBar{
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.horizontalCenter: parent.horizontalCenter
 
-                    source : iconsource("zoomin20.png")
+                    source : iconsource("zoomout20.png")
                 }
                 onClicked: {
-                    modellerDataPane.canvasZoom(3)
+                    modellerDataPane.canvasZoom(-3)
                 }
             }
 

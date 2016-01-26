@@ -31,7 +31,7 @@ WorkflowModel::WorkflowModel(const Ilwis::Resource &source, QObject *parent) : O
     _workflow.prepare(source);
 }
 
-QStringList WorkflowModel::asignConstantInputData(QString inputData, int operationIndex) {
+QStringList WorkflowModel::assignConstantInputData(QString inputData, int operationIndex) {
     QStringList inputParameters = inputData.split('|');
     OVertex vertex = operationIndex;
     QStringList* parameterEntrySet = new QStringList();
@@ -64,6 +64,12 @@ QStringList WorkflowModel::asignConstantInputData(QString inputData, int operati
     return *parameterEntrySet;
 }
 
+void WorkflowModel::assignConditionInputData(QString inputData, QStringList ids)
+{
+    // TODO: return a parameterEntrySet like method above
+    _workflow->assignConditionInputData(ids[0].toInt(), ids[1].toInt(), inputData.split('|'));
+}
+
 QStringList WorkflowModel::addOperation(const QString &id)
 {
     QStringList* parameterEntrySet = new QStringList();
@@ -76,12 +82,10 @@ QStringList WorkflowModel::addOperation(const QString &id)
         IOperationMetaData meta = _workflow->getOperationMetadata(v);
         std::vector<SPOperationParameter> inputs = meta->getInputParameters();
         for (int i = 0 ; i < inputs.size() ; i++) {
-//            if ( !inputs.at(i)->isOptional()) {
-                _workflow->assignInputData(v, i);
-                ++_inputParameterCount;
-                int parameterIndex = _workflow->getWorkflowParameterIndex(v, i);
-                parameterEntrySet->push_back(QString::number(parameterIndex) + "|insert");
-//            }
+            _workflow->assignInputData(v, i);
+            ++_inputParameterCount;
+            int parameterIndex = _workflow->getWorkflowParameterIndex(v, i);
+            parameterEntrySet->push_back(QString::number(parameterIndex) + "|insert");
         }
     }else {
        kernel()->issues()->log(QString(TR("Invalid operation id used in workflow %1")).arg(name()));
@@ -167,12 +171,12 @@ int WorkflowModel::operationOutputParameterCount(int operationIndex){
  * @return a string of fields which have been defined, seperated by |
  */
 
-QString WorkflowModel::implicitIndexes(int operationIndex){
+QStringList WorkflowModel::implicitIndexes(int operationIndex){
     try {
         const OVertex& operationVertex = operationIndex;
         return _workflow->implicitIndexes(operationVertex);
     } catch (std::out_of_range e) {
-       return "";
+       return QStringList();
     }
 }
 
@@ -337,20 +341,36 @@ void WorkflowModel::store(const QStringList &coordinates)
     }
 }
 
-void WorkflowModel::load()
-{
-
-//    _workflow->connectTo(QUrl("ilwis://internalcatalog/" + _workflow->name() + "_workflow"), QString("workflow"), QString("stream"), Ilwis::IlwisObject::cmINPUT);
-}
-
 void WorkflowModel::createMetadata()
 {
     _workflow->createMetadata();
 }
 
-int WorkflowModel::addCondition(int containerId, int operationId)
+QVariantMap WorkflowModel::addCondition(int containerId, int operationId)
 {
     return _workflow->addCondition(containerId, operationId);
+}
+
+
+QVariantMap WorkflowModel::getOpenConditionParameters(const int containerId, const int conditionId)
+{
+    Condition condition = _workflow->getCondition(containerId, conditionId);
+    QStringList hiddenFields;
+    QStringList constantValues;
+    QVariantMap resultMap;
+
+    for (const AssignedInputData parameter : condition._inputAssignments) {
+        constantValues.push_back(parameter.value);
+    }
+    resultMap.insert("constantValues", constantValues);
+
+    for (const EdgeProperties edge : condition._edges) {
+        hiddenFields.push_back(QString::number(edge._inputParameterIndex));
+    }
+    resultMap.insert("hiddenFields", hiddenFields);
+    resultMap.insert("operationId", condition._operation->id());
+
+    return resultMap;
 }
 
 QVariantList WorkflowModel::getConditions(int containerId)
@@ -362,11 +382,24 @@ QVariantList WorkflowModel::getConditions(int containerId)
     for (Condition condition : container.conditions) {
         QVariantMap map;
 
-        // TODO: Works for integers but propably not for other conditions. NEEDS SOME WORK (switch case?)
-        map.insert("first", !condition._inputAssignments[0].value.isEmpty());
-        map.insert("condition", condition._inputAssignments[1].value);
-        map.insert("second", !condition._inputAssignments[2].value.isEmpty());
         map.insert("xId", i);
+        map.insert("name", "");
+
+        QString value = condition._operation->source()["keyword"].toString();
+        if (value.contains("condition")){
+            map.insert("first", !condition._inputAssignments[0].value.isEmpty());
+            map.insert("condition", condition._inputAssignments[1].value);
+            map.insert("second", !condition._inputAssignments[2].value.isEmpty());
+        } else {
+            bool set = true;
+            for (AssignedInputData input : condition._inputAssignments){
+                if (input.value.isEmpty()) {
+                    set = false;
+                }
+            }
+            map.insert("name", condition._operation->name());
+            map.insert("set", set);
+        }
 
         results.push_back(map);
 

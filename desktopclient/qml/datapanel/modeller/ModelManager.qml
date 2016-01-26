@@ -10,13 +10,17 @@ import ".." as DataPanel
 Rectangle {
     id : modelmanager
     width: parent.width
-    height: 62
+    height: 300
 
     /**
       Calls the newForm method and passes through the fields that should be hidden
       */
     function showOperationFormWithHiddenFields(operation, itemId, constantValues, hiddenFields){
         forms.item.showOperationFormWithHiddenFields(operation, itemId, constantValues, hiddenFields)
+    }
+
+    function showConditionForm(operationId, hiddenFields, constantValues, conditionIds){
+        forms.item.showConditionForm(operationId, hiddenFields, constantValues, conditionIds)
     }
 
     function showOperationForm(operation, itemId, constantValues){

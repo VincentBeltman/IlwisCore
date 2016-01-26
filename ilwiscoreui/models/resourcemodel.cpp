@@ -478,8 +478,7 @@ bool ResourceModel::hasExtendedType(const QString &tp) const
     return false;
 }
 
-void ResourceModel::setUrls(const QUrl &url)
+void ResourceModel::setUrl(const QUrl &url, bool asRaw)
 {
-    _item.setUrl(url, true);
-    _item.setUrl(url, false);
+    _item.setUrl(url, asRaw);
 }

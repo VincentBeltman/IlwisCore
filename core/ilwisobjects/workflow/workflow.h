@@ -37,24 +37,6 @@ struct AssignedOutputData {
     QString outputName;
 };
 
-struct Condition {
-    Condition(){}
-    Condition(const Resource res) {
-        _operation.prepare(res);
-        for (auto parameter : _operation->getInputParameters()) {
-            _inputAssignments.push_back(AssignedInputData());
-        }
-    }
-
-    IOperationMetaData _operation;
-    QList<AssignedInputData> _inputAssignments;
-};
-
-struct ConditionContainer {
-    ConditionContainer() {}
-    QList<quint16> operationVertexes;
-    QList<Condition> conditions;
-};
 typedef std::shared_ptr<AssignedInputData> SPAssignedInputData;
 typedef std::shared_ptr<AssignedOutputData> SPAssignedOutputData;
 
@@ -89,17 +71,45 @@ struct NodeProperties {
  * \brief This struct is used for storing data in edges within the graph.
  */
 struct EdgeProperties {
-    EdgeProperties(int outParm, int inParm, int inRect, int outRect) :
+    EdgeProperties(int outParm, int inParm, int outRect, int inRect) :
         _outputParameterIndex(outParm),
         _inputParameterIndex(inParm),
         _outputRectangleIndex(outRect),
         _inputRectangleIndex(inRect){}
+    EdgeProperties(int outParm, int inParm, int outRect, int inRect, int outOper) :
+        _outputParameterIndex(outParm),
+        _inputParameterIndex(inParm),
+        _outputRectangleIndex(outRect),
+        _inputRectangleIndex(inRect),
+        _outputOperationIndex(outOper){}
+
     QString outputName;
     bool temporary = true;
     int _outputParameterIndex;
     int _inputParameterIndex;
     int _outputRectangleIndex;
     int _inputRectangleIndex;
+    int _outputOperationIndex;
+};
+
+struct Condition {
+    Condition(){}
+    Condition(const Resource res) {
+        _operation.prepare(res);
+        for (auto parameter : _operation->getInputParameters()) {
+            _inputAssignments.push_back(AssignedInputData());
+        }
+    }
+
+    IOperationMetaData _operation;
+    QList<AssignedInputData> _inputAssignments;
+    QList<EdgeProperties> _edges;
+};
+
+struct ConditionContainer {
+    ConditionContainer() {}
+    QList<quint16> operationVertexes;
+    QList<Condition> conditions;
 };
 
 typedef boost::property<boost::vertex_index1_t, NodeProperties> NodeProperty;
@@ -374,9 +384,9 @@ public:
     /*!
      * \brief Returns the inputs of an operation which have already been defined (if they for example have a flow drawn to them)
      * \param operationVertex the operations
-     * \return  A string seperated by |
+     * \return  A list of indexes
      */
-    QString implicitIndexes(const OVertex &operationVertex);
+    QStringList implicitIndexes(const OVertex &operationVertex);
 
     /*!
      * \brief Gets the metadata of the operation within this vertex
@@ -411,7 +421,7 @@ public:
      * \param type the type of the condition
      * \return the operation
       */
-    int addCondition(int containerId, int operationId);
+    QVariantMap addCondition(int containerId, int operationId);
 
     /*!
      * \brief Returns container with the given id
@@ -419,6 +429,23 @@ public:
      * \return the container
      */
     ConditionContainer getContainer(const int containerId) { return _conditionContainers[containerId]; }
+
+    /*!
+     * \brief Returns condition of container with the given ids
+     * \param containerId the id of the container
+     * \param conditionId the id of the condition
+     * \return the condition
+     */
+    Condition getCondition(const int containerId, const int conditionId) {
+        return _conditionContainers[containerId].conditions[conditionId];
+    }
+    /*!
+     * \brief Returns condition of container with the given ids
+     * \param containerId the id of the container
+     * \param conditionId the id of the condition
+     * \return the condition
+     */
+    void assignConditionInputData(const int containerId, const int conditionId, const QStringList inputData);
 
     /*!
      * \brief Call this to print the graph

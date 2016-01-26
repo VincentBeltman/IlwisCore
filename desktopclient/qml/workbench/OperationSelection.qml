@@ -90,23 +90,8 @@ WorkBenchShifter {
             x : parent.x + 5
 
             ApplicationForm{
-                BorderImage {
-                    id : title
-                    width: parent.width
-                    height : appFrame.formTitle != "" ? 25 : 0
-                    opacity : appFrame.formTitle != "" ? 1 : 0
-                    source : "../images/headerblue2CS1.png"
-                    border { left: 15; top: 0; right: 15; bottom: 0 }
-                    smooth : true
-                    Text  {
-                        text : appFrame.formTitle
-                        font.pointSize: 11
-                        x : 5
-                    }
-                }
-
                 id : appFrame
-                 width : parent.width
+                width : parent.width
                 height : parent.height - 30 < 0 ?  0 : parent.height - 30
                 opacity : 0
 

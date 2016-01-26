@@ -130,13 +130,15 @@ Rectangle {
         wfCanvas.showConditionTypeForm(containerId)
     }
 
-    function addCondition(conditionId) {
-
+    function addCondition(conditionId, name) {
+        console.log(conditionId)
+        console.log(name)
         testModel.append({
             'first': false,
             'condition': '',
             'second': false,
-            'xId': conditionId
+            'xId': conditionId,
+            'name': name
         })
     }
 
@@ -174,29 +176,12 @@ Rectangle {
             y: 0
 
             model : testModel
-            delegate:Row {
+            delegate: Row {
                 Column {
-                    Text {
-                        text: String.fromCharCode(xId * 2 + 65)
-                        width: (conditionList.width - 50) / 3
-                        horizontalAlignment: Text.AlignHCenter
-                        color: first ? 'green' : 'red'
-                    }
-                }
-                Column {
-                    Text {
-                        text: condition === '' ? '[operator]' : condition
-                        width: (conditionList.width - 50) / 3
-                        horizontalAlignment: Text.AlignHCenter
-                        color: condition !== '' ? 'green' : 'red'
-                    }
-                }
-                Column {
-                    Text {
-                        text: String.fromCharCode(xId * 2 + 65 + 1)
-                        width: (conditionList.width - 50) / 3
-                        horizontalAlignment: Text.AlignHCenter
-                        color: second ? 'green' : 'red'
+                    Loader{
+                        width: conditionList.width - 30
+                        height: 15
+                        source: name !== "" ? "OnlyNameCondition.qml" : "StandardCondition.qml"
                     }
                 }
                 Column {
@@ -208,12 +193,12 @@ Rectangle {
                             source : "../../../images/refresh20.png"
                         }
                         onClicked: {
-                            console.log('alter')
-                            refresh()
+                            var info = canvas.workflow.getOpenConditionParameters(containerId, xId)
+                            manager.showConditionForm(info.operationId, info.hiddenFields, info.constantValues, containerId + '|' + xId)
                         }
+                        Component.onCompleted: console.log(xId)
                     }
                 }
-
                 Column {
                     Button {
                         height : 15

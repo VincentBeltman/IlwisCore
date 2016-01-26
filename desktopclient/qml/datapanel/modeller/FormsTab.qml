@@ -10,7 +10,7 @@ import ".." as DataPanel
 Rectangle {
     id : modelmanager
     width: parent.width
-    height: 62
+    height: parent.height
 
     /**
       Calls the newForm method and passes through the fields that should be hidden
@@ -25,6 +25,10 @@ Rectangle {
         if (operation) {
             operationForm.item.showForm(operation, qsTr("Set constant values "), itemId, constantValues)
         }
+    }
+
+    function showConditionForm(operationId, hiddenFields, constantValues, conditionIds){
+        operationForm.item.showConditionForm(operationId, hiddenFields, constantValues, conditionIds)
     }
 
     /**

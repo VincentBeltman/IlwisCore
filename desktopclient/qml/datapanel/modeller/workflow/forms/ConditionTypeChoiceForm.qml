@@ -19,6 +19,8 @@ WorkflowChoiceForm {
         conditionTypeForm.state = "invisible"
         wfCanvas.canvasValid = false
         canvasActive = true
+        mastercatalog.currentCatalog.filter("")
+        filter.checked = false;
     }
 
     Rectangle {
@@ -76,6 +78,7 @@ WorkflowChoiceForm {
             }
         }
         Button{
+            id: filter
             width: 20
             height: 20
             checkable : true
@@ -109,8 +112,8 @@ WorkflowChoiceForm {
         anchors.top : conditionType.bottom
         anchors.topMargin: 5
         onClicked: {
-            var conditionId = canvas.workflow.addCondition(containerId, text.operationId)
-            wfCanvas.conditionBoxList[containerId].addCondition(conditionId)
+            var info = canvas.workflow.addCondition(containerId, text.operationId)
+            wfCanvas.conditionBoxList[containerId].addCondition(info.conditionId, info.name)
             reset()
         }
     }
