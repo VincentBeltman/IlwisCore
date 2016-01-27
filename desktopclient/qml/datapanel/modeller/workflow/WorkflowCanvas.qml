@@ -233,7 +233,6 @@ Modeller.ModellerWorkArea {
                     wfCanvas.conditionBoxList[containerIndex].resize()
                     wfCanvas.conditionBoxList[containerIndex].setCanvasColor(Global.mainbackgroundcolor)
 
-                    replacePanOperation()
                  } else {
                     if(item.containerIndex !== -1)
                     {
@@ -241,6 +240,7 @@ Modeller.ModellerWorkArea {
                     }
                     wfCanvas.parent.color = Global.mainbackgroundcolor
                 }
+                replacePanOperation()
                 area.positionChanged = false
             }
         }
