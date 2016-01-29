@@ -232,6 +232,7 @@ Modeller.ModellerWorkArea {
                     }
                     wfCanvas.conditionBoxList[containerIndex].resize()
                     wfCanvas.conditionBoxList[containerIndex].setCanvasColor(Global.mainbackgroundcolor)
+
                  } else {
                     if(item.containerIndex !== -1)
                     {
@@ -239,6 +240,7 @@ Modeller.ModellerWorkArea {
                     }
                     wfCanvas.parent.color = Global.mainbackgroundcolor
                 }
+                replacePanOperation()
                 area.positionChanged = false
             }
         }
@@ -372,6 +374,8 @@ Modeller.ModellerWorkArea {
               var containerIndex = item.containerIndex;
               wfCanvas.removeCurrentOperationFromCondition(item)
               wfCanvas.conditionBoxList[containerIndex].resize()
+
+              replacePanOperation()
           }
 
           // This removes 1 from the operation list beginning from deleteItemIndex
@@ -645,7 +649,9 @@ Modeller.ModellerWorkArea {
 
        function finishCreation(x,y,resource) {
            if (component.status == Component.Ready) {
-               currentItem = component.createObject(canvas, {"x": x, "y": y, "operation" : resource, "itemid" : operationsList.length, "scale": wfCanvas.scale});
+               var ptOp = transformedPoint(x, y)
+
+               currentItem = component.createObject(canvas, {"x": ptOp.x, "y": ptOp.y, "operation" : resource, "itemid" : operationsList.length, "scale": wfCanvas.scale});
                if (currentItem == null) {
                    // Error Handling
                    console.log("Error creating object");
@@ -669,7 +675,9 @@ Modeller.ModellerWorkArea {
 
        function finishCreatingCondition(x,y) {
            if (component.status == Component.Ready) {
-               currentItem = component.createObject(canvas, {"x": x, "y": y, "scale": wfCanvas.scale, "containerId": conditionBoxList.length});
+               var ptOp = transformedPoint(x, y)
+
+               currentItem = component.createObject(canvas, {"x": ptOp.x, "y": ptOp.y, "scale": wfCanvas.scale, "containerId": conditionBoxList.length});
                if (currentItem == null) {
                    // Error Handling
                    console.log("Error creating object");
