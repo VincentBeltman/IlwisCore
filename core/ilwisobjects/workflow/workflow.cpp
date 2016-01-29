@@ -397,18 +397,18 @@ OEdge Workflow::addOperationFlow(const OVertex &from, const OVertex &to, const E
 }
 
 void Workflow::addOperationToContainer(quint16 containerId, OVertex operationVertex) {
-    ConditionContainer container = _conditionContainers[containerId];
+    ConditionContainer *container = &_conditionContainers[containerId];
 
-    if(!container.operationVertexes.contains(operationVertex)) {
-        container.operationVertexes.push_back(operationVertex);
+    if(!container->operationVertexes.contains(operationVertex)) {
+        container->operationVertexes.push_back(operationVertex);
     }
 
 }
 void Workflow::removeOperationFromContainer(quint16 containerId, OVertex operationVertex) {
-    ConditionContainer container = _conditionContainers[containerId];
+    ConditionContainer *container = &_conditionContainers[containerId];
 
-    if(container.operationVertexes.contains(operationVertex)) {
-        container.operationVertexes.removeOne(operationVertex);
+    if(container->operationVertexes.contains(operationVertex)) {
+        container->operationVertexes.removeOne(operationVertex);
     }
 }
 
@@ -460,11 +460,22 @@ void Workflow::assignConditionInputData(const int containerId, const int conditi
 
     condition->_inputAssignments.clear();
 
-    for (QString value : inputData) {
+    for (int i = 0; i < inputData.length(); ++i) {
         AssignedInputData* input = new AssignedInputData();
-        input->value = value.trimmed();
-        condition->_inputAssignments.push_back(*input);
+        input->value = inputData[i].trimmed();
+        condition->_inputAssignments.insert(i, *input);
     }
+}
+
+QList<ConditionContainer> Workflow::getContainersByVertex(const int v)
+{
+    QList<ConditionContainer> containers;
+
+    for (ConditionContainer container : _conditionContainers)
+        if (container.operationVertexes.contains(v))
+            containers.push_back(container);
+
+    return containers;
 }
 
 NodePropertyMap Workflow::nodeIndex()

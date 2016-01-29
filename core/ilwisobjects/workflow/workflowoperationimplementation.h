@@ -4,6 +4,8 @@
 #include "workflow.h"
 
 namespace Ilwis {
+
+const quint64 CONDITION_FAILED = "CONDITION_FAILED";
 class WorkflowOperationImplementation: public OperationImplementation
 {
 
@@ -35,6 +37,7 @@ protected:
 
 private:
     QMap<OVertex, QStringList> _inputArgs;
+    QMap<int, bool> _containers;
     QMap<OVertex, std::pair<ExecutionContext*, SymbolTable>> _nodeExecutionContext;
     /*!
      * \brief Copies output to local context
@@ -66,7 +69,14 @@ private:
      * \return  true when succesful
      */
     bool reverseFollowExecutionPath(const OVertex &v, ExecutionContext *ctx, SymbolTable &symTable);
-
+    /*!
+     * \brief Checks if vertex is in container. If so, checks all conditions.
+     * \param v The vertex
+     * \param ctx Context to save to
+     * \param symTable The symbol table
+     * \return true when all conditions are met. False if otherwise.
+     */
+    bool checkConditions(const OVertex &v, ExecutionContext *ctx, SymbolTable &symTable);
 
 };
 }

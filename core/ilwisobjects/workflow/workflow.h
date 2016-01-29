@@ -96,13 +96,15 @@ struct Condition {
     Condition(){}
     Condition(const Resource res) {
         _operation.prepare(res);
+        int i = 0;
         for (auto parameter : _operation->getInputParameters()) {
-            _inputAssignments.push_back(AssignedInputData());
+            _inputAssignments.insert(i, AssignedInputData());
+            ++i;
         }
     }
 
     IOperationMetaData _operation;
-    QList<AssignedInputData> _inputAssignments;
+    QMap<int, AssignedInputData> _inputAssignments;
     QList<EdgeProperties> _edges;
 };
 
@@ -446,6 +448,11 @@ public:
      * \return the condition
      */
     void assignConditionInputData(const int containerId, const int conditionId, const QStringList inputData);
+    /*!
+     * \brief Returns all containers that contain this vertex.
+     * \return List of containers
+     */
+    QList<ConditionContainer> getContainersByVertex(const int v);
 
     /*!
      * \brief Call this to print the graph
