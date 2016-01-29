@@ -308,8 +308,8 @@ Rectangle {
             itemid,
             target.itemid,
             flowPoints,
-            attachRect.index,
-            selectedAttach.index
+            selectedAttach.index,
+            attachRect.index
         )
         target.resetInputModel()
         wfCanvas.stopWorkingLine()

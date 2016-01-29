@@ -530,7 +530,7 @@ Modeller.ModellerWorkArea {
     }
 
     Keys.onEscapePressed: {
-        console.log("escape key")
+        // TODO: doesn't work
         wfCanvas.stopWorkingLine()
     }
 
@@ -709,7 +709,6 @@ Modeller.ModellerWorkArea {
        }
 
        function addCurrentOperationToCondition(item) {
-           console.log("adding: " + item.itemid)
            var box = conditionBoxList[currentConditionContainer]
            item.containerIndex = currentConditionContainer
            box.addToOperationList(item.itemid)
@@ -718,7 +717,6 @@ Modeller.ModellerWorkArea {
        }
 
        function removeCurrentOperationFromCondition(item) {
-           console.log("removing: " + item.itemid)
            var box = conditionBoxList[item.containerIndex]
            box.removeFromOperationList(item.itemid)
            workflow.removeOperationFromContainer(item.containerIndex, item.itemid)

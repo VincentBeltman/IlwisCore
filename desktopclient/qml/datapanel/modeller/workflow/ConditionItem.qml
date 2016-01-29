@@ -131,8 +131,6 @@ Rectangle {
     }
 
     function addCondition(conditionId, name) {
-        console.log(conditionId)
-        console.log(name)
         testModel.append({
             'first': false,
             'condition': '',
@@ -196,7 +194,6 @@ Rectangle {
                             var info = canvas.workflow.getOpenConditionParameters(containerId, xId)
                             manager.showConditionForm(info.operationId, info.hiddenFields, info.constantValues, containerId + '|' + xId)
                         }
-                        Component.onCompleted: console.log(xId)
                     }
                 }
                 Column {
@@ -208,7 +205,7 @@ Rectangle {
                             source : "../../../images/close20.png"
                         }
                         onClicked: {
-                            console.log('remove')
+                            // TODO: remove condition
                             refresh()
                         }
                     }
