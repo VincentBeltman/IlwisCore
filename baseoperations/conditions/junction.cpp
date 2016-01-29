@@ -42,23 +42,16 @@ bool Junction::execute(ExecutionContext *ctx, SymbolTable& symTable)
     QVariant variant;
     QString setValue = _firstValue != sUNDEF ? _firstValue : _secondValue;
 
-//    switch(_type) {
-//    case itRASTER:
-//        variant.setValue<IRasterCoverage>(setValue);
-//        break;
-//    case itFEATURE:
-//        variant.setValue<IFeatureCoverage>(setValue);
-//        break;
-//    case itTABLE:
-//        variant.setValue<ITable>(setValue);
-//        break;
-//    default:
-//        variant.setValue<QString>(setValue);
-//        break;
-//    }
+    if (_type == "RasterCoverage")
+        variant.setValue<IRasterCoverage>(setValue);
+    else if (_type == "FeatureCoverage")
+        variant.setValue<IFeatureCoverage>(setValue);
+    else if (_type == "Table")
+        variant.setValue<ITable>(setValue);
+    else
+        variant.setValue<QString>(setValue);
 
-
-    ctx->addOutput(symTable, variant, sUNDEF, 0, Resource());
+    ctx->addOutput(symTable, variant, sUNDEF, _type, Resource());
     return true;
 }
 
@@ -69,11 +62,8 @@ OperationImplementation::State Junction::prepare(ExecutionContext *ctx,const Sym
 
     _firstValue = _expression.parm(0).value();
     _secondValue = _expression.parm(1).value();
-    bool ok;
-    _type = _expression.parm(2).value().toULong(&ok);
 
-    if (!ok)
-        return sPREPAREFAILED;
+    _type = _expression.parm(2).value();
 
     return sPREPARED;
 }
@@ -83,15 +73,15 @@ quint64 Junction::createMetadata()
 {
     OperationResource operation({"ilwis://operations/junction"});
     operation.setLongName("Junction function");
-    operation.setSyntax("junction(FirstValue, SecondValue)");
+    operation.setSyntax("junction(FirstValue, SecondValue, Type=!RasterCoverage|FeatureCoverage|Number|String|Table|Boolean)");
     operation.setDescription(TR("Returns set value. This operation is only usefull in the modeler. Espacially when using conditions. Value is not set if it is empty"));
     operation.setInParameterCount({3});
     operation.addInParameter(0,itANY, TR("first value"),TR("returns this if set"));
     operation.addInParameter(1,itANY, TR("second value"),TR("returns this if first value is not set"));
-    operation.addInParameter(2,itINTEGER, TR("type"),TR("The type of the values"));
+    operation.addInParameter(2,itSTRING, TR("type"),TR("The type of the values"));
     operation.setOutParameterCount({1});
     operation.addOutParameter(0,itANY, TR("set value"), TR("first if set else second"));
-    operation.setKeywords("junction, operation, internal");
+    operation.setKeywords("junction, operation");
 
     mastercatalog()->addItems({operation});
     return operation.id();

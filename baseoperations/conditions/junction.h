@@ -17,8 +17,7 @@ public:
 
     NEW_OPERATION(Junction);
 private:
-    QString _firstValue, _secondValue;
-    unsigned long _type;
+    QString _firstValue, _secondValue, _type;
 
 };
 }
