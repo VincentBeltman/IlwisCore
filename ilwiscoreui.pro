@@ -140,7 +140,7 @@ SOURCES += \
     ilwiscoreui/models/chartmodel.cpp \
     ilwiscoreui/models/consolescriptmodel.cpp \
     ilwiscoreui/models/datapanemodel.cpp \
-   ilwiscoreui/models/tabmodel.cpp \
+    ilwiscoreui/models/tabmodel.cpp \
     ilwiscoreui/models/operationworker.cpp \
     ilwiscoreui/models/objectcreator.cpp \
     ilwiscoreui/models/ilwisobjectcreatormodel.cpp \

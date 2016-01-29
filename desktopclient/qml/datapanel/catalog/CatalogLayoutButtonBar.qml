@@ -38,4 +38,3 @@ Row {
         checked: false
     }
 }
-

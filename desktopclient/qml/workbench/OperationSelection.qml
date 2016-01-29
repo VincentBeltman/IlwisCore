@@ -91,7 +91,7 @@ WorkBenchShifter {
 
             ApplicationForm{
                 id : appFrame
-                 width : parent.width
+                width : parent.width
                 height : parent.height - 30 < 0 ?  0 : parent.height - 30
                 opacity : 0
 

@@ -220,13 +220,11 @@ id: thumbDelegate
                 property string ilwisobjectid : model !== null ? id : ""
                 property string type : model !== null ? typeName : ""
                 property string ids : model !== null ? mastercatalog.selectedIds() : ""
-
                 Drag.keys: typeName
                 Drag.active: mouseArea.drag.active
                 Drag.hotSpot.x: 10
                 Drag.hotSpot.y: 10
                 opacity : Drag.active / 2
-
                 states: State {
                     when: mouseArea.drag.active
                     ParentChange { target: image; parent: root }
@@ -237,4 +235,3 @@ id: thumbDelegate
     }
 
 }
-

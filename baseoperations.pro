@@ -56,6 +56,8 @@ HEADERS += \
     baseoperations/creators/createcornersgeoreference.h \
     baseoperations/creators/createprojectedcoordinatesystem.h \
     baseoperations/util/testoperation.h \
+    baseoperations/conditions/numbercondition.h \
+    baseoperations/conditions/junction.h \
     baseoperations/data/saveas.h
 
 SOURCES += \
@@ -99,10 +101,18 @@ SOURCES += \
     baseoperations/creators/createcornersgeoreference.cpp \
     baseoperations/creators/createprojectedcoordinatesystem.cpp \
     baseoperations/util/testoperation.cpp \
+<<<<<<< HEAD
     baseoperations/data/saveas.cpp
+=======
+    baseoperations/conditions/numbercondition.cpp \
+    baseoperations/conditions/junction.cpp
+>>>>>>> modeller
 
 OTHER_FILES += \
-    baseoperations/baseoperations.json
+    baseoperations/baseoperations.json \
+    desktopclient/asd.qml \
+    desktopclient/asdadfdafs.qml \
+    desktopclient/sad.qml
 
 LIBS += -L$$PWD/../libraries/$$PLATFORM$$CONF/ -lilwiscore
 

@@ -21,8 +21,8 @@ public:
     NEW_OPERATION(TestOperation);
 
 private:
-    IRasterCoverage _raster1;
-    IRasterCoverage _raster2;
+    ITable _raster1;
+//    IRasterCoverage _raster2;
 };
 }
 }

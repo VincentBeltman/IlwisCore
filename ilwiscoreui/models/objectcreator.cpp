@@ -268,7 +268,7 @@ QString ObjectCreator::createProjectedCoordinateSystem(const QVariantMap &parms)
 QString ObjectCreator::createWorkflow(const QVariantMap &parms)
 {
     QString name = parms["name"].toString();
-    OperationResource res(QUrl("ilwis://operations/" + name), itWORKFLOW);
+    OperationResource res(QUrl(parms["url"].toString()), itWORKFLOW);
     res.setDescription(parms["description"].toString());
     res.setKeywords(parms["keywords"].toString());
     res.prepare();
