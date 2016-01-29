@@ -42,6 +42,8 @@ bool Junction::execute(ExecutionContext *ctx, SymbolTable& symTable)
     QVariant variant;
     QString setValue = _firstValue != sUNDEF ? _firstValue : _secondValue;
 
+
+    // TODO: setvalue is the name. This should be the object itself.
     if (_type == "RasterCoverage")
         variant.setValue<IRasterCoverage>(setValue);
     else if (_type == "FeatureCoverage")
