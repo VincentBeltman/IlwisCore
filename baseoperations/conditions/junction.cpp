@@ -53,7 +53,8 @@ bool Junction::execute(ExecutionContext *ctx, SymbolTable& symTable)
     else
         variant.setValue<QString>(setValue);
 
-    ctx->addOutput(symTable, variant, sUNDEF, _type, Resource());
+    // TODO: actually send type
+    ctx->addOutput(symTable, variant, sUNDEF, 0, Resource());
     return true;
 }
 

@@ -5,7 +5,7 @@
 
 namespace Ilwis {
 
-const quint64 CONDITION_FAILED = "CONDITION_FAILED";
+const QString CONDITION_FAILED = "CONDITION_FAILED";
 class WorkflowOperationImplementation: public OperationImplementation
 {
 
